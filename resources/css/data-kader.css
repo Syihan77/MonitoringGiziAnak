@@ -1,0 +1,286 @@
+/* =========================================================
+   CSS DATA KADER (AKURASI DESAIN TINGGI & FORM BERFUNGSI)
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+}
+
+.kader-page {
+  background-color: #e8f5e9; /* Warna latar belakang dari desain */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* KOTAK UTAMA (CARD) */
+.kader-card {
+  background-color: #ffffff;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  box-shadow: 3px 2px 8px 2px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 672px; /* Ukuran proporsional sesuai jarak kiri-kanan AutoHTML */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- BAGIAN HEADER (HIJAU) --- */
+.kader-header {
+  background-color: #95d5b2;
+  border-bottom: 1px solid #dfe4dc;
+  padding: 32px 32px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kader-header .logo {
+  width: 180px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.kader-header .title {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 40px;
+  margin: 0;
+}
+
+.kader-header .subtitle {
+  color: #343a40;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: center;
+  margin: 8px 0 24px 0;
+}
+
+/* STEPPER PROGRESS */
+.stepper-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px; /* Ini yang mengatur seberapa dekat jarak kedua lingkaran */
+  margin: 0 auto; /* Membuat posisi keseluruhan sejajar di tengah */
+  padding-top: 10px;
+}
+
+.stepper-line {
+  position: absolute;
+  top: 30px; /* Posisi vertikal pas di tengah lingkaran */
+  left: 30px; /* Menyembunyikan ujung garis kiri tepat di belakang lingkaran pertama */
+  right: 30px; /* Menyembunyikan ujung garis kanan tepat di belakang lingkaran kedua */
+  height: 4px;
+  background-color: #dfe4dc;
+  border-radius: 9999px;
+  z-index: 1;
+}
+
+.stepper-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 60px; /* Lebar area per step (30px ke tengah) */
+}
+
+.step .circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 400;
+  border: 2px solid;
+}
+
+/* Step Aktif (Hijau) */
+.step .circle.active {
+  background-color: #006a38;
+  border-color: #006a38;
+  color: #ffffff;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.step-text.active-text {
+  color: #006a38;
+}
+
+/* Step Non-aktif (Putih/Abu) */
+.step .circle:not(.active) {
+  background-color: #ffffff;
+  border-color: #becabd;
+  color: #64748b;
+}
+
+.step .step-text {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 16px;
+  color: #343a40;
+}
+
+
+/* --- BAGIAN FORM (PUTIH) --- */
+.kader-form {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px; /* Jarak antar input persis seperti AutoHTML */
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-label {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+}
+
+.input-label .required {
+  color: #e53935;
+}
+
+.helper-text {
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+/* KOTAK INPUT */
+.input-box {
+  background-color: #ffffff;
+  border: 1px solid #becabd;
+  border-radius: 6px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.input-box:focus-within {
+  border-color: #006a38;
+  box-shadow: 0 0 0 1px #006a38;
+}
+
+.input-icon {
+  width: 16px;
+  margin-right: 12px;
+  opacity: 0.6;
+}
+
+.input-box input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: #0f172a;
+  width: 100%;
+}
+
+.input-box input::placeholder,
+.textarea-box textarea::placeholder {
+  color: rgba(100, 116, 139, 0.6);
+}
+
+/* KHUSUS TEXTAREA ALAMAT */
+.textarea-box {
+  height: auto;
+  align-items: flex-start;
+  padding-top: 10px;
+  min-height: 100px;
+}
+
+.textarea-box textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: #0f172a;
+  resize: none;
+  height: 80px;
+  font-family: inherit;
+}
+
+/* TOMBOL LANJUTKAN */
+.form-action {
+  border-top: 1px solid #dfe4dc;
+  padding-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-submit {
+  background-color: #006a38;
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #00552d;
+}
+
+.btn-submit img {
+  width: 16px;
+}
+
+/* Responsif Layar Kecil */
+@media (max-width: 600px) {
+  .kader-header {
+    padding: 24px 20px;
+  }
+  .kader-header .title {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  .kader-form {
+    padding: 24px 20px;
+  }
+}
+/* Stepper ringkas HP kecil: angka saja */
+@media (max-width: 480px) {
+  .stepper-container { max-width: 240px; }
+  .step .step-text { display: none; }
+  .step .circle { width: 34px; height: 34px; font-size: 14px; }
+}

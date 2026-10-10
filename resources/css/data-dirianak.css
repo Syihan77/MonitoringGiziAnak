@@ -1,0 +1,360 @@
+/* =========================================================
+   CSS DATA DIRI ANAK (STEP 2)
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+}
+
+.anak-page {
+  background-color: #e8f5e9;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* KOTAK UTAMA (CARD) */
+.anak-card {
+  background-color: #ffffff;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  box-shadow: 3px 2px 8px 2px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 672px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- BAGIAN HEADER (HIJAU) --- */
+.anak-header {
+  background-color: #95d5b2;
+  border-bottom: 1px solid #dfe4dc;
+  padding: 32px 32px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.anak-logo {
+  width: 180px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.anak-title {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 40px;
+  margin: 0;
+}
+
+.anak-subtitle {
+  color: #343a40;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: center;
+  margin: 8px 0 24px 0;
+}
+
+/* STEPPER PROGRESS */
+.stepper-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  padding-top: 10px;
+}
+
+.stepper-line {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  right: 30px;
+  height: 4px;
+  background-color: #dfe4dc;
+  border-radius: 9999px;
+  z-index: 1;
+}
+
+.stepper-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 60px;
+}
+
+.step .circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 400;
+  border: 2px solid;
+}
+
+/* Step Aktif (Hijau) */
+.step .circle.active {
+  background-color: #006a38;
+  border-color: #006a38;
+  color: #ffffff;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.step-text.active-text {
+  color: #006a38;
+}
+
+/* Step Non-aktif (Putih/Abu) */
+.step .circle:not(.active) {
+  background-color: #ffffff;
+  border-color: #becabd;
+  color: #64748b;
+}
+
+.step .step-text {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 16px;
+  color: #343a40;
+}
+
+/* --- BAGIAN FORM (PUTIH) --- */
+.anak-form {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-label {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+}
+
+.input-label .required {
+  color: #e53935;
+}
+
+.helper-text {
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+/* KOTAK INPUT */
+.input-box {
+  background-color: #ffffff;
+  border: 1px solid #becabd;
+  border-radius: 6px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.input-box:focus-within {
+  border-color: #006a38;
+  box-shadow: 0 0 0 1px #006a38;
+}
+
+.input-icon {
+  width: 16px;
+  margin-right: 12px;
+  opacity: 0.6;
+}
+
+.input-box input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: #0f172a;
+  width: 100%;
+}
+
+.input-box input::placeholder,
+.textarea-box textarea::placeholder {
+  color: rgba(100, 116, 139, 0.6);
+}
+
+/* KHUSUS TEXTAREA ALAMAT */
+.textarea-box {
+  height: auto;
+  align-items: flex-start;
+  padding-top: 10px;
+  min-height: 100px;
+}
+
+.textarea-box textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: #0f172a;
+  resize: none;
+  height: 80px;
+  font-family: inherit;
+}
+
+/* RADIO BUTTON GROUP */
+.radio-group {
+  display: flex;
+  gap: 24px;
+  padding: 8px 0;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.radio-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #006a38;
+}
+
+.radio-text {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+/* TOMBOL AKSI (2 TOMBOL) */
+.form-action-two-buttons {
+  border-top: 1px solid #dfe4dc;
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #006a38;
+  border: 1px solid #006a38;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #f0fdf4;
+}
+
+.btn-secondary img {
+  width: 16px;
+}
+
+.btn-submit {
+  background-color: #006a38;
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #00552d;
+}
+
+.btn-submit img {
+  width: 16px;
+}
+
+/* Responsif Layar Kecil */
+@media (max-width: 600px) {
+  .anak-header {
+    padding: 24px 20px;
+  }
+  
+  .anak-title {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  
+  .anak-form {
+    padding: 24px 20px;
+  }
+  
+  .stepper-container {
+    max-width: 280px;
+  }
+  
+  .step .step-text {
+    font-size: 11px;
+  }
+  
+  .form-action-two-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .btn-secondary,
+  .btn-submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* Stepper ringkas HP kecil: angka saja */
+@media (max-width: 480px) {
+  .stepper-container { max-width: 240px; }
+  .step .step-text { display: none; }
+  .step .circle { width: 34px; height: 34px; font-size: 14px; }
+}

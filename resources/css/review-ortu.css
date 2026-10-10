@@ -1,0 +1,505 @@
+/* =========================================================
+   CSS REVIEW ORANG TUA (STEP 4)
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+}
+
+.review-ortu-page {
+  background-color: #e8f5e9;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* KOTAK UTAMA (CARD) */
+.review-ortu-card {
+  background-color: #ffffff;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  box-shadow: 3px 2px 8px 2px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 672px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- BAGIAN HEADER (HIJAU) --- */
+.review-ortu-header {
+  background-color: #95d5b2;
+  border-bottom: 1px solid #dfe4dc;
+  padding: 32px 32px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.review-ortu-logo {
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.review-ortu-title {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 40px;
+  margin: 0;
+}
+
+.review-ortu-subtitle {
+  color: #343a40;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: center;
+  margin: 8px 0 24px 0;
+}
+
+/* STEPPER PROGRESS */
+.stepper-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  padding-top: 10px;
+}
+
+.stepper-line {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  right: 30px;
+  height: 4px;
+  background-color: #dfe4dc;
+  border-radius: 9999px;
+  z-index: 1;
+}
+
+.stepper-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 60px;
+}
+
+.step .circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 400;
+  border: 2px solid;
+}
+
+/* Step Aktif (Hijau) */
+.step .circle.active {
+  background-color: #006a38;
+  border-color: #006a38;
+  color: #ffffff;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.step-text.active-text {
+  color: #006a38;
+}
+
+/* Step Non-aktif (Putih/Abu) */
+.step .circle:not(.active) {
+  background-color: #ffffff;
+  border-color: #becabd;
+  color: #64748b;
+}
+
+.step .step-text {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 16px;
+  color: #343a40;
+}
+
+/* --- BAGIAN BODY (PUTIH) --- */
+.review-ortu-body {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* REVIEW SECTION */
+.review-section {
+  background-color: #f8faf9;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  padding: 24px;
+  border-left: 4px solid #006a38;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-circle {
+  width: 40px;
+  height: 40px;
+  background-color: #e8f5e9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-circle img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.section-title h2 {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.btn-edit {
+  background-color: #ffffff;
+  color: #006a38;
+  border: 1px solid #006a38;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.btn-edit:hover {
+  background-color: #f0fdf4;
+}
+
+.btn-edit img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* DATA LIST */
+.data-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #e8f5e9;
+}
+
+.data-row:last-child {
+  border-bottom: none;
+}
+
+.data-row.highlight {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 0 -16px;
+}
+
+.data-label {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.data-value {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  flex: 2;
+}
+
+/* CHILD PROFILE CARD */
+.child-profile-card {
+  background-color: #ffffff;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.child-photo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #e8f5e9;
+}
+
+.child-info {
+  flex: 1;
+}
+
+.child-name {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.child-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.child-gender,
+.child-birth,
+.child-age {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.child-age {
+  background-color: #e8f5e9;
+  color: #006a38;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+/* MEASUREMENT DETAIL */
+.measurement-detail {
+  margin-top: 16px;
+}
+
+.measurement-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin: 0 0 16px 0;
+}
+
+.measurement-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.measurement-item {
+  background-color: #ffffff;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.measurement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.measurement-name {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.measurement-icon-small {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.measurement-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.value-number {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.value-unit {
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* TOMBOL AKSI (2 TOMBOL) */
+.form-action-two-buttons {
+  border-top: 1px solid #dfe4dc;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #006a38;
+  border: 1px solid #006a38;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #f0fdf4;
+}
+
+.btn-secondary img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.btn-submit {
+  background-color: #006a38;
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #00552d;
+}
+
+.btn-submit img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* Responsif Layar Kecil */
+@media (max-width: 600px) {
+  .review-ortu-header {
+    padding: 24px 20px;
+  }
+  
+  .review-ortu-logo {
+    width: 120px;
+  }
+  
+  .review-ortu-title {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  
+  .review-ortu-body {
+    padding: 24px 20px;
+  }
+  
+  .stepper-container {
+    max-width: 280px;
+  }
+  
+  .step .step-text {
+    font-size: 11px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .measurement-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-action-two-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .btn-secondary,
+  .btn-submit {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .child-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+/* Stepper ringkas HP kecil: angka saja */
+@media (max-width: 480px) {
+  .stepper-container { max-width: 240px; }
+  .step .step-text { display: none; }
+  .step .circle { width: 34px; height: 34px; font-size: 14px; }
+}

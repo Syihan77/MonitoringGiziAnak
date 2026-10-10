@@ -1,0 +1,52 @@
+/* Form ukur kader: melengkapi data-pertumbuhan.css */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.input-label {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.input-label .required {
+  color: #e53935;
+}
+
+.input-box select,
+.input-box input[type="date"] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: #0f172a;
+  font-family: inherit;
+}
+
+.helper-text {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.hasil-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #14532d;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .form-action-two-buttons .btn-secondary,
+  .form-action-two-buttons .btn-submit {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}

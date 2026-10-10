@@ -1,0 +1,585 @@
+﻿/* =========================================================
+   CSS DETAIL RESEP - SESUAI FIGMA (KONSISTEN #E8F5E9)
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+body {
+  background-color: #eef7f0; /* Hijau sangat muda seperti Figma */
+  min-height: 100vh;
+  font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* TOP BAR */
+.top-bar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-back-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #006a38;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.btn-back-top:hover {
+  background: #E8F5E9;
+  border-color: #006a38;
+}
+
+.back-icon {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ai-badge-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff7ed;
+  color: #ea580c;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.ai-icon-top {
+  font-size: 14px;
+}
+
+/* MAIN CONTENT */
+.resep-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 40px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* HEADER RESEP CARD */
+.resep-header-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.resep-image-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.resep-hero-image {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+.resep-info-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.resep-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.resep-description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+/* INFO GRID (2x2) */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.info-box {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.info-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 106, 56, 0.08);
+}
+
+.info-box-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.calorie-icon { background: #fef3c7; }
+.time-icon { background: #dbeafe; }
+.difficulty-icon { background: #fce7f3; }
+.category-icon { background: #e0e7ff; }
+
+.info-box-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-box-label {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.info-box-value {
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* BAHAN + GIZI GRID */
+.bahan-gizi-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+}
+
+/* BAHAN CARD */
+.bahan-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.bahan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.bahan-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.bahan-badge {
+  background: #E8F5E9;
+  color: #006a38;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bahan-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bahan-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.bahan-list li:last-child {
+  border-bottom: none;
+}
+
+.bahan-bullet {
+  width: 8px;
+  height: 8px;
+  background: #006a38;
+  border-radius: 50%;
+}
+
+.bahan-nama {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.bahan-jumlah {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: right;
+}
+
+.bahan-status {
+  background: #f0fdf4;
+  color: #006a38;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* GIZI CARD */
+.gizi-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.gizi-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 24px 0;
+}
+
+.gizi-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.gizi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gizi-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gizi-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.gizi-value {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gizi-value.calorie { color: #f59e0b; }
+.gizi-value.protein { color: #006a38; }
+.gizi-value.carb { color: #0e7490; }
+.gizi-value.fat { color: #ef4444; }
+.gizi-value.fiber { color: #06b6d4; }
+
+.gizi-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.gizi-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+
+.gizi-bar-fill.calorie { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+.gizi-bar-fill.protein { background: linear-gradient(90deg, #006a38, #059669); }
+.gizi-bar-fill.carb { background: linear-gradient(90deg, #0e7490, #0891b2); }
+.gizi-bar-fill.fat { background: linear-gradient(90deg, #ef4444, #f87171); }
+.gizi-bar-fill.fiber { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+
+.gizi-info-box {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: #065f46;
+  line-height: 1.5;
+}
+
+.info-icon-circle {
+  width: 20px;
+  height: 20px;
+  background: #006a38;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* CARA MEMASAK CARD */
+.memasak-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.memasak-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 32px 0;
+}
+
+/* TIMELINE LANGKAH */
+.langkah-timeline {
+  position: relative;
+  padding-left: 40px;
+}
+
+.langkah-timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.langkah-item {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.langkah-item:last-child {
+  margin-bottom: 0;
+}
+
+.langkah-number {
+  position: absolute;
+  left: -40px;
+  top: 0;
+  width: 32px;
+  height: 32px;
+  background: #006a38;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+.langkah-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.langkah-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.langkah-waktu {
+  background: #E8F5E9;
+  color: #006a38;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.langkah-desc {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .resep-header-card {
+    grid-template-columns: 1fr;
+  }
+  
+  .resep-hero-image {
+    min-height: 240px;
+  }
+  
+  .bahan-gizi-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .resep-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .top-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .resep-content {
+    padding: 0 16px 32px 16px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bahan-list li {
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+  }
+  
+  .bahan-jumlah {
+    grid-column: 2;
+    text-align: left;
+  }
+  
+  .bahan-status {
+    grid-column: 2;
+    justify-self: start;
+  }
+  
+  .langkah-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Bottom navbar: hanya tampil di mobile */
+.nav-links-ortu {
+  display: none;
+}
+
+.nav-item-ortu svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-icon-plus {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #3f4940;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .nav-links-ortu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    max-width: 100vw;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+    gap: 0;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 200;
+  }
+
+  .nav-item-ortu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #3f4940;
+    text-decoration: none;
+    padding: 10px 4px calc(8px + env(safe-area-inset-bottom));
+    min-height: 60px;
+    justify-content: center;
+  }
+
+  .nav-item-ortu svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .resep-content {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+}

@@ -1,0 +1,408 @@
+/* =========================================================
+   CSS DATA PERTUMBUHAN ANAK (STEP 3) - FIXED
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+}
+
+.pertumbuhan-page {
+  background-color: #e8f5e9;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* KOTAK UTAMA (CARD) */
+.pertumbuhan-card {
+  background-color: #ffffff;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  box-shadow: 3px 2px 8px 2px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 672px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- BAGIAN HEADER (HIJAU) --- */
+.pertumbuhan-header {
+  background-color: #95d5b2;
+  border-bottom: 1px solid #dfe4dc;
+  padding: 32px 32px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pertumbuhan-logo {
+  width: 150px; /* Diperkecil sedikit agar proporsional */
+  height: auto; /* INI KUNCI: Agar tinggi menyesuaikan otomatis */
+  object-fit: contain; /* Mencegah gambar ketarik/gepeng */
+  margin-bottom: 8px;
+  display: block;
+}
+
+.pertumbuhan-title {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 40px;
+  margin: 0;
+}
+
+.pertumbuhan-subtitle {
+  color: #343a40;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: center;
+  margin: 8px 0 24px 0;
+}
+
+/* STEPPER PROGRESS */
+.stepper-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  padding-top: 10px;
+}
+
+.stepper-line {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  right: 30px;
+  height: 4px;
+  background-color: #dfe4dc;
+  border-radius: 9999px;
+  z-index: 1;
+}
+
+.stepper-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 60px;
+}
+
+.step .circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 400;
+  border: 2px solid;
+}
+
+/* Step Aktif (Hijau) */
+.step .circle.active {
+  background-color: #006a38;
+  border-color: #006a38;
+  color: #ffffff;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.step-text.active-text {
+  color: #006a38;
+}
+
+/* Step Non-aktif (Putih/Abu) */
+.step .circle:not(.active) {
+  background-color: #ffffff;
+  border-color: #becabd;
+  color: #64748b;
+}
+
+.step .step-text {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 16px;
+  color: #343a40;
+}
+
+/* --- BAGIAN FORM (PUTIH) --- */
+.pertumbuhan-form {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* INFO BOX (ANALISIS CERDAS) */
+.info-box {
+  background-color: #fff8ed;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.info-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  overflow: hidden; /* Mencegah ikon keluar dari lingkaran */
+}
+
+.info-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain; /* Mencegah ikon ketarik */
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-title {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.info-text {
+  color: #343a40;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* GRID PENGUKURAN (TINGGI & BERAT) */
+.measurement-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.measurement-card {
+  background-color: #f8faf9;
+  border: 1px solid #dfe4dc;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.measurement-icon {
+  width: 56px;
+  height: 56px;
+  background-color: #e8f5e9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  overflow: hidden; /* Mencegah ikon keluar dari lingkaran */
+}
+
+.measurement-icon img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain; /* Mencegah ikon ketarik */
+}
+
+.measurement-label {
+  color: #0f172a;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.measurement-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.measurement-input-wrapper input {
+  width: 100px;
+  height: 48px;
+  border: 1px solid #becabd;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
+  color: #0f172a;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: #ffffff;
+  transition: 0.2s;
+}
+
+.measurement-input-wrapper input:focus {
+  outline: none;
+  border-color: #006a38;
+  box-shadow: 0 0 0 1px #006a38;
+}
+
+.measurement-input-wrapper input::placeholder {
+  color: #becabd;
+}
+
+/* Hilangkan spinner di input number */
+.measurement-input-wrapper input::-webkit-outer-spin-button,
+.measurement-input-wrapper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none; /* Tambahan standar untuk Chrome/Safari */
+  margin: 0;
+}
+
+.measurement-input-wrapper input[type=number] {
+  -moz-appearance: textfield; 
+  appearance: textfield; /* ✅ Tambahan ini yang diminta linter */
+}
+
+.measurement-unit {
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* TOMBOL AKSI (2 TOMBOL) */
+.form-action-two-buttons {
+  border-top: 1px solid #dfe4dc;
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #006a38;
+  border: 1px solid #006a38;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #f0fdf4;
+}
+
+.btn-secondary img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.btn-submit {
+  background-color: #006a38;
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #00552d;
+}
+
+.btn-submit img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* Responsif Layar Kecil */
+@media (max-width: 600px) {
+  .pertumbuhan-header {
+    padding: 24px 20px;
+  }
+  
+  .pertumbuhan-logo {
+    width: 120px; /* Lebih kecil di mobile */
+  }
+  
+  .pertumbuhan-title {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  
+  .pertumbuhan-form {
+    padding: 24px 20px;
+  }
+  
+  .stepper-container {
+    max-width: 280px;
+  }
+  
+  .step .step-text {
+    font-size: 11px;
+  }
+  
+  .measurement-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-action-two-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .btn-secondary,
+  .btn-submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* Stepper ringkas HP kecil: angka saja */
+@media (max-width: 480px) {
+  .stepper-container { max-width: 240px; }
+  .step .step-text { display: none; }
+  .step .circle { width: 34px; height: 34px; font-size: 14px; }
+}
