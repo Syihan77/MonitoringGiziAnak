@@ -30,7 +30,6 @@
         <a href="#" class="nav-item-ortu active" data-page="input">
           <span class="nav-icon-plus"><x-icon name="plus" /></span> Input
         </a>
-        <!-- ? PERBAIKAN 1: href diarahkan ke history-ortu.html -->
         <a href="/history-ortu" class="nav-item-ortu" data-page="history">
           <x-icon name="history" /> History
         </a>
@@ -52,51 +51,22 @@
         <span class="ai-icon"><x-icon name="sparkle" /></span>
         <span>AI GENERATED</span>
       </div>
-      <!-- ? PERBAIKAN 2: Ditambahkan ID agar nama anak bisa muncul dinamis -->
       <h1 class="ai-title" id="ai-page-title">Rencana Makan Mingguan</h1>
-      <p class="ai-subtitle">Disusun khusus berdasarkan kebutuhan kalori, riwayat pertumbuhan, dan ketersediaan bahan di kulkas Anda.</p>
+      <p class="ai-subtitle">Disusun khusus berdasarkan riwayat pertumbuhan, kebutuhan gizi harian, dan bahan yang ada di rumah Anda.</p>
     </section>
 
     <!-- SECTION INPUT -->
     <div class="input-sections">
       
-      <!-- Section 1: Budget -->
-      <div class="input-card">
-        <div class="input-card-header">
-          <div class="input-icon-wrapper budget-icon">
-            <span><x-icon name="money" /></span>
-          </div>
-          <div>
-            <h3 class="input-title">Berapa uang belanja Hari ini?</h3>
-            <p class="input-subtitle">Pilih nominal siap tekan atau masukkan sendiri agar rekomendasi lebih pas.</p>
-          </div>
-        </div>
-
-        <div class="budget-options">
-          <button class="budget-btn" data-budget="10000">Rp 10.000</button>
-          <button class="budget-btn" data-budget="15000">Rp 15.000</button>
-          <button class="budget-btn" data-budget="20000">Rp 20.000</button>
-          <button class="budget-btn" data-budget="25000">Rp 25.000</button>
-        </div>
-
-        <div class="custom-budget">
-          <label class="custom-label">Atau masukkan nominal sendiri</label>
-          <div class="input-with-icon">
-            <span class="input-prefix">Rp</span>
-            <input type="number" id="custom-budget-input" placeholder="15000" min="0">
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 2: Bahan di Rumah -->
+      <!-- Section: Bahan di Rumah (Section Budget dihapus sesuai SKPL v2.0) -->
       <div class="input-card">
         <div class="input-card-header">
           <div class="input-icon-wrapper ingredients-icon">
-            <span><x-icon name="broccoli" /></span> <!-- Ditambahkan emoji agar tidak kosong -->
+            <span><x-icon name="broccoli" /></span>
           </div>
           <div>
             <h3 class="input-title">Bahan apa yang ada di rumah?</h3>
-            <p class="input-subtitle">Pilih bahan umum yang tersedia agar resepnya lebih mudah dibuat.</p>
+            <p class="input-subtitle">Pilih bahan umum yang tersedia agar sistem dapat mencari resep yang paling cocok.</p>
           </div>
         </div>
 
@@ -137,8 +107,10 @@
         <div class="menu-card">
           <div class="menu-card-header">
             <h3 class="menu-title">Opsi 1</h3>
-            <span class="menu-calories">Total: 320 kkal</span>
+            <span class="menu-calories">320 kkal / Porsi</span>
           </div>
+          
+          <div class="menu-porsi-badge">Menghasilkan: 2 Porsi</div>
           
           <div class="meal-section">
             <div class="meal-type">
@@ -169,8 +141,10 @@
         <div class="menu-card">
           <div class="menu-card-header">
             <h3 class="menu-title">Opsi 2</h3>
-            <span class="menu-calories">Total: 350 kkal</span>
+            <span class="menu-calories">350 kkal / Porsi</span>
           </div>
+          
+          <div class="menu-porsi-badge">Menghasilkan: 3 Porsi</div>
           
           <div class="meal-section">
             <div class="meal-type">
@@ -201,8 +175,10 @@
         <div class="menu-card">
           <div class="menu-card-header">
             <h3 class="menu-title">Opsi 3</h3>
-            <span class="menu-calories">Total: 310 kkal</span>
+            <span class="menu-calories">310 kkal / Porsi</span>
           </div>
+          
+          <div class="menu-porsi-badge">Menghasilkan: 2 Porsi</div>
           
           <div class="meal-section">
             <div class="meal-type">
@@ -238,10 +214,8 @@
     @vite(['resources/js/api.js'])
     @vite(['resources/js/input-ortu.js'])
   
-  <!-- Script Tambahan untuk Personalisasi Judul -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Ambil nama anak dari sessionStorage agar halaman terasa personal
       const dataAnak = JSON.parse(sessionStorage.getItem('anakDataStep2'));
       if (dataAnak && dataAnak.namaAnak) {
         const titleElement = document.getElementById('ai-page-title');

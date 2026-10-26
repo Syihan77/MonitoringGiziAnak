@@ -3,33 +3,8 @@
  * File: input-ortu.js
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Budget Selection
-  const budgetButtons = document.querySelectorAll('.budget-btn');
-  const customBudgetInput = document.getElementById('custom-budget-input');
-  let selectedBudget = null;
 
-  budgetButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Remove selected from all buttons
-      budgetButtons.forEach(b => b.classList.remove('selected'));
-      // Add selected to clicked button
-      btn.classList.add('selected');
-      // Clear custom input
-      customBudgetInput.value = '';
-      // Set selected budget
-      selectedBudget = parseInt(btn.dataset.budget);
-    });
-  });
-
-  // Custom budget input
-  customBudgetInput.addEventListener('input', (e) => {
-    // Remove selected from all buttons
-    budgetButtons.forEach(b => b.classList.remove('selected'));
-    selectedBudget = parseInt(e.target.value) || 0;
-  });
-
-  // 2. Ingredients Selection (katalog TKPI via API + custom)
-  // Tag menyimpan {id: uuid|null, nama}; id null = custom, di-resolve saat generate.
+  // 1. Ingredients Selection (katalog TKPI via API + custom)
   const tagsContainer = document.getElementById('ingredients-tags');
   const ingredientSearch = document.getElementById('ingredient-search');
   let selectedIngredients = [];
@@ -76,9 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 2b. Autocomplete katalog bahan (backend, debounce, min 2 huruf).
-  // In-flow tepat di bawah search bar (BUKAN overlay) agar tak menutupi
-  // teks ketikan dan akur dengan keyboard popup HP.
+  // Autocomplete katalog bahan
   const searchWrap = ingredientSearch.closest('.search-ingredients') || ingredientSearch.parentElement;
   const saranBox = document.createElement('div');
   saranBox.id = 'ingredient-suggest';
@@ -133,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   ingredientSearch.addEventListener('blur', () => setTimeout(tutupSaran, 150));
 
-  // Custom: Enter = tambah sebagai tag custom (di-resolve saat generate)
   ingredientSearch.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && ingredientSearch.value.trim()) {
       e.preventDefault();
@@ -143,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 3. Generate Recommendations (API real)
+  // 2. Generate Recommendations (API real)
   const btnGenerate = document.getElementById('btn-generate');
   const recommendationsSection = document.getElementById('recommendations-section');
 
@@ -179,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
       info += `<p style="margin:0 0 12px;color:#92400e;background:#fef3c7;padding:10px 14px;border-radius:10px;">${data.saran}</p>`;
     }
     if (data.jumlah_rekomendasi === 0 && !data.saran) {
-      info += '<p>Tidak ada rekomendasi yang cocok. Coba tambah bahan atau naikkan anggaran.</p>';
+      info += '<p>Tidak ada rekomendasi yang cocok. Coba tambah bahan yang berbeda.</p>';
     }
     const kartu = data.menu.map((m, idx) => `
       <div class="menu-card">
@@ -187,12 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
           <h3 class="menu-title">Opsi ${idx + 1}</h3>
           <span class="menu-calories">${m.kecocokan_bahan} cocok</span>
         </div>
+        <div class="menu-porsi-badge">
+          Menghasilkan: ${m.jumlah_porsi_hasil || '-'} Porsi
+        </div>
         <div class="meal-section">
           <div class="meal-info">
             <h4 class="meal-name">${m.nama_resep}</h4>
-            <p style="color:#6b7280;font-size:13px;">${m.kategori_gizi}${
-              m.estimasi_biaya != null ? ` &middot; Rp${Number(m.estimasi_biaya).toLocaleString('id-ID')}` : ' &middot; biaya belum tersedia'
-            }</p>
+            <p style="color:#6b7280;font-size:13px;">${m.kategori_gizi || 'Gizi PER PORSI'}</p>
           </div>
         </div>
         <a href="#" class="btn-see-more" data-resep-id="${m.resep_id}">Lihat Resep →</a>
@@ -213,18 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnGenerate.addEventListener('click', async () => {
-    // Validation
-    if (!selectedBudget || selectedBudget <= 0) {
-      alert('Silakan pilih atau masukkan nominal budget belanja!');
-      return;
-    }
-
     if (selectedIngredients.length === 0) {
       alert('Silakan pilih minimal 1 bahan yang tersedia di rumah!');
       return;
     }
 
-    // Show loading state
     const originalText = btnGenerate.innerHTML;
     btnGenerate.innerHTML = 'Sedang Membuat Rekomendasi...';
     btnGenerate.disabled = true;
@@ -248,8 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const hasil = await window.NutriApi.rekomendasi(anakId, {
-        bahan_tersedia: ids,
-        anggaran_max: selectedBudget,
+        bahan_tersedia: ids
+        // Fitur anggaran ditiadakan sesuai aturan SKPL v2.0
       });
 
       if (dilewati > 0) {
@@ -261,16 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error('Rekomendasi API gagal:', err && err.message);
       alert((err && err.message) || 'Rekomendasi gagal dimuat. Periksa koneksi lalu coba lagi.');
+    } finally {
       btnGenerate.innerHTML = originalText;
       btnGenerate.disabled = false;
-      return;
     }
-
-    btnGenerate.innerHTML = originalText;
-    btnGenerate.disabled = false;
   });
 
-  // 4. Navigation
+  // 3. Navigation
   const navItems = document.querySelectorAll('.nav-item-ortu');
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {

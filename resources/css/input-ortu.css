@@ -2,11 +2,10 @@
    CSS INPUT ORANG TUA - RENCANA MAKAN (KONSISTEN #E8F5E9)
    ========================================================= */
 
-/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 body {
-  background-color: #E8F5E9; /* ✅ DIPERBAIKI: Konsisten #E8F5E9 */
+  background-color: #E8F5E9;
   min-height: 100vh;
   font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
   margin: 0;
@@ -17,9 +16,8 @@ body {
   min-width: 0;
 }
 
-/* NAVBAR - SAMA DENGAN DB-ORTU */
 .navbar-ortu {
-  background: rgba(232, 245, 233, 0.9); /* ✅ DIPERBAIKI: RGBA dari #E8F5E9 */
+  background: rgba(232, 245, 233, 0.9);
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(6px);
   position: sticky;
@@ -126,14 +124,12 @@ body {
   object-fit: cover;
 }
 
-/* MAIN CONTENT */
 .input-ortu-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 48px;
 }
 
-/* AI HEADER SECTION */
 .ai-header-section {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -179,7 +175,6 @@ body {
   max-width: 600px;
 }
 
-/* INPUT SECTIONS */
 .input-sections {
   display: flex;
   flex-direction: column;
@@ -213,12 +208,8 @@ body {
   flex-shrink: 0;
 }
 
-.budget-icon {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-}
-
 .ingredients-icon {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
 }
 
 .input-title {
@@ -236,90 +227,6 @@ body {
   margin: 0;
 }
 
-/* BUDGET OPTIONS */
-.budget-options {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.budget-btn {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 14px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #3f4940;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.budget-btn:hover {
-  background: #E8F5E9; /* ✅ DIPERBAIKI: Konsisten #E8F5E9 */
-  border-color: #006a38;
-  color: #006a38;
-}
-
-.budget-btn.selected {
-  background: #006a38;
-  border-color: #006a38;
-  color: #ffffff;
-}
-
-.custom-budget {
-  margin-top: 16px;
-}
-
-.custom-label {
-  display: block;
-  color: #6b7280;
-  font-size: 13px;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.input-with-icon {
-  display: flex;
-  align-items: center;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px 16px;
-  transition: all 0.2s;
-}
-
-.input-with-icon:focus-within {
-  background: #ffffff;
-  border-color: #006a38;
-  box-shadow: 0 0 0 3px rgba(0, 106, 56, 0.08);
-}
-
-.input-prefix {
-  color: #6b7280;
-  font-weight: 600;
-  margin-right: 8px;
-  font-size: 14px;
-}
-
-.input-with-icon input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 14px;
-  font-family: inherit;
-  color: #111827;
-  font-weight: 600;
-}
-
-.input-with-icon input::placeholder {
-  color: #9ca3af;
-}
-
-/* SEARCH INGREDIENTS */
 .search-ingredients {
   display: flex;
   align-items: center;
@@ -357,7 +264,6 @@ body {
   color: #9ca3af;
 }
 
-/* INGREDIENTS TAGS */
 .ingredients-tags {
   display: flex;
   flex-wrap: wrap;
@@ -381,7 +287,7 @@ body {
 }
 
 .ingredient-tag:hover {
-  background: #E8F5E9; /* ✅ DIPERBAIKI: Konsisten #E8F5E9 */
+  background: #E8F5E9;
   border-color: #006a38;
   color: #006a38;
 }
@@ -397,7 +303,6 @@ body {
   font-weight: 700;
 }
 
-/* BUTTON GENERATE */
 .btn-generate {
   background: linear-gradient(135deg, #006a38 0%, #004d29 100%);
   color: #ffffff;
@@ -430,7 +335,6 @@ body {
   font-size: 20px;
 }
 
-/* RECOMMENDATIONS SECTION */
 .recommendations-section {
   margin-top: 40px;
 }
@@ -468,9 +372,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #E8F5E9; /* ✅ DIPERBAIKI: Konsisten #E8F5E9 */
+  border-bottom: 1px solid #E8F5E9;
 }
 
 .menu-title {
@@ -482,12 +386,23 @@ body {
 }
 
 .menu-calories {
-  background: #E8F5E9; /* ✅ DIPERBAIKI: Konsisten #E8F5E9 */
+  background: #E8F5E9;
   color: #006a38;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.menu-porsi-badge {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
 
 .meal-section {
@@ -520,7 +435,7 @@ body {
   height: 80px;
   border-radius: 10px;
   object-fit: cover;
-  border: 2px solid #E8F5E9; /* ✅ DIPERBAIKI: Konsisten #E8F5E9 */
+  border: 2px solid #E8F5E9;
 }
 
 .meal-info {
@@ -562,7 +477,7 @@ body {
   flex-wrap: wrap;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid #E8F5E9; /* ✅ DIPERBAIKI: Konsisten #E8F5E9 */
+  border-top: 1px solid #E8F5E9;
 }
 
 .meal-nutrition span {
@@ -586,7 +501,6 @@ body {
   gap: 10px;
 }
 
-/* RESPONSIVE */
 @media (max-width: 1200px) {
   .menu-cards-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -606,10 +520,6 @@ body {
     font-size: 24px;
   }
   
-  .budget-options {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
   .menu-cards-grid {
     grid-template-columns: 1fr;
   }
@@ -620,24 +530,17 @@ body {
 }
 
 @media (max-width: 480px) {
-  .budget-options {
-    grid-template-columns: 1fr;
-  }
-
   .input-card {
     padding: 20px;
   }
 }
 
-/* Ikon SVG nav: samakan ukuran dengan PNG lama */
 .nav-item-ortu svg {
   width: 20px;
   height: 20px;
 }
 
-/* BOTTOM NAVBAR MOBILE (≤640px): selalu terjangkau ibu jari */
 @media (max-width: 640px) {
-  /* Lepas jebakan containing-block: backdrop-filter membuat fixed turunannya relatif ke header */
   .navbar-ortu {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -695,10 +598,8 @@ body {
     background-color: rgba(0, 106, 56, 0.08);
   }
 
-  /* Ruang agar konten tak tertutup bottom-nav */
   .input-ortu-content {
     padding: 20px 16px calc(96px + env(safe-area-inset-bottom));
   }
 }
-/* Jaring pengaman media */
 img, svg { max-width: 100%; }
