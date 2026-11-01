@@ -150,7 +150,8 @@ const passwordInput = document.getElementById("password");
 
       try {
         const data = await window.NutriApi.login(email, password);
-        window.location.href = data.role === "kader" ? "/db-kader" : "/db-ortu";
+        if (data.role === "admin") window.location.href = "/admin-referensi";
+        else window.location.href = data.role === "kader" ? "/db-kader" : "/db-ortu";
       } catch (err) {
         if (err && err.error_code === "INVALID_CREDENTIALS") {
           loginError.textContent = "Email atau kata sandi salah.";

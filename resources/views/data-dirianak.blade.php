@@ -84,6 +84,21 @@
           </div>
         </div>
 
+        <div class="input-group">
+          <label class="input-label">Alergi / Pantangan Makanan</label>
+          <div id="alergi-options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;">
+            <label class="radio-label"><input type="checkbox" name="alergi" value="telur"><span class="radio-text">Telur</span></label>
+            <label class="radio-label"><input type="checkbox" name="alergi" value="ikan"><span class="radio-text">Ikan</span></label>
+            <label class="radio-label"><input type="checkbox" name="alergi" value="udang/ebi"><span class="radio-text">Udang / Ebi</span></label>
+            <label class="radio-label"><input type="checkbox" name="alergi" value="susu sapi/olahannya"><span class="radio-text">Susu Sapi</span></label>
+            <label class="radio-label"><input type="checkbox" name="alergi" value="kedelai"><span class="radio-text">Kedelai</span></label>
+            <label class="radio-label"><input type="checkbox" name="alergi" value="gluten"><span class="radio-text">Gluten</span></label>
+            <label class="radio-label"><input type="checkbox" name="alergi" value="wijen"><span class="radio-text">Wijen</span></label>
+            <label class="radio-label"><input type="checkbox" name="alergi" value="kacang-kacangan"><span class="radio-text">Kacang-kacangan</span></label>
+          </div>
+          <span class="helper-text">Pilih jika anak memiliki alergi atau pantangan. Dapat diubah dari dashboard.</span>
+        </div>
+
         <div class="form-action-two-buttons">
           <button type="button" class="btn-secondary" id="btn-kembali">
             <img src="/img/icon-arrow-left.png" alt="Arrow"> Kembali
@@ -121,7 +136,9 @@
         namaAnak: document.getElementById('namaAnak').value,
         tanggalLahirAnak: document.getElementById('tanggalLahirAnak').value,
         jenisKelamin: document.querySelector('input[name="jenisKelamin"]:checked').value,
-        alamatAnak: document.getElementById('alamatAnak').value
+        alamatAnak: document.getElementById('alamatAnak').value,
+        pantangan: Array.from(document.querySelectorAll('input[name="alergi"]:checked'))
+          .map((input) => ({ alergen: input.value, jenis: 'ALERGI' }))
       };
 
       // 2. Simpan ke sessionStorage

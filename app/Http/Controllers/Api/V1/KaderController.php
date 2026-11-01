@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Anak;
+use App\Models\KondisiHarian;
 use App\Models\Konsumsi;
 use App\Models\Pertumbuhan;
 use App\Models\User;
+use App\Services\NutritionService;
 use App\Support\ApiResponse;
 use App\Support\AuditLogger;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -48,6 +50,7 @@ class KaderController extends Controller
             'wilayah' => $filter['wilayah'],
             'total_anak_binaan' => count($anakIds),
             'anak_terukur' => count($terakhir),
+            'distribusi_kategori_pemantauan' => $this->distribusiKategori($terakhir),
             'distribusi_status_gizi' => $this->distribusiGizi($terakhir),
             'distribusi_stunting_indikatif' => $this->distribusiStunting($terakhir),
         ], 'Dashboard kader');
@@ -82,33 +85,72 @@ class KaderController extends Controller
             ->get()
             ->map(fn (Pertumbuhan $p) => [
                 'tanggal_ukur' => $p->tanggal_ukur->toDateString(),
+                'usia_bulan_saat_ukur' => $p->usia_bulan_saat_ukur === null
+                    ? $p->umur_bulan
+                    : (float) $p->usia_bulan_saat_ukur,
                 'umur_bulan' => $p->umur_bulan,
                 'berat_kg' => (float) $p->berat_kg,
                 'tinggi_cm' => (float) $p->tinggi_cm,
                 'zscore_bb_u' => $p->z_bb_u === null ? null : (float) $p->z_bb_u,
                 'zscore_tb_u' => $p->z_tb_u === null ? null : (float) $p->z_tb_u,
                 'zscore_bb_tb' => $p->z_bb_tb === null ? null : (float) $p->z_bb_tb,
+                'kategori_pemantauan' => $p->kategoriEfektif(),
+                'metode_klasifikasi' => $p->metodeKlasifikasiEfektif(),
+                'versi_aturan' => $p->versiAturanEfektif(),
+                'status_validitas_pengukuran' => $p->statusValiditasEfektif(),
+                'pesan' => $p->pesanEfektif(),
                 'status_gizi_antropometri' => $p->status_gizi_antropometri,
             ]);
 
         AuditLogger::log($user, 'logbook_view', ['anak_id' => $anak->id]);
 
-        $konsumsi = Konsumsi::query()
-            ->with('bahan')
+        $mulai = today()->subDays(6)->toDateString();
+
+        $kondisi = KondisiHarian::query()
             ->where('anak_id', $anak->id)
-            ->where('tanggal_konsumsi', '>=', today()->subDays(6)->toDateString())
+            ->whereDate('tanggal_kondisi', '>=', $mulai)
+            ->orderByDesc('tanggal_kondisi')
+            ->get()
+            ->map(fn (KondisiHarian $k) => [
+                'tanggal' => $k->tanggal_kondisi->toDateString(),
+                'status_kondisi' => $k->status_kondisi,
+                'penanda' => $k->status_kondisi === KondisiHarian::STATUS_SAKIT
+                    ? NutritionService::PENANDA_ANAK_SAKIT
+                    : null,
+            ])
+            ->values();
+
+        $konsumsi = Konsumsi::query()
+            ->with(['bahan', 'resep', 'kondisi'])
+            ->where('anak_id', $anak->id)
+            ->whereDate('tanggal_konsumsi', '>=', $mulai)
             ->orderByDesc('tanggal_konsumsi')
             ->orderBy('created_at')
             ->limit(100)
             ->get()
             ->groupBy(fn ($k) => $k->tanggal_konsumsi->toDateString())
-            ->map(fn ($rows, $tgl) => [
-                'tanggal_konsumsi' => $tgl,
-                'items' => $rows->map(fn ($r) => [
-                    'nama_bahan' => $r->bahan->nama_bahan,
-                    'porsi_gram' => (float) $r->porsi_gram,
-                ])->values(),
-            ])
+            ->map(function ($rows, $tgl) {
+                $statusKondisi = $rows->first()->kondisi?->status_kondisi;
+
+                return [
+                    'tanggal_konsumsi' => $tgl,
+                    'status_kondisi' => $statusKondisi,
+                    'penanda' => $statusKondisi === KondisiHarian::STATUS_SAKIT
+                        ? NutritionService::PENANDA_ANAK_SAKIT
+                        : null,
+                    'items' => $rows->map(fn ($r) => [
+                        'konsumsi_id' => $r->id,
+                        'nama_bahan' => $r->bahan->nama_bahan,
+                        'porsi_gram' => (float) $r->porsi_gram,
+                        'metode_input' => $r->metode_input,
+                        'resep_id' => $r->resep_id,
+                        'nama_resep' => $r->resep?->nama_resep,
+                        'porsi_resep_dikonsumsi' => $r->porsi_resep_dikonsumsi,
+                        'status_validitas' => $r->status_validitas,
+                        'alasan_invalid' => $r->alasan_invalid,
+                    ])->values(),
+                ];
+            })
             ->values();
 
         return ApiResponse::success([
@@ -119,6 +161,7 @@ class KaderController extends Controller
             'pemilik_nama' => $anak->user->nama,
             'wilayah' => $anak->user->wilayah_posyandu,
             'riwayat' => $riwayat,
+            'kondisi_harian' => $kondisi,
             'konsumsi_terakhir' => $konsumsi,
         ], 'Logbook anak binaan');
     }
@@ -137,7 +180,7 @@ class KaderController extends Controller
     /**
      * Pengukuran terakhir tiap anak (satu baris per anak).
      *
-     * @param list<string> $anakIds
+     * @param  list<string>  $anakIds
      * @return list<Pertumbuhan>
      */
     private function pengukuranTerakhir(array $anakIds): array
@@ -161,7 +204,30 @@ class KaderController extends Controller
     }
 
     /**
-     * @param list<Pertumbuhan> $terakhir
+     * @param  list<Pertumbuhan>  $terakhir
+     * @return array<string, int>
+     */
+    private function distribusiKategori(array $terakhir): array
+    {
+        $dist = [
+            Pertumbuhan::KATEGORI_NORMAL_LOW_RISK => 0,
+            Pertumbuhan::KATEGORI_AT_RISK_MONITORING => 0,
+            Pertumbuhan::KATEGORI_HIGH_RISK_REFERRAL => 0,
+        ];
+
+        foreach ($terakhir as $p) {
+            $kategori = $p->kategoriEfektif();
+
+            if ($kategori !== null && isset($dist[$kategori])) {
+                $dist[$kategori]++;
+            }
+        }
+
+        return $dist;
+    }
+
+    /**
+     * @param  list<Pertumbuhan>  $terakhir
      * @return array<string, int>
      */
     private function distribusiGizi(array $terakhir): array
@@ -182,7 +248,7 @@ class KaderController extends Controller
     }
 
     /**
-     * @param list<Pertumbuhan> $terakhir
+     * @param  list<Pertumbuhan>  $terakhir
      * @return array<string, int>
      */
     private function distribusiStunting(array $terakhir): array

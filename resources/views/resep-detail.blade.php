@@ -67,6 +67,7 @@
             </div>
           </div>
         </div>
+        <div id="resep-peringatan" style="display:none;margin-top:12px;padding:12px 14px;border-radius:12px;background:#fef3c7;color:#92400e;font-size:13px;"></div>
       </div>
     </div>
 

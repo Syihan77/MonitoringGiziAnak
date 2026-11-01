@@ -51,9 +51,10 @@
                     <h3 class="child-name-header" id="child-name">Memuat Data...</h3>
                     <p class="child-age-header"><x-icon name="user" /> <span id="child-age">-</span></p>
                 </div>
-                <div class="status-badge-header">
-                    <span class="status-dot"></span> Status Normal
+                <div class="status-badge-header" id="status-badge-header">
+                    <span class="status-dot"></span> <span id="status-badge-text">Belum diukur</span>
                 </div>
+                <button type="button" class="btn-kelola-alergi" id="btn-kelola-alergi" style="margin-left:10px;border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:7px 12px;cursor:pointer;font-size:12px;">Kelola Alergi</button>
             </div>
         </section>
 
@@ -187,6 +188,34 @@
             </div>
         </div>
     </main>
+
+    <!-- ========================================== -->
+    <!-- MODAL KELOLA ALERGI / PANTANGAN -->
+    <!-- ========================================== -->
+    <div id="modal-alergi-anak" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Alergi / Pantangan Anak</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-question">Pilih bahan atau kelompok makanan yang harus dihindari.</p>
+                <div id="alergi-modal-options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;">
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="telur"><span class="radio-text">Telur</span></label>
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="ikan"><span class="radio-text">Ikan</span></label>
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="udang/ebi"><span class="radio-text">Udang / Ebi</span></label>
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="susu sapi/olahannya"><span class="radio-text">Susu Sapi</span></label>
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="kedelai"><span class="radio-text">Kedelai</span></label>
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="gluten"><span class="radio-text">Gluten</span></label>
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="wijen"><span class="radio-text">Wijen</span></label>
+                    <label class="radio-label"><input type="checkbox" name="alergi-modal" value="kacang-kacangan"><span class="radio-text">Kacang-kacangan</span></label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" id="btn-alergi-batal">Batal</button>
+                <button type="button" class="btn-modal-cancel" id="btn-alergi-simpan" style="background:#006a38;color:#fff;">Simpan</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ========================================== -->
     <!-- MODAL POP-UP KONDISI ANAK (SKPL-F-15) -->

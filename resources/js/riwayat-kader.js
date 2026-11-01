@@ -60,13 +60,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function kelasStatus(status) {
-    if (status === 'normal') return 'baik';
-    if (status === 'kurang') return 'kurang';
+    if (status === 'NORMAL_LOW_RISK' || status === 'normal') return 'baik';
+    if (status === 'AT_RISK_MONITORING' || status === 'kurang') return 'kurang';
     return 'buruk';
   }
 
   function labelStatus(status) {
     const peta = {
+      NORMAL_LOW_RISK: 'Normal / Risiko Rendah',
+      AT_RISK_MONITORING: 'Perlu Pemantauan',
+      HIGH_RISK_REFERRAL: 'Perlu Rujukan',
       normal: 'Gizi Baik',
       kurang: 'Gizi Kurang',
       stunting_terindikasi: 'Stunting Terindikasi',
@@ -80,7 +83,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 2. ISI DATA PROFIL
   // ============================================
   const riwayat = Array.isArray(logbook.riwayat) ? logbook.riwayat : [];
-  const terakhir = riwayat.length > 0 ? riwayat[riwayat.length - 1] : null;
+  const terakhir = riwayat.length > 0
+    ? riwayat.reduce((a, b) =>
+      new Date(a.tanggal_ukur) > new Date(b.tanggal_ukur) ? a : b
+    )
+    : null;
   const namaAnak = logbook.nama || 'Anak Binaan';
 
   setText('breadcrumb-name', namaAnak);
@@ -93,10 +100,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   setText('profile-wilayah', logbook.wilayah || '-');
   setText('ai-child-name', namaAnak.split(' ')[0]);
 
-  const statusTerakhir = terakhir ? terakhir.status_gizi_antropometri : null;
+  const statusTerakhir = terakhir
+    ? (terakhir.kategori_pemantauan || terakhir.status_gizi_antropometri)
+    : null;
   setText('profile-status-text', labelStatus(statusTerakhir));
   const statusEl = document.getElementById('profile-status');
-  if (statusEl) statusEl.className = `status-value ${kelasStatus(statusTerakhir)}`;
+  if (statusEl) {
+    statusEl.className = `status-value ${kelasStatus(statusTerakhir)}`;
+    if (terakhir && terakhir.pesan) statusEl.title = terakhir.pesan;
+  }
 
   function setText(id, nilai) {
     const el = document.getElementById(id);
@@ -126,13 +138,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       const item = document.createElement('div');
       item.className = `timeline-item ${idx === 0 ? 'current' : ''}`;
 
-      const daftar = day.items.map((it) =>
-        `<div class="meal-card"><div class="meal-content">${it.nama_bahan} &middot; ${it.porsi_gram} g</div></div>`
-      ).join('');
+      const daftar = day.items.map((it) => {
+        const nama = it.nama_resep
+          ? `${it.nama_bahan} (${it.nama_resep})`
+          : it.nama_bahan;
+        const status = it.status_validitas === 'INVALID' ? ' · dikecualikan' : '';
+        return `<div class="meal-card"><div class="meal-content">${nama} &middot; ${it.porsi_gram} g${status}</div></div>`;
+      }).join('');
 
       item.innerHTML = `
         <div class="timeline-dot"></div>
         <div class="timeline-date">${tanggalLabel(day.tanggal_konsumsi)}</div>
+        ${day.status_kondisi === 'SAKIT' || day.penanda
+          ? '<div style="margin:8px 0;padding:10px 14px;border-radius:10px;background:#fef3c7;color:#92400e;font-size:13px;">Anak tercatat sedang sakit — data konsumsi tidak digunakan dalam analisis.</div>'
+          : ''}
         <div class="meals-grid">${daftar}</div>
       `;
       container.appendChild(item);
@@ -278,13 +297,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = document.createElement('div');
       card.className = 'daily-card';
 
+      const kategori = ukur.kategori_pemantauan || ukur.status_gizi_antropometri;
+      const usia = ukur.usia_bulan_saat_ukur ?? ukur.umur_bulan;
+
       card.innerHTML = `
         <div class="daily-header">
           <div>
             <div class="daily-date">${tanggalLabel(ukur.tanggal_ukur)}</div>
-            <div class="daily-meals-info">Usia ${ukur.umur_bulan} bln</div>
+            <div class="daily-meals-info">Usia ${usia} bln</div>
           </div>
-          <button class="btn-lengkap" type="button">${labelStatus(ukur.status_gizi_antropometri)}</button>
+          <button class="btn-lengkap" type="button">${labelStatus(kategori)}</button>
         </div>
         <div class="meal-item">
           <div class="meal-info">
@@ -298,6 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="meal-food">${ukur.zscore_bb_u ?? '-'} &middot; ${ukur.zscore_tb_u ?? '-'} &middot; ${ukur.zscore_bb_tb ?? '-'}</div>
           </div>
         </div>
+        ${ukur.pesan ? `<div class="meal-item"><div class="meal-info"><div class="meal-food">${ukur.pesan}</div></div></div>` : ''}
       `;
       gridContainer.appendChild(card);
     });

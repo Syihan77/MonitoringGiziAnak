@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -70,21 +70,21 @@
         </div>
         <div class="summary-card">
           <div class="card-top">
-            <span class="card-title">Gizi Baik</span>
+            <span class="card-title">Normal / Risiko Rendah</span>
             <div class="icon-wrapper baik"><img src="/img/icon-baik.png" alt=""></div>
           </div>
           <div class="card-value" id="gizi-baik">0</div>
         </div>
         <div class="summary-card">
           <div class="card-top">
-            <span class="card-title">Gizi Kurang</span>
+            <span class="card-title">Perlu Pemantauan</span>
             <div class="icon-wrapper kurang"><img src="/img/icon-kurang.png" alt=""></div>
           </div>
           <div class="card-value" id="gizi-kurang">0</div>
         </div>
         <div class="summary-card">
           <div class="card-top">
-            <span class="card-title">Gizi Buruk</span>
+            <span class="card-title">Perlu Rujukan</span>
             <div class="icon-wrapper buruk"><img src="/img/icon-buruk.png" alt=""></div>
           </div>
           <div class="card-value" id="gizi-buruk">0</div>
@@ -111,7 +111,7 @@
         </div>
 
         <div class="chart-card donut-chart-card">
-          <h3>Distribusi Gizi</h3>
+          <h3>Distribusi Kategori Pemantauan</h3>
           <div class="donut-chart-container">
             <div class="donut-chart" id="donutChart">
               <div class="donut-inner">
@@ -142,7 +142,7 @@
                 <th>Usia / JK</th>
                 <th>Nama Orang Tua</th>
                 <th>Wilayah Dusun</th>
-                <th>Status & Indikasi</th>
+                <th>Kategori Pemantauan</th>
                 <th>Tindakan Cepat</th>
               </tr>
             </thead>

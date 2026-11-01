@@ -24,4 +24,22 @@ return [
     */
     'cutoff_cukup' => 80.0,
     'cutoff_kurang' => 70.0,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Baseline Hybrid Recipe Ranking (KONF-11 belum final)
+    |--------------------------------------------------------------------------
+    |
+    | Bobot dan versi aturan dibuat konfigurabel agar dapat diganti tanpa
+    | mengubah struktur basis data. Filter verifikasi mengikuti SKPL-ML2-11.
+    |
+    */
+    'rekomendasi' => [
+        'versi_aturan' => 'hybrid-baseline-v1',
+        'bobot_gizi_umum' => 0.6,
+        'bobot_relevansi' => 0.4,
+        'top_k_default' => 5,
+        'top_k_maks' => 5,
+        'wajib_data_lengkap' => true,
+    ],
 ];

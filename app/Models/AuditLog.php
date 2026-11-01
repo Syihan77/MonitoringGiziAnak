@@ -22,6 +22,10 @@ class AuditLog extends Model
     protected $fillable = [
         'user_id',
         'aksi',
+        'entitas_target',
+        'entitas_id',
+        'nilai_lama',
+        'nilai_baru',
         'meta',
         'waktu_aksi',
     ];
@@ -32,6 +36,8 @@ class AuditLog extends Model
     protected function casts(): array
     {
         return [
+            'nilai_lama' => 'array',
+            'nilai_baru' => 'array',
             'meta' => 'array',
             'waktu_aksi' => 'datetime',
         ];

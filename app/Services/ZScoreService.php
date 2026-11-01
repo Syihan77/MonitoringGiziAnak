@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Anak;
+use App\Models\Pertumbuhan;
 use App\Models\WhoStandard;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -17,8 +18,18 @@ use Illuminate\Validation\ValidationException;
  */
 class ZScoreService
 {
+    public const VERSI_ATURAN = 'permenkes-2-2020-baseline-v1';
+
+    public const PESAN_NORMAL = 'Hasil ini bukan diagnosis. Lanjutkan pemantauan rutin dan konsultasikan dengan kader atau tenaga kesehatan bila diperlukan.';
+
+    public const PESAN_AT_RISK = 'Hasil ini bukan diagnosis. Lakukan pemantauan lebih dekat dan konsultasikan dengan kader atau tenaga kesehatan.';
+
+    public const PESAN_HIGH_RISK = 'Hasil ini bukan diagnosis. Segera konsultasikan dengan kader atau tenaga kesehatan sesuai alur rujukan.';
+
+    public const PESAN_UMUM = 'Hasil ini bukan diagnosis. Konsultasikan dengan kader atau tenaga kesehatan bila diperlukan.';
+
     /**
-     * @return array{umur_bulan: int, tinggi_koreksi_cm: float, z_bb_u: float, z_tb_u: float, z_bb_tb: float, status_bb_u: string, status_tb_u: string, status_bb_tb: string, status_gizi_antropometri: string}
+     * @return array{umur_bulan: int, tinggi_koreksi_cm: float, z_bb_u: float, z_tb_u: float, z_bb_tb: float, status_bb_u: string, status_tb_u: string, status_bb_tb: string, status_gizi_antropometri: string, kategori_pemantauan: string, metode_klasifikasi: string, versi_aturan: string, pesan: string}
      */
     public function hitung(Anak $anak, float $beratKg, float $tinggiCm, string $tanggalUkur, ?string $posisiUkur): array
     {
@@ -42,6 +53,7 @@ class ZScoreService
         $statusBbU = self::kategoriBbU($zBbU);
         $statusTbU = self::kategoriTbU($zTbU);
         $statusBbTb = self::kategoriBbTb($zBbTb);
+        $kategori = self::kategoriPemantauan($zBbU, $zTbU, $zBbTb);
 
         return [
             'umur_bulan' => $umur,
@@ -53,7 +65,38 @@ class ZScoreService
             'status_tb_u' => $statusTbU,
             'status_bb_tb' => $statusBbTb,
             'status_gizi_antropometri' => self::agregat($statusBbU, $statusTbU, $statusBbTb),
+            'kategori_pemantauan' => $kategori,
+            'metode_klasifikasi' => Pertumbuhan::METODE_ACUAN_ATURAN,
+            'versi_aturan' => self::VERSI_ATURAN,
+            'pesan' => self::pesanKategori($kategori),
         ];
+    }
+
+    /**
+     * Baseline kategori pemantauan (KONF-02 belum final).
+     *
+     * Kategori ini adalah rancangan sistem, bukan diagnosis WHO/Kemenkes.
+     */
+    public static function kategoriPemantauan(float $zBbU, float $zTbU, float $zBbTb): string
+    {
+        if ($zBbU < -3 || $zTbU < -3 || $zBbTb < -3) {
+            return Pertumbuhan::KATEGORI_HIGH_RISK_REFERRAL;
+        }
+
+        if ($zBbU < -2 || $zTbU < -2 || $zBbTb < -2 || $zBbTb > 2 || $zBbU > 1) {
+            return Pertumbuhan::KATEGORI_AT_RISK_MONITORING;
+        }
+
+        return Pertumbuhan::KATEGORI_NORMAL_LOW_RISK;
+    }
+
+    public static function pesanKategori(string $kategori): string
+    {
+        return match ($kategori) {
+            Pertumbuhan::KATEGORI_HIGH_RISK_REFERRAL => self::PESAN_HIGH_RISK,
+            Pertumbuhan::KATEGORI_AT_RISK_MONITORING => self::PESAN_AT_RISK,
+            default => self::PESAN_NORMAL,
+        };
     }
 
     /**
@@ -231,7 +274,7 @@ class ZScoreService
     }
 
     /**
-     * @param array{thresholds: list<float>, values: list<float>} $kurva
+     * @param  array{thresholds: list<float>, values: list<float>}  $kurva
      */
     public static function zDariKurva(float $nilai, array $kurva): float
     {

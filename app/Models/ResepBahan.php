@@ -17,6 +17,10 @@ class ResepBahan extends Model
         'resep_id',
         'bahan_id',
         'takaran_gram',
+        'takaran_jumlah',
+        'takaran_satuan',
+        'takaran_gram_ekuivalen',
+        'catatan_bahan',
     ];
 
     /**
@@ -26,6 +30,8 @@ class ResepBahan extends Model
     {
         return [
             'takaran_gram' => 'float',
+            'takaran_jumlah' => 'float',
+            'takaran_gram_ekuivalen' => 'float',
         ];
     }
 

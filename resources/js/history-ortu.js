@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let berat = legacyGrowth && legacyGrowth.beratBadan;
   let tinggi = legacyGrowth && legacyGrowth.tinggiBadan;
   let namaOrtu = legacyOrtu && legacyOrtu.namaLengkap;
+  let kategoriTerakhir = null;
+  let pesanKategori = null;
 
   if (window.NutriApi && window.NutriApi.getToken()) {
     try {
@@ -33,9 +35,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const riwayat = await window.NutriApi.ukurRiwayat(items[0].anak_id);
         const arr = Array.isArray(riwayat) ? riwayat : [];
         if (arr.length > 0) {
-          const terakhir = arr[arr.length - 1];
+          const terakhir = arr.reduce((a, b) =>
+            new Date(a.tanggal_ukur) > new Date(b.tanggal_ukur) ? a : b
+          );
           berat = terakhir.berat_kg;
           tinggi = terakhir.tinggi_cm;
+          kategoriTerakhir = terakhir.kategori_pemantauan || null;
+          pesanKategori = terakhir.pesan || null;
         }
       }
       const me = await window.NutriApi.me();
@@ -106,6 +112,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('profile-ibu').textContent = namaOrtu || '-';
   }
 
+  const labelKategori = {
+    NORMAL_LOW_RISK: 'Normal',
+    AT_RISK_MONITORING: 'Perlu Pemantauan',
+    HIGH_RISK_REFERRAL: 'Perlu Rujukan',
+  };
+  const statusTextBox = document.getElementById('profile-status-text');
+  const statusBox = document.getElementById('profile-status');
+  if (statusTextBox) statusTextBox.textContent = labelKategori[kategoriTerakhir] || 'Belum diukur';
+  if (statusBox) {
+    statusBox.className = 'status-value '
+      + (kategoriTerakhir === 'HIGH_RISK_REFERRAL'
+        ? 'buruk'
+        : (kategoriTerakhir === 'AT_RISK_MONITORING' ? 'kurang' : 'normal'));
+    if (pesanKategori) statusBox.title = pesanKategori;
+  }
+
   // ============================================
   // 4. TIMELINE KONSUMSI REAL (7 hari terakhir, via API)
   // Akun baru tanpa konsumsi -> empty state, BUKAN data contoh.
@@ -135,12 +157,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.className = `timeline-item ${day.current ? 'current' : ''}`;
 
       const daftar = day.items.map((it) =>
-        `<div class="meal-card"><div class="meal-content">${it.nama} &middot; ${it.porsi}</div></div>`
+        `<div class="meal-card"><div class="meal-content">${it.nama} &middot; ${it.porsi}`
+        + `${it.invalid ? ' <em>(dikecualikan)</em>' : ''}</div></div>`
       ).join('');
 
       item.innerHTML = `
         <div class="timeline-dot"></div>
         <div class="timeline-date">${day.tanggal}</div>
+        ${day.sakit ? '<div style="margin:8px 0;padding:10px 14px;border-radius:10px;background:#fef3c7;color:#92400e;font-size:13px;">Anak tercatat sedang sakit — data konsumsi tidak digunakan dalam analisis.</div>' : ''}
         <div class="meals-grid">${daftar}</div>
       `;
       container.appendChild(item);
@@ -171,9 +195,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       hasil.push({
         tanggal: labelTanggal(d, idx === 0),
         current: idx === 0,
+        sakit: items.some((it) => it.status_kondisi === 'SAKIT'),
         items: items.map((it) => ({
           nama: it.nama_bahan || 'Bahan',
           porsi: `${it.porsi_gram} g`,
+          invalid: it.status_validitas === 'INVALID',
         })),
       });
     });
@@ -235,9 +261,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         return {
           id: tgl,
           tanggal: new Date(y, m - 1, d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+          sakit: perTanggal[tgl].some((it) => it.status_kondisi === 'SAKIT'),
           items: perTanggal[tgl].map((it) => ({
             nama: it.nama_bahan || 'Bahan',
             porsi: `${it.porsi_gram} g`,
+            invalid: it.status_validitas === 'INVALID',
           })),
         };
       });
@@ -272,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="meal-radio checked" data-meal="konsumsi" data-id="${day.id}"></div>
           <div class="meal-info">
             <div class="meal-type">Konsumsi</div>
-            <div class="meal-food">${it.nama} &middot; ${it.porsi}</div>
+            <div class="meal-food">${it.nama} &middot; ${it.porsi}${it.invalid ? ' (dikecualikan)' : ''}</div>
           </div>
         </div>`).join('');
 
@@ -282,8 +310,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="daily-date">${day.tanggal}</div>
             <div class="daily-meals-info">${(day.items || []).length} item tercatat</div>
           </div>
-          <button class="btn-lengkap" data-id="${day.id}">✓ Lengkap</button>
+          <button class="btn-lengkap" data-id="${day.id}">${day.sakit ? 'Sakit' : 'Lengkap'}</button>
         </div>
+        ${day.sakit ? '<div style="margin:0 0 10px;padding:8px 12px;border-radius:8px;background:#fef3c7;color:#92400e;font-size:12px;">Data hari sakit dikecualikan dari analisis.</div>' : ''}
         ${rows}
       `;
       gridContainer.appendChild(card);
@@ -296,12 +325,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 8. EVENT LISTENERS GRID
   // ============================================
   function attachGridEventListeners() {
-    document.querySelectorAll('.btn-lengkap').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.target.textContent = e.target.textContent.includes('✓') ? 'Lengkap' : '✓ Lengkap';
-      });
-    });
-
     document.querySelectorAll('.meal-radio').forEach(radio => {
       radio.addEventListener('click', (e) => {
         e.target.classList.toggle('checked');

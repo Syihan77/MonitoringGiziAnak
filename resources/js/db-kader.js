@@ -15,6 +15,19 @@ const STATUS_META = {
   lebih: { label: 'Gizi Lebih', cls: 'blue' },
 };
 
+const KATEGORI_META = {
+  NORMAL_LOW_RISK: { label: 'Normal / Risiko Rendah', cls: 'green' },
+  AT_RISK_MONITORING: { label: 'Perlu Pemantauan', cls: 'yellow' },
+  HIGH_RISK_REFERRAL: { label: 'Perlu Rujukan', cls: 'red' },
+};
+
+function metaKategori(ukur) {
+  if (!ukur) return { label: 'Belum Diukur', cls: 'gray' };
+  return KATEGORI_META[ukur.kategori_pemantauan]
+    || STATUS_META[ukur.status_gizi_antropometri]
+    || { label: 'Belum Diukur', cls: 'gray' };
+}
+
 function inisial(nama) {
   if (!nama) return '?';
   return nama.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -129,10 +142,11 @@ class DashboardController {
   }
 
   updateSummaryCards(data) {
+    const kategori = data.distribusi_kategori_pemantauan || {};
     const dist = data.distribusi_status_gizi || {};
-    const baik = dist.baik || 0;
-    const kurang = dist.kurang || 0;
-    const buruk = dist.sangat_kurang || 0;
+    const baik = kategori.NORMAL_LOW_RISK ?? dist.baik ?? 0;
+    const kurang = kategori.AT_RISK_MONITORING ?? dist.kurang ?? 0;
+    const buruk = kategori.HIGH_RISK_REFERRAL ?? dist.sangat_kurang ?? 0;
 
     this.animateValue('total-anak', 0, data.total_anak_binaan || 0, 1000);
     this.animateValue('gizi-baik', 0, baik, 1000);
@@ -169,11 +183,12 @@ class DashboardController {
   }
 
   updateDonutChart(data) {
+    const kategori = data.distribusi_kategori_pemantauan || {};
     const dist = data.distribusi_status_gizi || {};
     const total = data.anak_terukur || 0;
-    const baik = dist.baik || 0;
-    const kurang = dist.kurang || 0;
-    const buruk = dist.sangat_kurang || 0;
+    const baik = kategori.NORMAL_LOW_RISK ?? dist.baik ?? 0;
+    const kurang = kategori.AT_RISK_MONITORING ?? dist.kurang ?? 0;
+    const buruk = kategori.HIGH_RISK_REFERRAL ?? dist.sangat_kurang ?? 0;
 
     const baikPersen = total > 0 ? ((baik / total) * 100).toFixed(0) : 0;
     const kurangPersen = total > 0 ? ((kurang / total) * 100).toFixed(0) : 0;
@@ -191,17 +206,17 @@ class DashboardController {
     const legendHTML = `
       <div class="legend-item">
         <div class="legend-color" style="background: #3c9a5f;"></div>
-        <span class="legend-text">Gizi Baik</span>
+        <span class="legend-text">Normal / Risiko Rendah</span>
         <span class="legend-value">${baikPersen}%</span>
       </div>
       <div class="legend-item">
         <div class="legend-color" style="background: #fdb813;"></div>
-        <span class="legend-text">Gizi Kurang</span>
+        <span class="legend-text">Perlu Pemantauan</span>
         <span class="legend-value">${kurangPersen}%</span>
       </div>
       <div class="legend-item">
         <div class="legend-color" style="background: #e53935;"></div>
-        <span class="legend-text">Gizi Buruk</span>
+        <span class="legend-text">Perlu Rujukan</span>
         <span class="legend-value">${burukPersen}%</span>
       </div>
     `;
@@ -219,7 +234,7 @@ class DashboardController {
 
     const rows = children.map(child => {
       const ukur = child.ukur_terakhir || null;
-      const meta = (ukur && STATUS_META[ukur.status_gizi_antropometri]) || { label: 'Belum Diukur', cls: 'gray' };
+      const meta = metaKategori(ukur);
       const nama = child.nama || '-';
 
       return `
@@ -325,7 +340,7 @@ class HistoryController {
           nama: c.nama || '-',
           usia: `${c.usia_bulan} Bulan`,
           tanggal: c.ukur_terakhir.tanggal_ukur,
-          status: ((c.ukur_terakhir && STATUS_META[c.ukur_terakhir.status_gizi_antropometri]) || { label: 'Belum Diukur' }).label,
+          status: metaKategori(c.ukur_terakhir).label,
         }))
         .sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
       this.renderHistoryTable(this.historyData);

@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\Api\V1\AnakController;
 use App\Http\Controllers\Api\V1\AdminImporController;
 use App\Http\Controllers\Api\V1\AdminReferensiController;
+use App\Http\Controllers\Api\V1\AnakController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\KaderController;
+use App\Http\Controllers\Api\V1\KondisiHarianController;
 use App\Http\Controllers\Api\V1\KonsumsiController;
 use App\Http\Controllers\Api\V1\PertumbuhanController;
 use App\Http\Controllers\Api\V1\RekomendasiController;
@@ -42,7 +43,10 @@ Route::prefix('v1')->middleware('throttle:120,1')->group(function () {
         Route::post('/admin/impor-anak', [AdminImporController::class, 'imporAnak']);
         Route::post('/admin/impor-ukur', [AdminImporController::class, 'imporUkur']);
 
-        // SKPL-F-06 & F-07: konsumsi harian & analisis gizi (Fase 2).
+        // SKPL-F-06 & F-07: kondisi harian, konsumsi, & analisis gizi.
+        Route::post('/anak/{anakId}/kondisi-harian', [KondisiHarianController::class, 'store']);
+        Route::get('/anak/{anakId}/kondisi-harian', [KondisiHarianController::class, 'show']);
+
         Route::post('/anak/{anakId}/konsumsi', [KonsumsiController::class, 'store']);
         Route::get('/anak/{anakId}/konsumsi', [KonsumsiController::class, 'index']);
         Route::get('/anak/{anakId}/analisis-gizi', [KonsumsiController::class, 'analisis']);

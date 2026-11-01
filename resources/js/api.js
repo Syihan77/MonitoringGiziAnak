@@ -121,6 +121,7 @@
     me: () => get('/me'),
     anakList: () => get('/anak'),
     anakCreate: (payload) => post('/anak', payload),
+    anakUpdate: (id, payload) => put(`/anak/${id}`, payload),
     anakDetail: (id) => get(`/anak/${id}`),
     ukurCreate: (anakId, payload) => post(`/anak/${anakId}/pertumbuhan`, payload),
     ukurRiwayat: (anakId, params) => {

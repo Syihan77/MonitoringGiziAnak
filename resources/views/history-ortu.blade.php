@@ -82,9 +82,9 @@
       <div class="profile-right">
         <div class="status-gizi-badge">
           <span class="status-label">STATUS GIZI</span>
-          <div class="status-value normal">
+          <div class="status-value normal" id="profile-status">
             <span class="status-dot"></span>
-            <span>Normal</span>
+            <span id="profile-status-text">Belum diukur</span>
           </div>
         </div>
       </div>

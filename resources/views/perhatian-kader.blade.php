@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -49,7 +49,7 @@
               <th>Usia / JK</th>
               <th>Nama Orang Tua</th>
               <th>Wilayah Dusun</th>
-              <th>Status & Indikasi</th>
+              <th>Kategori Pemantauan</th>
               <th>Tindakan Cepat</th>
             </tr>
           </thead>

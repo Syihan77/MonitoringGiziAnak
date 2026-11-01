@@ -147,8 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (data.defisiensi_terdeteksi && data.defisiensi_terdeteksi.length > 0) {
       info = `<p style="margin:0 0 12px;color:#4b5563;">Fokus perbaikan: ${data.defisiensi_terdeteksi.join(', ')}.</p>`;
     }
+    if (data.peringatan) {
+      info += `<p style="margin:0 0 12px;color:#92400e;background:#fef3c7;padding:10px 14px;border-radius:10px;">${data.peringatan}</p>`;
+    }
     if (data.saran) {
       info += `<p style="margin:0 0 12px;color:#92400e;background:#fef3c7;padding:10px 14px;border-radius:10px;">${data.saran}</p>`;
+    }
+    if (data.pemeriksaan_pantangan === 'tidak_dilakukan') {
+      info += `<p style="margin:0 0 12px;color:#4b5563;font-size:13px;">Data alergi/pantangan anak belum diisi, sehingga penyaringan alergen tidak dilakukan. Lengkapi dari dashboard bila ada alergi.</p>`;
     }
     if (data.jumlah_rekomendasi === 0 && !data.saran) {
       info += '<p>Tidak ada rekomendasi yang cocok. Coba tambah bahan yang berbeda.</p>';
@@ -157,15 +163,19 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="menu-card">
         <div class="menu-card-header">
           <h3 class="menu-title">Opsi ${idx + 1}</h3>
-          <span class="menu-calories">${m.kecocokan_bahan} cocok</span>
+          <span class="menu-calories">${m.kecocokan_bahan ? `${m.kecocokan_bahan} cocok` : 'Rekomendasi umum'}</span>
         </div>
         <div class="menu-porsi-badge">
           Menghasilkan: ${m.jumlah_porsi_hasil || '-'} Porsi
         </div>
+        ${m.perlu_modifikasi ? `<div style="margin:10px 0;padding:10px 12px;border-radius:10px;background:#fef3c7;color:#92400e;font-size:13px;"><strong>Perlu modifikasi:</strong> ${m.instruksi_modifikasi || m.peringatan_modifikasi || ''}</div>` : ''}
         <div class="meal-section">
           <div class="meal-info">
             <h4 class="meal-name">${m.nama_resep}</h4>
-            <p style="color:#6b7280;font-size:13px;">${m.kategori_gizi || 'Gizi PER PORSI'}</p>
+            <p style="color:#6b7280;font-size:13px;">${m.kategori_gizi || 'Menu bergizi'}</p>
+            <p style="color:#6b7280;font-size:13px;">${m.alasan_peringkat || ''}</p>
+            ${Array.isArray(m.alergen) && m.alergen.length ? `<p style="color:#92400e;font-size:12px;">Alergen: ${m.alergen.join(', ')}</p>` : ''}
+            ${m.catatan_resep ? `<p style="color:#6b7280;font-size:12px;">${m.catatan_resep}</p>` : ''}
           </div>
         </div>
         <a href="#" class="btn-see-more" data-resep-id="${m.resep_id}">Lihat Resep →</a>
@@ -186,11 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnGenerate.addEventListener('click', async () => {
-    if (selectedIngredients.length === 0) {
-      alert('Silakan pilih minimal 1 bahan yang tersedia di rumah!');
-      return;
-    }
-
     const originalText = btnGenerate.innerHTML;
     btnGenerate.innerHTML = 'Sedang Membuat Rekomendasi...';
     btnGenerate.disabled = true;
@@ -214,8 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const hasil = await window.NutriApi.rekomendasi(anakId, {
-        bahan_tersedia: ids
-        // Fitur anggaran ditiadakan sesuai aturan SKPL v2.0
+        bahan_tersedia: ids,
+        top_k: 5
       });
 
       if (dilewati > 0) {

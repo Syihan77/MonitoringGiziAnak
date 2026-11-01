@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class AdminImporController extends Controller
 {
@@ -118,7 +119,7 @@ class AdminImporController extends Controller
                     $data['tanggal_ukur'],
                     $data['posisi_ukur'] ?? null,
                 );
-            } catch (\Illuminate\Validation\ValidationException $e) {
+            } catch (ValidationException $e) {
                 $galat[] = ['baris' => $data['baris'], 'pesan' => $e->validator->errors()->first()];
 
                 continue;
@@ -139,6 +140,12 @@ class AdminImporController extends Controller
                 'status_tb_u' => $hasil['status_tb_u'],
                 'status_bb_tb' => $hasil['status_bb_tb'],
                 'status_gizi_antropometri' => $hasil['status_gizi_antropometri'],
+                'usia_bulan_saat_ukur' => $hasil['umur_bulan'],
+                'kategori_pemantauan' => $hasil['kategori_pemantauan'],
+                'metode_klasifikasi' => $hasil['metode_klasifikasi'],
+                'versi_aturan' => $hasil['versi_aturan'],
+                'status_validitas_pengukuran' => Pertumbuhan::VALID,
+                'alasan_pengecualian' => null,
                 'dicatat_oleh' => $request->user()->id,
             ];
         }
@@ -173,8 +180,8 @@ class AdminImporController extends Controller
     }
 
     /**
-     * @param list<string> $wajib
-     * @param list<string> $opsional
+     * @param  list<string>  $wajib
+     * @param  list<string>  $opsional
      * @return list<array<string, ?string>>
      */
     private function bacaCsv(Request $request, array $wajib, array $opsional): array
@@ -237,8 +244,8 @@ class AdminImporController extends Controller
     }
 
     /**
-     * @param list<string> $ids
-     * @param list<array{baris: int, pesan: string}> $galat
+     * @param  list<string>  $ids
+     * @param  list<array{baris: int, pesan: string}>  $galat
      * @return array{total_baris: int, berhasil: int, gagal: int, ids: list<string>, galat: list<array{baris: int, pesan: string}>}
      */
     private function ringkasan(int $total, array $ids, array $galat): array

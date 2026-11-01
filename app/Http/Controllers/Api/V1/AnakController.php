@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAnakRequest;
 use App\Http\Requests\UpdateAnakRequest;
 use App\Models\Anak;
+use App\Models\PantanganAnak;
 use App\Models\Pertumbuhan;
 use App\Models\User;
 use App\Services\ZScoreService;
@@ -74,10 +75,16 @@ class AnakController extends Controller
     public function store(StoreAnakRequest $request): JsonResponse
     {
         $anak = DB::transaction(function () use ($request) {
+            $data = $request->validated();
+            $pantangan = $data['pantangan'] ?? [];
+            unset($data['pantangan']);
+
             $created = Anak::create([
-                ...$request->validated(),
+                ...$data,
                 'user_id' => $request->user()->id,
             ]);
+
+            $this->simpanPantangan($created, $pantangan);
 
             AuditLogger::log($request->user(), 'anak_create', ['anak_id' => $created->id]);
 
@@ -102,7 +109,16 @@ class AnakController extends Controller
         $anak = $this->findOrFail($request, $id, 'update');
 
         DB::transaction(function () use ($request, $anak) {
-            $anak->update($request->validated());
+            $data = $request->validated();
+            $punyaPantangan = array_key_exists('pantangan', $data);
+            $pantangan = $data['pantangan'] ?? [];
+            unset($data['pantangan']);
+
+            $anak->update($data);
+
+            if ($punyaPantangan) {
+                $this->simpanPantangan($anak, $pantangan);
+            }
 
             AuditLogger::log($request->user(), 'anak_update', ['anak_id' => $anak->id]);
         });
@@ -125,7 +141,7 @@ class AnakController extends Controller
 
     private function findOrFail(Request $request, string $id, string $ability): Anak
     {
-        $anak = Anak::with('user')->find($id);
+        $anak = Anak::with(['user', 'pantangan.bahan'])->find($id);
 
         if ($anak === null) {
             throw new HttpResponseException(ApiResponse::error('RESOURCE_NOT_FOUND', 'Data anak tidak ditemukan.', 404));
@@ -134,6 +150,38 @@ class AnakController extends Controller
         Gate::authorize($ability, $anak);
 
         return $anak;
+    }
+
+    /**
+     * @param  list<array{bahan_id?: ?string, alergen?: ?string, jenis?: ?string}>  $pantangan
+     */
+    private function simpanPantangan(Anak $anak, array $pantangan): void
+    {
+        $anak->pantangan()->delete();
+        $unik = [];
+
+        foreach ($pantangan as $item) {
+            $bahanId = $item['bahan_id'] ?? null;
+            $alergen = trim((string) ($item['alergen'] ?? ''));
+            $alergen = $alergen === '' ? null : $alergen;
+
+            if ($bahanId === null && $alergen === null) {
+                continue;
+            }
+
+            $jenis = $item['jenis'] ?? PantanganAnak::JENIS_ALERGI;
+            $kunci = ($bahanId ?? '').'|'.($alergen ?? '').'|'.$jenis;
+            if (isset($unik[$kunci])) {
+                continue;
+            }
+
+            $unik[$kunci] = true;
+            $anak->pantangan()->create([
+                'bahan_id' => $bahanId,
+                'alergen' => $alergen,
+                'jenis' => $jenis,
+            ]);
+        }
     }
 
     /**
@@ -163,6 +211,11 @@ class AnakController extends Controller
                 'zscore_bb_u' => $ukur->z_bb_u === null ? null : (float) $ukur->z_bb_u,
                 'zscore_tb_u' => $ukur->z_tb_u === null ? null : (float) $ukur->z_tb_u,
                 'zscore_bb_tb' => $ukur->z_bb_tb === null ? null : (float) $ukur->z_bb_tb,
+                'kategori_pemantauan' => $ukur->kategoriEfektif(),
+                'metode_klasifikasi' => $ukur->metodeKlasifikasiEfektif(),
+                'versi_aturan' => $ukur->versiAturanEfektif(),
+                'status_validitas_pengukuran' => $ukur->statusValiditasEfektif(),
+                'pesan' => $ukur->pesanEfektif(),
                 'status_gizi_antropometri' => $ukur->status_gizi_antropometri,
             ];
         }
@@ -175,10 +228,19 @@ class AnakController extends Controller
      */
     private function detail(Anak $anak): array
     {
+        $anak->loadMissing('pantangan.bahan');
+
         return [
             ...$this->ringkas($anak),
             'alamat' => $anak->alamat,
             'pemilik_wilayah' => $anak->user->wilayah_posyandu,
+            'pantangan' => $anak->pantangan->map(fn (PantanganAnak $item) => [
+                'id' => $item->id,
+                'bahan_id' => $item->bahan_id,
+                'nama_bahan' => $item->bahan?->nama_bahan,
+                'alergen' => $item->alergen,
+                'jenis' => $item->jenis,
+            ])->values(),
         ];
     }
 }

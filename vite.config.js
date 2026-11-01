@@ -8,6 +8,7 @@ export default defineConfig({
                 // CSS global + per halaman NutriTumbuh
                 'resources/css/globals.css',
                 'resources/css/styleguide.css',
+                'resources/css/admin-referensi.css',
                 'resources/css/daftar.css',
                 'resources/css/data-dirianak.css',
                 'resources/css/data-kader.css',
@@ -27,6 +28,7 @@ export default defineConfig({
                 'resources/css/ukur-kader.css',
                 // JS per halaman (hanya yang ada file-nya)
                 'resources/js/api.js',
+                'resources/js/admin-referensi.js',
                 'resources/js/db-kader.js',
                 'resources/js/db-ortu.js',
                 'resources/js/history-ortu.js',

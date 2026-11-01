@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Gate;
 class RekomendasiController extends Controller
 {
     /**
-     * SKPL §5.4.7 (F-08): rekomendasi menu berbasis bahan/anggaran.
+     * SKPL A5.4.8 (F-08): Hybrid Recipe Ranking tanpa anggaran.
      */
     public function store(Request $request, string $anakId, RecommendationService $engine): JsonResponse
     {
@@ -25,36 +25,30 @@ class RekomendasiController extends Controller
         $data = $request->validate([
             'bahan_tersedia' => ['sometimes', 'array', 'max:100'],
             'bahan_tersedia.*' => ['uuid', 'exists:bahan_makanans,id'],
-            'anggaran_max' => ['sometimes', 'numeric', 'min:0', 'max:100000000'],
+            'top_k' => ['sometimes', 'integer', 'min:1', 'max:'.config('nutrition.rekomendasi.top_k_maks', 5)],
+            'anggaran_max' => ['prohibited'],
             'tanggal' => ['sometimes', 'date', 'before_or_equal:today'],
         ]);
-
-        if (empty($data['bahan_tersedia'] ?? []) && ! isset($data['anggaran_max'])) {
-            throw new HttpResponseException(ApiResponse::error(
-                'VALIDATION_ERROR',
-                'Data yang dikirim tidak valid.',
-                400,
-                ['errors' => ['masukan' => ['Isi bahan_tersedia atau anggaran_max.']]]
-            ));
-        }
 
         $hasil = $engine->rekomendasikan(
             $anak,
             $data['bahan_tersedia'] ?? [],
-            isset($data['anggaran_max']) ? (float) $data['anggaran_max'] : null,
+            isset($data['top_k']) ? (int) $data['top_k'] : null,
             $data['tanggal'] ?? null,
             $request->user()->id,
         );
 
         AuditLogger::log($request->user(), 'rekomendasi_minta', [
-            'anak_id' => $anak->id, 'jumlah_hasil' => $hasil['jumlah_rekomendasi'],
+            'anak_id' => $anak->id,
+            'jumlah_hasil' => $hasil['jumlah_rekomendasi'],
+            'metode_ranking' => $hasil['metode_ranking'],
         ]);
 
-        return ApiResponse::success($hasil, 'Rekomendasi menu', 201);
+        return ApiResponse::success($hasil, 'Rekomendasi menu');
     }
 
     /**
-     * SKPL §5.4.7 (F-09): detail resep beserta bahan & takaran.
+     * SKPL A5.4.8 (F-09): detail resep dengan porsi dan gizi per porsi.
      */
     public function show(Request $request, string $resepId): JsonResponse
     {
@@ -66,31 +60,36 @@ class RekomendasiController extends Controller
             ));
         }
 
-        $gizi = ['energi' => 0.0, 'protein' => 0.0, 'lemak' => 0.0, 'karbohidrat' => 0.0];
-        foreach ($resep->bahans as $rb) {
-            $faktor = ((float) $rb->takaran_gram) / 100.0;
-            $gizi['energi'] += ((float) ($rb->bahan->energi_per100g ?? 0.0)) * $faktor;
-            $gizi['protein'] += ((float) ($rb->bahan->protein_per100g ?? 0.0)) * $faktor;
-            $gizi['lemak'] += ((float) ($rb->bahan->lemak_per100g ?? 0.0)) * $faktor;
-            $gizi['karbohidrat'] += ((float) ($rb->bahan->karbohidrat_per100g ?? 0.0)) * $faktor;
-        }
-        $porsi = max($resep->porsi_saji, 1);
-        $giziPerPorsi = array_map(fn ($v) => round($v / $porsi, 1), $gizi);
-
         return ApiResponse::success([
             'resep_id' => $resep->id,
             'nama_resep' => $resep->nama_resep,
             'cara_memasak' => $resep->cara_memasak,
             'kategori_gizi' => $resep->kategori_gizi,
-            'estimasi_biaya' => $resep->estimasi_biaya === null ? null : (float) $resep->estimasi_biaya,
-            'biaya_lengkap' => $resep->biayaLengkap(),
+            'jumlah_porsi_hasil' => $resep->jumlah_porsi_hasil,
             'porsi_saji' => $resep->porsi_saji,
+            'estimasi_biaya' => $resep->estimasi_biaya,
+            'biaya_lengkap' => $resep->biayaLengkap(),
+            'gizi_per_porsi' => $resep->giziPerPorsi(),
+            'usia_min_bulan' => $resep->usia_min_bulan,
+            'usia_maks_bulan' => $resep->usia_maks_bulan,
+            'usia_minimal_bulan_jika_dimodifikasi' => $resep->usia_minimal_bulan_jika_dimodifikasi,
+            'modifikasi_untuk_turunkan_usia' => $resep->modifikasi_untuk_turunkan_usia,
+            'catatan_resep' => $resep->catatan_resep,
+            'alergen' => $resep->alergen ?? [],
+            'keyakinan_label' => $resep->keyakinan_label,
+            'jenis_menu' => $resep->jenis_menu,
+            'tekstur_sajian' => $resep->tekstur_sajian,
+            'sumber_resep' => $resep->sumber_resep,
+            'status_verifikasi_data' => $resep->status_verifikasi_data,
             'tingkat_kesulitan' => $resep->tingkat_kesulitan,
-            'gizi_per_porsi' => $giziPerPorsi,
             'bahans' => $resep->bahans->map(fn ($rb) => [
                 'bahan_id' => $rb->bahan_id,
                 'nama_bahan' => $rb->bahan->nama_bahan,
-                'takaran_gram' => (float) $rb->takaran_gram,
+                'takaran_gram' => $rb->takaran_gram === null ? null : (float) $rb->takaran_gram,
+                'takaran_jumlah' => $rb->takaran_jumlah,
+                'takaran_satuan' => $rb->takaran_satuan,
+                'takaran_gram_ekuivalen' => $rb->takaran_gram_ekuivalen,
+                'catatan_bahan' => $rb->catatan_bahan,
             ])->values(),
         ], 'Detail resep');
     }

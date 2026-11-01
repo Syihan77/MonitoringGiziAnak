@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -82,7 +82,7 @@
       </div>
       <div class="profile-right">
         <div class="status-gizi-badge">
-          <span class="status-label">STATUS GIZI</span>
+          <span class="status-label">KATEGORI PEMANTAUAN</span>
           <div class="status-value" id="profile-status">
             <span class="status-dot"></span>
             <span id="profile-status-text">-</span>

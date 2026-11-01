@@ -35,6 +35,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   setText('resep-waktu', '-');
   setText('resep-kesulitan', data.tingkat_kesulitan || '-');
   setText('resep-kategori', data.kategori_gizi || '-');
+  setText('resep-description', data.catatan_resep || 'Menu ini disusun berdasarkan kebutuhan gizi dan riwayat tumbuh kembang balita Anda.');
+
+  const peringatan = document.getElementById('resep-peringatan');
+  if (peringatan) {
+    const pesan = [];
+    if (data.usia_minimal_bulan_jika_dimodifikasi && data.modifikasi_untuk_turunkan_usia) {
+      pesan.push(`Usia minimum resep ini ${data.usia_min_bulan} bulan. Untuk usia ${data.usia_minimal_bulan_jika_dimodifikasi} bulan, resep perlu dimodifikasi: ${data.modifikasi_untuk_turunkan_usia}`);
+    }
+    if (Array.isArray(data.alergen) && data.alergen.length) {
+      pesan.push(`Mengandung alergen: ${data.alergen.join(', ')}.`);
+    }
+    if (data.porsi_saji === null) {
+      pesan.push('Takaran porsi saji belum tersedia; gunakan jumlah porsi hasil sebagai acuan.');
+    }
+    if (pesan.length) {
+      peringatan.innerHTML = pesan.join('<br>');
+      peringatan.style.display = 'block';
+    }
+  }
 
   const gizi = data.gizi_per_porsi || {};
   const energi = gizi.energi ?? 0;
@@ -53,11 +72,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (bahanList) {
     bahanList.innerHTML = '';
     bahans.forEach(bahan => {
+      const jumlah = bahan.takaran_jumlah
+        ? `${bahan.takaran_jumlah} ${bahan.takaran_satuan || 'g'}`
+        : (bahan.takaran_gram === null ? 'Takaran belum tersedia' : `${bahan.takaran_gram} gram`);
       const li = document.createElement('li');
       li.innerHTML = `
         <div class="bahan-bullet"></div>
         <span class="bahan-nama">${bahan.nama_bahan}</span>
-        <span class="bahan-jumlah">${bahan.takaran_gram} gram</span>
+        <span class="bahan-jumlah">${jumlah}</span>
       `;
       bahanList.appendChild(li);
     });

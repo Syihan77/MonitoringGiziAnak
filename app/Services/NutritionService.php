@@ -3,7 +3,11 @@
 namespace App\Services;
 
 use App\Models\Anak;
+use App\Models\KondisiHarian;
 use App\Models\Konsumsi;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Rule-Based Nutrition Engine (SKPL-F-07).
@@ -11,6 +15,18 @@ use App\Models\Konsumsi;
  */
 class NutritionService
 {
+    public const STATUS_DIANALISIS = 'DIANALISIS';
+
+    public const STATUS_BELUM_ADA_DATA = 'TIDAK_DAPAT_DIANALISIS_BELUM_ADA_DATA';
+
+    public const STATUS_ANAK_SAKIT = 'TIDAK_DAPAT_DIANALISIS_ANAK_SAKIT';
+
+    public const STATUS_TIDAK_ADA_DATA_VALID = 'TIDAK_DAPAT_DIANALISIS_TIDAK_ADA_DATA_VALID';
+
+    public const CATATAN = 'Status bersifat indikatif (asupan di bawah acuan AKG), bukan diagnosis defisiensi.';
+
+    public const PENANDA_ANAK_SAKIT = 'Anak tercatat sedang sakit pada tanggal ini — data konsumsi tidak digunakan dalam analisis.';
+
     /**
      * Zat gizi yang dianalisis: kolom bahan => kunci AKG/respons.
      *
@@ -26,27 +42,71 @@ class NutritionService
     ];
 
     /**
-     * @return array{tanggal: string, kelompok_umur: string, ringkasan: list<array{zat_gizi: string, total: float, akg: float, persentase_akg: float, status: string}>, rekomendasi_tersedia: bool, analisis_status: string}
+     * @return array<string, mixed>
      */
     public function analisis(Anak $anak, string $tanggal): array
     {
+        if (CarbonImmutable::parse($tanggal)->lt($anak->tanggal_lahir)) {
+            throw ValidationException::withMessages([
+                'tanggal' => 'Tanggal analisis tidak boleh sebelum tanggal lahir anak.',
+            ]);
+        }
+
+        $kondisi = KondisiHarian::query()
+            ->where('anak_id', $anak->id)
+            ->whereDate('tanggal_kondisi', $tanggal)
+            ->first();
+
         $konsumsi = Konsumsi::query()
             ->with('bahan')
             ->where('anak_id', $anak->id)
-            ->where('tanggal_konsumsi', $tanggal)
-            ->get();        $kelompok = self::kelompokUmur(
+            ->whereDate('tanggal_konsumsi', $tanggal)
+            ->get();
+
+        $kelompok = self::kelompokUmur(
             ZScoreService::umurBulanPenuh($anak->tanggal_lahir->toDateString(), $tanggal)
         );
         $akg = config("nutrition.akg.{$kelompok}");
+        $statusKondisi = $kondisi?->status_kondisi;
+        $sakit = $statusKondisi === KondisiHarian::STATUS_SAKIT;
+
+        $dasar = [
+            'tanggal' => $tanggal,
+            'kelompok_umur' => $akg['label'],
+            'status_kondisi' => $statusKondisi,
+            'catatan' => self::CATATAN,
+        ];
 
         if ($konsumsi->isEmpty()) {
-            return [
-                'tanggal' => $tanggal,
-                'kelompok_umur' => $akg['label'],
+            return array_merge($dasar, [
                 'ringkasan' => [],
                 'rekomendasi_tersedia' => false,
+                'status_analisis' => self::STATUS_BELUM_ADA_DATA,
                 'analisis_status' => 'tidak_dapat_dianalisis',
-            ];
+                'penanda' => null,
+                'dikecualikan' => [],
+            ]);
+        }
+
+        $valid = $sakit
+            ? collect()
+            : $konsumsi->filter(fn (Konsumsi $row) => $row->status_validitas === Konsumsi::VALID);
+
+        $dikecualikan = $this->dikecualikan($konsumsi, $sakit);
+
+        if ($valid->isEmpty()) {
+            $status = $sakit
+                ? self::STATUS_ANAK_SAKIT
+                : self::STATUS_TIDAK_ADA_DATA_VALID;
+
+            return array_merge($dasar, [
+                'ringkasan' => [],
+                'rekomendasi_tersedia' => false,
+                'status_analisis' => $status,
+                'analisis_status' => 'tidak_dapat_dianalisis',
+                'penanda' => $sakit ? self::PENANDA_ANAK_SAKIT : null,
+                'dikecualikan' => $dikecualikan,
+            ]);
         }
 
         $total = [];
@@ -54,7 +114,7 @@ class NutritionService
             $total[$kolom] = 0.0;
         }
 
-        foreach ($konsumsi as $row) {
+        foreach ($valid as $row) {
             $faktor = ((float) $row->porsi_gram) / 100.0;
 
             foreach (array_keys(self::ZAT_GIZI) as $kolom) {
@@ -64,19 +124,39 @@ class NutritionService
 
         $ringkasan = self::ringkasanDariTotal($total, $akg, $defisiensi);
 
-        return [
-            'tanggal' => $tanggal,
-            'kelompok_umur' => $akg['label'],
+        return array_merge($dasar, [
             'ringkasan' => $ringkasan,
             'rekomendasi_tersedia' => $defisiensi,
+            'status_analisis' => self::STATUS_DIANALISIS,
             'analisis_status' => 'dianalisis',
-        ];
+            'penanda' => null,
+            'dikecualikan' => $dikecualikan,
+        ]);
+    }
+
+    /**
+     * @param  Collection<int, Konsumsi>  $konsumsi
+     * @return list<array{konsumsi_id: string, bahan_id: string, nama_bahan: string|null, alasan_invalid: string|null}>
+     */
+    private function dikecualikan(Collection $konsumsi, bool $sakit): array
+    {
+        return $konsumsi
+            ->filter(fn (Konsumsi $row) => $sakit || $row->status_validitas !== Konsumsi::VALID)
+            ->map(fn (Konsumsi $row) => [
+                'konsumsi_id' => $row->id,
+                'bahan_id' => $row->bahan_id,
+                'nama_bahan' => $row->bahan?->nama_bahan,
+                'alasan_invalid' => $sakit ? Konsumsi::ALASAN_ANAK_SAKIT : $row->alasan_invalid,
+            ])
+            ->values()
+            ->all();
     }
 
     /**
      * Agregat bulanan: rata-rata %AKG harian antar hari tercatat.
+     * Konsumsi INVALID (mis. anak sakit) tidak dihitung sebagai hari tercatat.
      *
-     * @return array{bulan: string, hari_tercatat: int, rata_persen_akg: float|null, status: string, zat_terendah: string|null, rata_per_zat: array<string, float>}
+     * @return array{bulan: string, hari_tercatat: int, hari_dikecualikan: int, rata_persen_akg: float|null, status: string, zat_terendah: string|null, rata_per_zat: array<string, float>}
      */
     public function agregatBulanan(Anak $anak, string $bulan): array
     {
@@ -84,18 +164,42 @@ class NutritionService
             throw new \InvalidArgumentException('Format bulan harus YYYY-MM.');
         }
 
-        $rows = Konsumsi::query()
+        $mulai = CarbonImmutable::parse($bulan.'-01')->startOfMonth();
+        $selesai = $mulai->endOfMonth();
+
+        if ($selesai->toDateString() < $anak->tanggal_lahir->toDateString()) {
+            throw ValidationException::withMessages([
+                'bulan' => 'Bulan analisis tidak boleh sebelum tanggal lahir anak.',
+            ]);
+        }
+
+        $tanggalSakit = KondisiHarian::query()
+            ->where('anak_id', $anak->id)
+            ->whereDate('tanggal_kondisi', '>=', $mulai->toDateString())
+            ->whereDate('tanggal_kondisi', '<=', $selesai->toDateString())
+            ->where('status_kondisi', KondisiHarian::STATUS_SAKIT)
+            ->get()
+            ->map(fn (KondisiHarian $k) => $k->tanggal_kondisi->toDateString())
+            ->all();
+
+        $semua = Konsumsi::query()
             ->with('bahan')
             ->where('anak_id', $anak->id)
-            ->where('tanggal_konsumsi', 'like', "{$bulan}-%")
+            ->whereDate('tanggal_konsumsi', '>=', $mulai->toDateString())
+            ->whereDate('tanggal_konsumsi', '<=', $selesai->toDateString())
             ->orderBy('tanggal_konsumsi')
             ->get()
             ->groupBy(fn ($r) => $r->tanggal_konsumsi->toDateString());
+
+        $rows = $semua
+            ->filter(fn ($items, $tanggal) => ! in_array($tanggal, $tanggalSakit, true)
+                && $items->contains(fn (Konsumsi $r) => $r->status_validitas === Konsumsi::VALID));
 
         if ($rows->isEmpty()) {
             return [
                 'bulan' => $bulan,
                 'hari_tercatat' => 0,
+                'hari_dikecualikan' => $semua->count(),
                 'rata_persen_akg' => null,
                 'status' => 'belum_tercatat',
                 'zat_terendah' => null,
@@ -113,6 +217,10 @@ class NutritionService
                 $total[$kolom] = 0.0;
             }
             foreach ($items as $row) {
+                if ($row->status_validitas !== Konsumsi::VALID) {
+                    continue;
+                }
+
                 $faktor = ((float) $row->porsi_gram) / 100.0;
                 foreach (array_keys(self::ZAT_GIZI) as $kolom) {
                     $total[$kolom] += ((float) ($row->bahan->{$kolom} ?? 0.0)) * $faktor;
@@ -143,6 +251,7 @@ class NutritionService
         return [
             'bulan' => $bulan,
             'hari_tercatat' => count($perHari),
+            'hari_dikecualikan' => $semua->count() - count($perHari),
             'rata_persen_akg' => $rata,
             'status' => $rata >= (float) config('nutrition.cutoff_cukup', 80.0)
                 ? 'TERPENUHI'
@@ -153,8 +262,8 @@ class NutritionService
     }
 
     /**
-     * @param array<string, float> $total
-     * @param array<string, mixed> $akg
+     * @param  array<string, float>  $total
+     * @param  array<string, mixed>  $akg
      * @return list<array{zat_gizi: string, total: float, akg: float, persentase_akg: float, status: string}>
      */
     private static function ringkasanDariTotal(array $total, array $akg, ?bool &$defisiensi = null): array

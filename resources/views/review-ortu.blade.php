@@ -97,12 +97,13 @@
             <div class="avatar-initial avatar-md" id="review-avatar-anak">?</div>
             <div class="child-info">
               <h3 class="child-name" id="review-nama-anak">-</h3>
-              <div class="child-meta">
+            <div class="child-meta">
                 <span class="child-gender" id="review-gender-anak">-</span>
                 <span class="child-birth" id="review-tgl-anak">-</span>
                 <span class="child-age" id="review-usia-anak">-</span>
-              </div>
             </div>
+            <p class="helper-text" style="margin:8px 0 0;">Alergi / pantangan: <strong id="review-alergi-anak">Tidak ada</strong></p>
+          </div>
           </div>
 
           <!-- Detail Pengukuran -->
@@ -197,6 +198,11 @@
       }
       document.getElementById('review-usia-anak').textContent = `Usia ${years} Th ${months} Bln`;
 
+      const alergiAnak = Array.isArray(dataAnak.pantangan) ? dataAnak.pantangan : [];
+      document.getElementById('review-alergi-anak').textContent = alergiAnak.length
+        ? alergiAnak.map((item) => item.alergen).filter(Boolean).join(', ')
+        : 'Tidak ada';
+
       // 4. Tampilkan Data Pertumbuhan
       document.getElementById('review-tinggi').textContent = dataPertumbuhan.tinggiBadan;
       document.getElementById('review-berat').textContent = dataPertumbuhan.beratBadan;
@@ -253,6 +259,7 @@
             tanggal_lahir: dataAnak.tanggalLahirAnak,
             jenis_kelamin: jk,
             alamat: dataAnak.alamatAnak || undefined,
+            pantangan: Array.isArray(dataAnak.pantangan) ? dataAnak.pantangan : [],
           });
 
           // 4. Simpan pengukuran awal (tanggal ukur = hari ini).

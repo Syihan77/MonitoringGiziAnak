@@ -6,6 +6,11 @@
  */
 
 const PERHATIAN_STATUS = {
+  AT_RISK_MONITORING: { label: 'Perlu Pemantauan', cls: 'gizi-kurang', avatar: 'yellow' },
+  HIGH_RISK_REFERRAL: { label: 'Perlu Rujukan', cls: 'gizi-buruk', avatar: 'red' },
+};
+
+const PERHATIAN_LEGACY = {
   kurang: { label: 'Gizi Kurang', cls: 'gizi-kurang', avatar: 'yellow' },
   stunting_terindikasi: { label: 'Stunting Terindikasi', cls: 'gizi-buruk', avatar: 'red' },
   gizi_buruk: { label: 'Gizi Buruk', cls: 'gizi-buruk', avatar: 'red' },
@@ -32,7 +37,8 @@ function renderTable(data) {
 
   const rows = data.map(child => {
     const ukur = child.ukur_terakhir || null;
-    const meta = (ukur && PERHATIAN_STATUS[ukur.status_gizi_antropometri])
+    const meta = (ukur && (PERHATIAN_STATUS[ukur.kategori_pemantauan]
+      || PERHATIAN_LEGACY[ukur.status_gizi_antropometri]))
       || { label: 'Belum Diukur', cls: 'belum-ukur', avatar: 'gray' };
 
     return `
@@ -91,8 +97,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const items = Array.isArray(list) ? list : (list && list.data) || [];
 
     const perlu = items.filter((c) => {
-      const s = c.ukur_terakhir && c.ukur_terakhir.status_gizi_antropometri;
-      return s === null || s === undefined || s !== 'normal';
+      const ukur = c.ukur_terakhir;
+      if (!ukur) return true;
+      if (ukur.kategori_pemantauan) return ukur.kategori_pemantauan !== 'NORMAL_LOW_RISK';
+      return ukur.status_gizi_antropometri !== 'normal';
     });
 
     renderTable(perlu);

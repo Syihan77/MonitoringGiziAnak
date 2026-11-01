@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let tglLahirAnak = legacyAnak && legacyAnak.tanggalLahirAnak;
     let tinggi = legacyGrowth && legacyGrowth.tinggiBadan;
     let berat = legacyGrowth && legacyGrowth.beratBadan;
+    let kategoriTerakhir = null;
+    let pesanKategori = null;
+    let profilAnak = null;
+    let profilAnakId = null;
 
     if (window.NutriApi && window.NutriApi.getToken()) {
         try {
@@ -27,15 +31,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (items.length > 0) {
                 const pertama = items[0];
                 const detail = await window.NutriApi.anakDetail(pertama.anak_id);
+                profilAnak = detail;
+                profilAnakId = pertama.anak_id;
                 namaAnak = detail.nama;
                 tglLahirAnak = detail.tanggal_lahir;
                 
                 const riwayat = await window.NutriApi.ukurRiwayat(pertama.anak_id);
                 const arr = Array.isArray(riwayat) ? riwayat : [];
                 if (arr.length > 0) {
-                    const terakhir = arr[arr.length - 1];
+                    const terakhir = arr.reduce((a, b) =>
+                        new Date(a.tanggal_ukur) > new Date(b.tanggal_ukur) ? a : b
+                    );
                     tinggi = terakhir.tinggi_cm;
                     berat = terakhir.berat_kg;
+                    kategoriTerakhir = terakhir.kategori_pemantauan || null;
+                    pesanKategori = terakhir.pesan || null;
                 }
             }
         } catch (e) {
@@ -91,6 +101,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('bb-value').textContent = berat || '-';
     }
 
+    const labelKategori = {
+        NORMAL_LOW_RISK: 'Normal',
+        AT_RISK_MONITORING: 'Perlu Pemantauan',
+        HIGH_RISK_REFERRAL: 'Perlu Rujukan',
+    };
+    const badgeText = document.getElementById('status-badge-text');
+    const badge = document.getElementById('status-badge-header');
+    if (badgeText) badgeText.textContent = labelKategori[kategoriTerakhir] || 'Belum diukur';
+    if (badge && pesanKategori) badge.title = pesanKategori;
+    if (badge) {
+        const dot = badge.querySelector('.status-dot');
+        if (dot) {
+            dot.style.background = kategoriTerakhir === 'HIGH_RISK_REFERRAL'
+                ? '#dc2626'
+                : (kategoriTerakhir === 'AT_RISK_MONITORING' ? '#d97706' : '#16a34a');
+        }
+    }
+
     // ==========================================
     // 2. TAB SYSTEM LOGIC (SKPL-F-06)
     // ==========================================
@@ -121,7 +149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!resepSelect) return;
         try {
             if (window.NutriApi && window.NutriApi.getToken()) {
-                const res = await window.NutriApi.get('/resep');
+                const res = await window.NutriApi.get('/resep?status_verifikasi_data=DATA_LENGKAP&limit=100');
                 const items = Array.isArray(res) ? res : (res && res.data) || [];
                 resepSelect.innerHTML = '<option value="">-- Pilih Resep Makanan --</option>';
                 items.forEach(r => {
@@ -158,7 +186,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.warn('Gagal memuat detail resep:', err);
             }
 
-            const bahanArr = (detail && (detail.bahan || detail.RESEP_BAHAN)) || [];
+            const bahanArr = (detail && (detail.bahans || detail.bahan || detail.RESEP_BAHAN)) || [];
+            resepBahanContainer.dataset.porsiHasil = (detail && (detail.jumlah_porsi_hasil || detail.porsi_saji)) || 1;
             bahanResepList.innerHTML = '';
 
             if (bahanArr.length === 0) {
@@ -167,13 +196,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bahanArr.forEach((b) => {
                     const bahanId = b.bahan_id || b.id;
                     const namaBahan = b.nama_bahan || (b.bahan_makanan && b.bahan_makanan.nama_bahan) || 'Bahan Makanan';
-                    const takaranStr = b.takaran_jumlah ? `${b.takaran_jumlah} ${b.takaran_satuan || 'g'}` : `${b.takaran_gram || 100}g`;
-                    const gramEkuivalen = b.takaran_gram_ekuivalen || b.takaran_gram || 100;
+                    const gramEkuivalen = b.takaran_gram_ekuivalen ?? b.takaran_gram ?? null;
+                    const bisaDihitung = gramEkuivalen !== null && Number(gramEkuivalen) > 0;
+                    const takaranStr = b.takaran_jumlah
+                        ? `${b.takaran_jumlah} ${b.takaran_satuan || 'g'}`
+                        : (bisaDihitung ? `${gramEkuivalen}g` : 'Takaran belum tersedia');
 
                     const label = document.createElement('label');
                     label.className = 'bahan-resep-item';
                     label.innerHTML = `
-                        <input type="checkbox" class="cb-bahan-resep" value="${bahanId}" data-nama="${namaBahan}" data-gram="${gramEkuivalen}" checked>
+                        <input type="checkbox" class="cb-bahan-resep" value="${bahanId}" data-nama="${namaBahan}" data-gram="${bisaDihitung ? gramEkuivalen : ''}" ${bisaDihitung ? 'checked' : 'disabled'}>
                         <div class="bahan-teks">
                             <span>${namaBahan}</span>
                             <span class="bahan-takaran">${takaranStr}</span>
@@ -303,6 +335,75 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnBatal) btnBatal.addEventListener('click', tutupModalKondisi);
 
     // ==========================================
+    // 5b. MODAL KELOLA ALERGI / PANTANGAN
+    // ==========================================
+    const modalAlergi = document.getElementById('modal-alergi-anak');
+    const btnKelolaAlergi = document.getElementById('btn-kelola-alergi');
+    const btnAlergiBatal = document.getElementById('btn-alergi-batal');
+    const btnAlergiSimpan = document.getElementById('btn-alergi-simpan');
+
+    function isiModalAlergi() {
+        const aktif = new Set(
+            ((profilAnak && profilAnak.pantangan) || [])
+                .map((item) => item.alergen)
+                .filter(Boolean)
+        );
+
+        document.querySelectorAll('input[name="alergi-modal"]').forEach((input) => {
+            input.checked = aktif.has(input.value);
+        });
+    }
+
+    function tutupModalAlergi() {
+        if (modalAlergi) modalAlergi.style.display = 'none';
+    }
+
+    if (btnKelolaAlergi) {
+        btnKelolaAlergi.addEventListener('click', () => {
+            if (!profilAnakId) return alert('Data anak belum tersedia.');
+            isiModalAlergi();
+            if (modalAlergi) modalAlergi.style.display = 'flex';
+        });
+    }
+
+    if (btnAlergiBatal) btnAlergiBatal.addEventListener('click', tutupModalAlergi);
+
+    if (btnAlergiSimpan) {
+        btnAlergiSimpan.addEventListener('click', async () => {
+            if (!profilAnakId) return;
+
+            const opsi = Array.from(document.querySelectorAll('input[name="alergi-modal"]'));
+            const nilaiDikenal = new Set(opsi.map((input) => input.value));
+            const pantanganLain = ((profilAnak && profilAnak.pantangan) || [])
+                .filter((item) => item.bahan_id || (item.alergen && !nilaiDikenal.has(item.alergen)))
+                .map((item) => item.bahan_id
+                    ? { bahan_id: item.bahan_id, jenis: item.jenis || 'PANTANGAN' }
+                    : { alergen: item.alergen, jenis: item.jenis || 'ALERGI' });
+            const pantangan = [
+                ...pantanganLain,
+                ...opsi
+                    .filter((input) => input.checked)
+                    .map((input) => ({ alergen: input.value, jenis: 'ALERGI' })),
+            ];
+
+            const teksAsli = btnAlergiSimpan.textContent;
+            btnAlergiSimpan.textContent = 'Menyimpan...';
+            btnAlergiSimpan.disabled = true;
+
+            try {
+                await window.NutriApi.anakUpdate(profilAnakId, { pantangan });
+                if (profilAnak) profilAnak.pantangan = pantangan;
+                tutupModalAlergi();
+            } catch (err) {
+                alert((err && err.message) || 'Gagal menyimpan alergi.');
+            } finally {
+                btnAlergiSimpan.textContent = teksAsli;
+                btnAlergiSimpan.disabled = false;
+            }
+        });
+    }
+
+    // ==========================================
     // 6. SUBMIT KONSUMSI & AKG PROCESS
     // ==========================================
     const btnCalculate = document.getElementById('btn-calculate');
@@ -396,14 +497,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const resepId = resepSelect.value;
                 const checkedBahan = Array.from(document.querySelectorAll('.cb-bahan-resep:checked'));
                 const porsiDikonsumsi = parseFloat(resepPorsiInput ? resepPorsiInput.value : 1) || 1;
+                const porsiHasil = parseFloat(resepBahanContainer.dataset.porsiHasil) || 1;
 
                 payload.resep_id = resepId;
-                payload.porsi_resep_dikonsumsi = porsiDikonsumsi;
-                payload.items = checkedBahan.map((cb) => ({
-                    bahan_id: cb.value,
-                    jumlah: parseFloat(cb.dataset.gram || 100) * porsiDikonsumsi,
-                    satuan: 'g'
-                }));
+                payload.jumlah_porsi_dikonsumsi = porsiDikonsumsi;
+                payload.items = checkedBahan
+                    .filter((cb) => Number(cb.dataset.gram) > 0)
+                    .map((cb) => ({
+                        bahan_id: cb.value,
+                        jumlah: (parseFloat(cb.dataset.gram) / porsiHasil) * porsiDikonsumsi,
+                        satuan: 'g'
+                    }));
             } else {
                 const items = [];
                 for (const item of catatItems) {
@@ -418,6 +522,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
                 payload.items = items;
+            }
+
+            if (payload.items.length === 0) {
+                tampilGalatCatat('Tidak ada bahan yang cocok di katalog. Perbaiki nama makanan lalu coba lagi.');
+                return;
             }
 
             // 3. Simpan Konsumsi ke API (SKPL-F-16)
@@ -458,8 +567,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             + `<strong>${r.persentase_akg}% (${r.status})</strong></div>`
         ).join('');
 
+        let isi = '';
+        if (data.analisis_status !== 'dianalisis' && rows === '') {
+            const pesan = data.penanda
+                || (data.status_analisis === 'TIDAK_DAPAT_DIANALISIS_TIDAK_ADA_DATA_VALID'
+                    ? 'Data konsumsi hari ini tidak valid sehingga belum dapat dianalisis.'
+                    : 'Belum ada data konsumsi yang dapat dianalisis pada tanggal ini.');
+            isi = `<p class="hasil-kosong">${pesan}</p>`;
+        } else {
+            isi = rows;
+        }
+
         catatHasil.innerHTML = `<h4>Hasil analisis hari ini (${data.kelompok_umur || ''})</h4>`
-            + rows
+            + isi
+            + (data.catatan ? `<p class="hasil-catatan">${data.catatan}</p>` : '')
             + `<a href="/history-ortu" class="hasil-link" style="display:inline-block;margin-top:8px;">Lihat History →</a>`;
         catatHasil.style.display = 'block';
         catatHasil.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

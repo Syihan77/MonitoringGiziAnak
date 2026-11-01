@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\BahanMakanan;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
@@ -82,7 +83,7 @@ class BahanSeeder extends Seeder
             }
 
             $rows[] = [
-                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'id' => (string) Str::uuid(),
                 'nama_bahan' => mb_substr($nama, 0, 100),
                 'kelompok_gizi' => mb_substr(trim((string) ($sel[$idx['kelompok']] ?? '')) ?: 'Lainnya', 0, 50),
                 'energi_per100g' => self::angka($sel[$idx['energi_kkal']] ?? null),
@@ -91,7 +92,6 @@ class BahanSeeder extends Seeder
                 'lemak_per100g' => self::angka($sel[$idx['lemak_g']] ?? null),
                 'zat_besi_per100g' => self::angka($sel[$idx['besi_mg']] ?? null),
                 'zinc_per100g' => self::angka($sel[$idx['seng_mg']] ?? null),
-                'estimasi_harga_per100g' => null,
                 'sumber_rujukan' => mb_substr('TKPI 2020 '.trim((string) ($sel[$idx['kode_pangan']] ?? '')), 0, 100),
                 'created_at' => now(),
                 'updated_at' => now(),

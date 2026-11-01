@@ -46,4 +46,24 @@ class Anak extends Model
     {
         return $this->hasMany(Pertumbuhan::class)->orderBy('tanggal_ukur');
     }
+
+    public function kondisiHarian(): HasMany
+    {
+        return $this->hasMany(KondisiHarian::class)->orderBy('tanggal_kondisi');
+    }
+
+    public function konsumsis(): HasMany
+    {
+        return $this->hasMany(Konsumsi::class)->orderBy('tanggal_konsumsi');
+    }
+
+    public function pantangan(): HasMany
+    {
+        return $this->hasMany(PantanganAnak::class);
+    }
+
+    public function rekomendasiLogs(): HasMany
+    {
+        return $this->hasMany(RekomendasiLog::class)->orderBy('tanggal_minta');
+    }
 }

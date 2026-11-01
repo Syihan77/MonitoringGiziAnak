@@ -88,10 +88,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         posisi_ukur: inputPosisi.value,
       });
 
-      boxHasil.innerHTML = `Tersimpan. Umur ${hasil.umur_bulan} bln — `
+      const kategori = hasil.kategori_pemantauan || hasil.status_gizi_antropometri;
+      boxHasil.innerHTML = `Tersimpan. Umur ${hasil.usia_bulan_saat_ukur ?? hasil.umur_bulan} bln — `
         + `Z BB/U ${hasil.zscore_bb_u}, TB/U ${hasil.zscore_tb_u}, BB/TB ${hasil.zscore_bb_tb}. `
-        + `Status: <strong>${hasil.status_gizi_antropometri}</strong> `
-        + `(<a href="/riwayat-kader?id=${selectAnak.value}">lihat riwayat</a>).`;
+        + `Kategori: <strong>${kategori}</strong> `
+        + `(<a href="/riwayat-kader?id=${selectAnak.value}">lihat riwayat</a>).`
+        + (hasil.pesan ? `<br><span style="font-size:13px;">${hasil.pesan}</span>` : '');
       boxHasil.style.display = 'block';
       form.querySelectorAll('input[type="number"]').forEach((i) => { i.value = ''; });
     } catch (err) {

@@ -25,6 +25,19 @@ class PertumbuhanController extends Controller
         $anak = $this->anakOrFail($request, $anakId, 'view');
         $data = $request->validated();
 
+        $umur = ZScoreService::umurBulanPenuh(
+            $anak->tanggal_lahir->toDateString(),
+            $data['tanggal_ukur'],
+        );
+
+        if ($umur > 60) {
+            throw new HttpResponseException(ApiResponse::error(
+                'USIA_DI_LUAR_RENTANG',
+                'Umur anak saat pengukuran di luar rentang 0-60 bulan.',
+                400,
+            ));
+        }
+
         $hasil = $zscore->hitung(
             $anak,
             (float) $data['berat_badan_kg'],
@@ -49,6 +62,12 @@ class PertumbuhanController extends Controller
                 'status_tb_u' => $hasil['status_tb_u'],
                 'status_bb_tb' => $hasil['status_bb_tb'],
                 'status_gizi_antropometri' => $hasil['status_gizi_antropometri'],
+                'usia_bulan_saat_ukur' => $hasil['umur_bulan'],
+                'kategori_pemantauan' => $hasil['kategori_pemantauan'],
+                'metode_klasifikasi' => $hasil['metode_klasifikasi'],
+                'versi_aturan' => $hasil['versi_aturan'],
+                'status_validitas_pengukuran' => Pertumbuhan::VALID,
+                'alasan_pengecualian' => null,
                 'dicatat_oleh' => $request->user()->id,
             ]);
 
@@ -61,10 +80,16 @@ class PertumbuhanController extends Controller
 
         return ApiResponse::success([
             'pertumbuhan_id' => $catat->id,
+            'usia_bulan_saat_ukur' => $hasil['umur_bulan'],
             'umur_bulan' => $hasil['umur_bulan'],
             'zscore_bb_u' => $hasil['z_bb_u'],
             'zscore_tb_u' => $hasil['z_tb_u'],
             'zscore_bb_tb' => $hasil['z_bb_tb'],
+            'kategori_pemantauan' => $hasil['kategori_pemantauan'],
+            'metode_klasifikasi' => $hasil['metode_klasifikasi'],
+            'versi_aturan' => $hasil['versi_aturan'],
+            'status_validitas_pengukuran' => Pertumbuhan::VALID,
+            'pesan' => $hasil['pesan'],
             'status_gizi_antropometri' => $hasil['status_gizi_antropometri'],
             'status_rincian' => [
                 'bb_u' => $hasil['status_bb_u'],
@@ -89,20 +114,28 @@ class PertumbuhanController extends Controller
 
         $riwayat = Pertumbuhan::query()
             ->where('anak_id', $anak->id)
-            ->when(isset($filter['dari_tanggal']), fn ($q) => $q->where('tanggal_ukur', '>=', $filter['dari_tanggal']))
-            ->when(isset($filter['sampai_tanggal']), fn ($q) => $q->where('tanggal_ukur', '<=', $filter['sampai_tanggal']))
+            ->when(isset($filter['dari_tanggal']), fn ($q) => $q->whereDate('tanggal_ukur', '>=', $filter['dari_tanggal']))
+            ->when(isset($filter['sampai_tanggal']), fn ($q) => $q->whereDate('tanggal_ukur', '<=', $filter['sampai_tanggal']))
             ->orderBy('tanggal_ukur')
             ->when(isset($filter['limit']), fn ($q) => $q->limit($filter['limit']))
             ->get()
             ->map(fn (Pertumbuhan $p) => [
                 'pertumbuhan_id' => $p->id,
                 'tanggal_ukur' => $p->tanggal_ukur->toDateString(),
+                'usia_bulan_saat_ukur' => $p->usia_bulan_saat_ukur === null
+                    ? $p->umur_bulan
+                    : (float) $p->usia_bulan_saat_ukur,
                 'umur_bulan' => $p->umur_bulan,
                 'berat_kg' => (float) $p->berat_kg,
                 'tinggi_cm' => (float) $p->tinggi_cm,
-                'zscore_bb_u' => (float) $p->z_bb_u,
-                'zscore_tb_u' => (float) $p->z_tb_u,
-                'zscore_bb_tb' => (float) $p->z_bb_tb,
+                'zscore_bb_u' => $p->z_bb_u === null ? null : (float) $p->z_bb_u,
+                'zscore_tb_u' => $p->z_tb_u === null ? null : (float) $p->z_tb_u,
+                'zscore_bb_tb' => $p->z_bb_tb === null ? null : (float) $p->z_bb_tb,
+                'kategori_pemantauan' => $p->kategoriEfektif(),
+                'metode_klasifikasi' => $p->metodeKlasifikasiEfektif(),
+                'versi_aturan' => $p->versiAturanEfektif(),
+                'status_validitas_pengukuran' => $p->statusValiditasEfektif(),
+                'pesan' => $p->pesanEfektif(),
                 'status_gizi_antropometri' => $p->status_gizi_antropometri,
             ]);
 

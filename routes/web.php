@@ -9,6 +9,8 @@ Route::view('/daftar', 'daftar');
 Route::view('/login', 'login')->name('login');
 Route::view('/kebijakan', 'kebijakan');
 
+Route::view('/admin-referensi', 'admin-referensi');
+
 // Alur Kader
 Route::view('/data-kader', 'data-kader');
 Route::view('/review-kader', 'review-kader');
