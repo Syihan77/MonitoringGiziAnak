@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -98,16 +98,24 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Tanggal lahir tidak boleh melebihi hari ini (backend menolak via validasi).
+      // Batasi tanggal maksimal hari ini
       const tgl = document.getElementById('tanggalLahir');
       if (tgl) tgl.max = new Date().toISOString().slice(0, 10);
+
+      // RESTORE DATA DARI SESSION JIKA SUDAH ADA
+      const savedData = JSON.parse(sessionStorage.getItem('ortuDataStep1') || 'null');
+      if (savedData) {
+        if (savedData.namaLengkap) document.getElementById('namaLengkap').value = savedData.namaLengkap;
+        if (savedData.tanggalLahir) document.getElementById('tanggalLahir').value = savedData.tanggalLahir;
+        if (savedData.alamat) document.getElementById('alamat').value = savedData.alamat;
+        if (savedData.wilayahPosyandu) document.getElementById('wilayahPosyandu').value = savedData.wilayahPosyandu;
+        if (savedData.noTelp) document.getElementById('noTelp').value = savedData.noTelp;
+      }
     });
 
-    // Tangkap event submit form (Pola sama persis dengan data-kader)
     document.getElementById('form-data-ortu').addEventListener('submit', function(e) {
-      e.preventDefault(); // Mencegah reload halaman
+      e.preventDefault();
       
-      // 1. Ambil data dari input berdasarkan ID
       const formData = {
         namaLengkap: document.getElementById('namaLengkap').value,
         tanggalLahir: document.getElementById('tanggalLahir').value,
@@ -116,10 +124,7 @@
         noTelp: document.getElementById('noTelp').value
       };
 
-      // 2. Simpan ke sessionStorage sebagai string JSON
       sessionStorage.setItem('ortuDataStep1', JSON.stringify(formData));
-
-      // 3. Redirect ke halaman berikutnya (Step 2: Data Diri Anak)
       window.location.href = '/data-dirianak';
     });
   </script>
