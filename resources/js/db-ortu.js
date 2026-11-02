@@ -535,11 +535,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 4. Jika Sakit -> Tampilkan Banner Khusus INVALID (SKPL-F-16)
             if (statusKondisi === 'SAKIT') {
                 catatHasil.innerHTML = `
-                    <div class="banner-sakit">
-                        <span>⚠️</span>
-                        <div>Anak tercatat sedang sakit pada tanggal ini — data konsumsi tidak digunakan dalam analisis.</div>
+                    <div class="banner-sakit" style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:16px;border-radius:12px;margin-top:16px;display:flex;gap:12px;align-items:center;">
+                        <span style="font-size:24px;">⚠️</span>
+                        <div style="font-size:14px;line-height:1.4;">Anak tercatat sedang sakit pada tanggal ini — data konsumsi tidak digunakan dalam analisis.</div>
                     </div>
-                    <a href="/history-ortu" class="hasil-link" style="display:inline-block;margin-top:12px;">Lihat History →</a>
+                    <a href="/history-ortu" class="hasil-link" style="display:inline-block;margin-top:12px;font-weight:600;color:#006a38;text-decoration:none;">Lihat History →</a>
                 `;
                 catatHasil.style.display = 'block';
             } else {
@@ -560,28 +560,102 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // ==========================================
+    // 7. FORMAT TAMPILAN ANALISIS GIZI (UI CARD BARU)
+    // ==========================================
+    function formatNamaZatGizi(nama) {
+        const kamus = {
+            energi: 'Energi',
+            protein: 'Protein',
+            lemak: 'Lemak',
+            karbohidrat: 'Karbohidrat',
+            zat_besi: 'Zat Besi',
+            zinc: 'Zinc / Seng',
+            vitamin_a: 'Vitamin A',
+            vitamin_c: 'Vitamin C',
+            kalsium: 'Kalsium',
+            serat: 'Serat'
+        };
+        return kamus[nama.toLowerCase()] || nama.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    function formatLabelStatus(status) {
+        const peta = {
+            sangat_kurang: { teks: 'Sangat Kurang', bg: '#fee2e2', text: '#991b1b', border: '#f87171' },
+            kurang: { teks: 'Kurang', bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
+            cukup: { teks: 'Cukup', bg: '#dcfce7', text: '#166534', border: '#4ade80' },
+            lebih: { teks: 'Lebih', bg: '#e0e7ff', text: '#3730a3', border: '#818cf8' }
+        };
+        return peta[status.toLowerCase()] || { teks: status, bg: '#f3f4f6', text: '#374151', border: '#d1d5db' };
+    }
+
     function tampilkanAnalisis(data) {
         if (!catatHasil) return;
-        const rows = (data.ringkasan || []).map((r) =>
-            `<div class="hasil-row"><span>${r.zat_gizi}</span>`
-            + `<strong>${r.persentase_akg}% (${r.status})</strong></div>`
-        ).join('');
 
-        let isi = '';
-        if (data.analisis_status !== 'dianalisis' && rows === '') {
+        if (data.analisis_status !== 'dianalisis' && (!data.ringkasan || data.ringkasan.length === 0)) {
             const pesan = data.penanda
                 || (data.status_analisis === 'TIDAK_DAPAT_DIANALISIS_TIDAK_ADA_DATA_VALID'
                     ? 'Data konsumsi hari ini tidak valid sehingga belum dapat dianalisis.'
                     : 'Belum ada data konsumsi yang dapat dianalisis pada tanggal ini.');
-            isi = `<p class="hasil-kosong">${pesan}</p>`;
-        } else {
-            isi = rows;
+            catatHasil.innerHTML = `
+                <div style="background:#ffffff;border-radius:12px;padding:20px;color:#374151;border:1px solid #e5e7eb;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);margin-top:16px;">
+                    <p style="margin:0;font-size:14px;color:#6b7280;text-align:center;">${pesan}</p>
+                </div>
+            `;
+            catatHasil.style.display = 'block';
+            return;
         }
 
-        catatHasil.innerHTML = `<h4>Hasil analisis hari ini (${data.kelompok_umur || ''})</h4>`
-            + isi
-            + (data.catatan ? `<p class="hasil-catatan">${data.catatan}</p>` : '')
-            + `<a href="/history-ortu" class="hasil-link" style="display:inline-block;margin-top:8px;">Lihat History →</a>`;
+        const cards = (data.ringkasan || []).map((r) => {
+            const namaFormat = formatNamaZatGizi(r.zat_gizi);
+            const statusConfig = formatLabelStatus(r.status);
+            const persen = parseFloat(r.persentase_akg) || 0;
+            const barWidth = Math.min(persen, 100);
+
+            return `
+                <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-weight:600;font-size:15px;color:#111827;">${namaFormat}</span>
+                        <span style="background:${statusConfig.bg};color:${statusConfig.text};border:1px solid ${statusConfig.border};font-size:12px;font-weight:700;padding:2px 8px;border-radius:9999px;">
+                            ${statusConfig.teks}
+                        </span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-size:12px;color:#6b7280;">Pemenuhan AKG:</span>
+                        <strong style="font-size:16px;color:#111827;">${r.persentase_akg}%</strong>
+                    </div>
+                    <div style="width:100%;height:8px;background:#e5e7eb;border-radius:9999px;overflow:hidden;">
+                        <div style="width:${barWidth}%;height:100%;background:${statusConfig.text};border-radius:9999px;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        catatHasil.innerHTML = `
+            <div style="background:#ffffff;border-radius:16px;padding:20px;color:#1f2937;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);margin-top:16px;border:1px solid #e5e7eb;">
+                <div style="border-bottom:1px solid #f3f4f6;padding-bottom:12px;margin-bottom:14px;">
+                    <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Hasil Analisis Asupan Hari Ini</h3>
+                    <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Standar Kebutuhan Usia: <strong>${data.kelompok_umur || '1–3 Tahun'}</strong></p>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;">
+                    ${cards}
+                </div>
+
+                ${data.catatan ? `
+                    <div style="margin-top:14px;padding:10px 14px;background:#f8fafc;border-left:4px solid #3b82f6;border-radius:4px;font-size:12px;color:#475569;line-height:1.5;">
+                        ℹ️ ${data.catatan}
+                    </div>
+                ` : ''}
+
+                <div style="margin-top:16px;text-align:right;">
+                    <a href="/history-ortu" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#006a38;text-decoration:none;padding:6px 12px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;">
+                        Lihat Riwayat & History Lengkap →
+                    </a>
+                </div>
+            </div>
+        `;
+        
         catatHasil.style.display = 'block';
         catatHasil.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
