@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -113,25 +113,45 @@
   </div>
 
   <script>
-    // Load data from previous step if exists (optional)
     document.addEventListener('DOMContentLoaded', function() {
-      // Tanggal lahir tidak boleh melebihi hari ini (backend menolak via validasi).
       const tgl = document.getElementById('tanggalLahirAnak');
       if (tgl) tgl.max = new Date().toISOString().slice(0, 10);
 
       const ortuData = sessionStorage.getItem('ortuDataStep1');
       if (!ortuData) {
-        // Jika tidak ada data step 1, kembali ke halaman awal
         alert('Silakan isi data orang tua terlebih dahulu');
         window.location.href = '/data-ortu';
+        return;
+      }
+
+      // RESTORE DATA ANAK JIKA SUDAH PERNAH DIISI
+      const savedAnak = JSON.parse(sessionStorage.getItem('anakDataStep2') || 'null');
+      if (savedAnak) {
+        if (savedAnak.namaAnak) document.getElementById('namaAnak').value = savedAnak.namaAnak;
+        if (savedAnak.tanggalLahirAnak) document.getElementById('tanggalLahirAnak').value = savedAnak.tanggalLahirAnak;
+        if (savedAnak.alamatAnak) document.getElementById('alamatAnak').value = savedAnak.alamatAnak;
+        
+        // Centang ulang jenis kelamin
+        if (savedAnak.jenisKelamin) {
+          const radioJk = document.querySelector(`input[name="jenisKelamin"][value="${savedAnak.jenisKelamin}"]`);
+          if (radioJk) radioJk.checked = true;
+        }
+
+        // Centang ulang checkbox alergi
+        if (Array.isArray(savedAnak.pantangan)) {
+          const alergenList = savedAnak.pantangan.map(p => p.alergen);
+          document.querySelectorAll('input[name="alergi"]').forEach(chk => {
+            if (alergenList.includes(chk.value)) {
+              chk.checked = true;
+            }
+          });
+        }
       }
     });
 
-    // Handle form submission
     document.getElementById('form-data-anak').addEventListener('submit', function(e) {
       e.preventDefault();
       
-      // 1. Ambil data dari input
       const formData = {
         namaAnak: document.getElementById('namaAnak').value,
         tanggalLahirAnak: document.getElementById('tanggalLahirAnak').value,
@@ -141,14 +161,10 @@
           .map((input) => ({ alergen: input.value, jenis: 'ALERGI' }))
       };
 
-      // 2. Simpan ke sessionStorage
       sessionStorage.setItem('anakDataStep2', JSON.stringify(formData));
-
-      // 3. Redirect ke halaman berikutnya (Step 3: Data Pertumbuhan Anak)
       window.location.href = '/data-pertumbuhan';
     });
 
-    // Handle tombol Kembali
     document.getElementById('btn-kembali').addEventListener('click', function() {
       window.location.href = '/data-ortu';
     });
