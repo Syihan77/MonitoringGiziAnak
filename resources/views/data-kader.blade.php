@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    @vite(['resources/css/globals.css', 'resources/css/data-kader.css'])
+  @vite(['resources/css/globals.css', 'resources/css/data-kader.css'])
 </head>
 <body>
   <div class="kader-page">
@@ -35,14 +35,12 @@
         </div>
       </div>
 
-      <!-- Hapus action & method, kita handle pakai JavaScript -->
       <form class="kader-form" id="form-data-kader">
         
         <div class="input-group">
           <label class="input-label">Nama Lengkap <span class="required">*</span></label>
           <div class="input-box">
             <img class="input-icon" src="/img/orang.png" alt="User">
-            <!-- TAMBAHKAN id dan name -->
             <input type="text" id="nama" name="nama" placeholder="Tekan untuk mengisi nama lengkap" required>
           </div>
           <span class="helper-text">Sesuai dengan yang ada di dokumen resmi anda</span>
@@ -99,26 +97,70 @@
   </div>
 
   <script>
-    // Tangkap event submit form
-    document.getElementById('form-data-kader').addEventListener('submit', function(e) {
-      e.preventDefault(); // Mencegah reload halaman
-      
-      // 1. Ambil data dari input berdasarkan ID
+  document.addEventListener('DOMContentLoaded', function() {
+    const tgl = document.getElementById('tglLahir') || document.querySelector('input[type="date"]');
+    if (tgl) tgl.max = new Date().toISOString().slice(0, 10);
+
+    // Ambil data jika sebelumnya sudah pernah diisi
+    const saved = JSON.parse(sessionStorage.getItem('kaderData') || sessionStorage.getItem('kaderDataStep1') || 'null');
+    if (saved) {
+      const inputNama = document.getElementById('nama') || document.getElementById('namaLengkap');
+      if (inputNama && (saved.nama || saved.namaLengkap)) {
+        inputNama.value = saved.nama || saved.namaLengkap;
+      }
+
+      const inputNip = document.getElementById('nip');
+      if (inputNip && saved.nip) inputNip.value = saved.nip;
+
+      if (tgl && (saved.tglLahir || saved.tanggalLahir)) {
+        tgl.value = saved.tglLahir || saved.tanggalLahir;
+      }
+
+      const inputAlamat = document.getElementById('alamat');
+      if (inputAlamat && saved.alamat) inputAlamat.value = saved.alamat;
+
+      const inputWilayah = document.getElementById('wilayahPosyandu');
+      if (inputWilayah && saved.wilayahPosyandu) inputWilayah.value = saved.wilayahPosyandu;
+
+      const inputTelp = document.getElementById('noTelp');
+      if (inputTelp && saved.noTelp) inputTelp.value = saved.noTelp;
+    }
+  });
+
+  const formKader = document.getElementById('form-data-kader') || document.querySelector('form');
+  if (formKader) {
+    formKader.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Ambil elemen berdasarkan id persis di HTML
+      const elNama = document.getElementById('nama') || document.getElementById('namaLengkap');
+      const elNip = document.getElementById('nip');
+      const elTgl = document.getElementById('tglLahir') || document.querySelector('input[type="date"]');
+      const elAlamat = document.getElementById('alamat');
+      const elWilayah = document.getElementById('wilayahPosyandu');
+      const elTelp = document.getElementById('noTelp');
+
+      const namaVal = elNama ? elNama.value.trim() : '';
+
       const formData = {
-        nama: document.getElementById('nama').value,
-        nip: document.getElementById('nip').value,
-        tglLahir: document.getElementById('tglLahir').value,
-        alamat: document.getElementById('alamat').value,
-        wilayahPosyandu: document.getElementById('wilayahPosyandu').value,
-        noTelp: document.getElementById('noTelp').value
+        nama: namaVal,
+        namaLengkap: namaVal,
+        nip: elNip ? elNip.value.trim() : '',
+        nomorIndukPegawai: elNip ? elNip.value.trim() : '',
+        tglLahir: elTgl ? elTgl.value : '',
+        tanggalLahir: elTgl ? elTgl.value : '',
+        alamat: elAlamat ? elAlamat.value.trim() : '',
+        wilayahPosyandu: elWilayah ? elWilayah.value.trim() : '',
+        noTelp: elTelp ? elTelp.value.trim() : ''
       };
 
-      // 2. Simpan ke sessionStorage sebagai string JSON
+      // Simpan ke storage
       sessionStorage.setItem('kaderData', JSON.stringify(formData));
+      sessionStorage.setItem('kaderDataStep1', JSON.stringify(formData));
 
-      // 3. Redirect ke halaman review
       window.location.href = '/review-kader';
     });
-  </script>
+  }
+</script>
 </body>
 </html>
