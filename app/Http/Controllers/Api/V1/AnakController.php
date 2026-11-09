@@ -204,10 +204,11 @@ class AnakController extends Controller
         if ($sertakanUkur) {
             $ukur = $ukurTerakhir;
             $data['ukur_terakhir'] = $ukur === null ? null : [
+                'pertumbuhan_id' => $ukur->id,
                 'tanggal_ukur' => $ukur->tanggal_ukur->toDateString(),
-                'umur_bulan' => $ukur->umur_bulan,
-                'berat_kg' => (float) $ukur->berat_kg,
-                'tinggi_cm' => (float) $ukur->tinggi_cm,
+                'usia_bulan_saat_ukur' => $ukur->umur_bulan,
+                'berat_badan_kg' => (float) $ukur->berat_kg,
+                'tinggi_badan_cm' => (float) $ukur->tinggi_cm,
                 'zscore_bb_u' => $ukur->z_bb_u === null ? null : (float) $ukur->z_bb_u,
                 'zscore_tb_u' => $ukur->z_tb_u === null ? null : (float) $ukur->z_tb_u,
                 'zscore_bb_tb' => $ukur->z_bb_tb === null ? null : (float) $ukur->z_bb_tb,
@@ -216,7 +217,6 @@ class AnakController extends Controller
                 'versi_aturan' => $ukur->versiAturanEfektif(),
                 'status_validitas_pengukuran' => $ukur->statusValiditasEfektif(),
                 'pesan' => $ukur->pesanEfektif(),
-                'status_gizi_antropometri' => $ukur->status_gizi_antropometri,
             ];
         }
 
