@@ -141,12 +141,24 @@
               <h3>AI Analisa Pertumbuhan</h3>
             </div>
             <p class="card-description" id="ai-analysis-text">
-              Tren kenaikan berat badan <span id="ai-child-name">Budi</span> menunjukkan grafik positif dalam 3 bulan terakhir. Asupan protein harian sudah memenuhi target standar KMS.
+              Perubahan berat badan <span id="ai-child-name">Budi</span> dan asupan protein harian dapat dipantau melalui grafik pertumbuhan serta catatan terbaru.
             </p>
-            <div class="graph-placeholder">
-              <span class="graph-icon"><x-icon name="bars" /></span>
-              <span>[ Visualisasi Grafik KMS ]</span>
+          </div>
+
+          <!-- GRAFIK PERTUMBUHAN -->
+          <div class="growth-chart-card">
+            <div class="growth-chart-header">
+              <h3 class="section-title-small">Grafik Pertumbuhan</h3>
+              <div class="growth-chart-tabs" role="group" aria-label="Pilih indikator pertumbuhan">
+                <button type="button" class="growth-tab active" data-indikator="bb_u">BB/U</button>
+                <button type="button" class="growth-tab" data-indikator="tb_u">TB/U</button>
+              </div>
             </div>
+            <div class="growth-chart-canvas">
+              <canvas id="growthChart"></canvas>
+            </div>
+            <p class="growth-chart-empty" id="growth-empty" hidden>Belum ada data pengukuran.</p>
+            <p class="growth-chart-note">Garis acuan Permenkes/WHO, bukan diagnosis.</p>
           </div>
 
           <!-- CATATAN HARIAN -->

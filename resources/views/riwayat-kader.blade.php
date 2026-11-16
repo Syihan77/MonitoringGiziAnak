@@ -91,6 +91,22 @@
       </div>
     </div>
 
+    <!-- GRAFIK PERTUMBUHAN -->
+    <div class="section-card growth-chart-card">
+      <div class="growth-chart-header">
+        <h2 class="section-title-small">Grafik Pertumbuhan</h2>
+        <div class="growth-chart-tabs" role="group" aria-label="Pilih indikator pertumbuhan">
+          <button type="button" class="growth-tab active" data-indikator="bb_u">BB/U</button>
+          <button type="button" class="growth-tab" data-indikator="tb_u">TB/U</button>
+        </div>
+      </div>
+      <div class="growth-chart-canvas">
+        <canvas id="growthChartKader"></canvas>
+      </div>
+      <p class="growth-chart-empty" id="growth-empty-kader" hidden>Belum ada data pengukuran.</p>
+      <p class="growth-chart-note">Garis acuan Permenkes/WHO, bukan diagnosis.</p>
+    </div>
+
     <!-- SEARCH & FILTER -->
     <div class="search-filter-bar">
       <div class="search-box-large">

@@ -128,6 +128,10 @@
       const q = params ? `?${new URLSearchParams(params).toString()}` : '';
       return get(`/anak/${anakId}/pertumbuhan${q}`);
     },
+    trenPertumbuhan: (anakId, params) => {
+      const q = params ? `?${new URLSearchParams(params).toString()}` : '';
+      return get(`/anak/${anakId}/tren-pertumbuhan${q}`);
+    },
     konsumsiList: (anakId, tanggal) => get(`/anak/${anakId}/konsumsi?tanggal=${tanggal}`),
     konsumsiRentang: (anakId, dari, sampai) => get(`/anak/${anakId}/konsumsi?dari_tanggal=${dari}&sampai_tanggal=${sampai}`),
     bahanSearch: (q, limit) => get(`/bahan-makanan?q=${encodeURIComponent(q)}&limit=${limit || 10}`),

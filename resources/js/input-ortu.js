@@ -150,6 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (data.peringatan) {
       info += `<p style="margin:0 0 12px;color:#92400e;background:#fef3c7;padding:10px 14px;border-radius:10px;">${data.peringatan}</p>`;
     }
+    if (data.mode_demo) {
+      info += `<div class="demo-banner"><strong>Mode demo — data belum terverifikasi.</strong> ${data.peringatan_demo || ''}</div>`;
+    }
     if (data.saran) {
       info += `<p style="margin:0 0 12px;color:#92400e;background:#fef3c7;padding:10px 14px;border-radius:10px;">${data.saran}</p>`;
     }
@@ -165,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <h3 class="menu-title">Opsi ${idx + 1}</h3>
           <span class="menu-calories">${m.kecocokan_bahan ? `${m.kecocokan_bahan} cocok` : 'Rekomendasi umum'}</span>
         </div>
+        ${m.label_data === 'DEMO_BELUM_TERVERIFIKASI' ? '<div class="menu-demo-badge">Demo — belum terverifikasi</div>' : ''}
         <div class="menu-porsi-badge">
           Menghasilkan: ${m.jumlah_porsi_hasil || '-'} Porsi
         </div>

@@ -449,7 +449,8 @@ html, body {
     font-size: 16px;
   }
 
-  .trend-header .badge-green {
+  .trend-header .badge-green,
+  .trend-header .badge-neutral {
     flex-basis: 100%;
     justify-content: center;
   }
@@ -477,6 +478,18 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.badge-neutral {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 8px 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .badge-red {

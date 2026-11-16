@@ -136,6 +136,7 @@
                 <section class="section-title-with-icon">
                     <span class="section-icon"><x-icon name="chart" /></span>
                     <h2>Perkembangan Fisik</h2>
+                    <button type="button" class="btn-ukur-ortu" id="btn-catat-ukur">+ Catat Pengukuran</button>
                 </section>
 
                 <div class="physical-grid">
@@ -163,6 +164,8 @@
                         <div class="physical-change positive"><span></span> Berat ideal</div>
                     </div>
                 </div>
+
+                <p class="ukur-ortu-hasil" id="ukur-ortu-hasil" style="display: none;"></p>
             </div>
 
             <div class="right-column">
@@ -214,6 +217,54 @@
                 <button type="button" class="btn-modal-cancel" id="btn-alergi-batal">Batal</button>
                 <button type="button" class="btn-modal-cancel" id="btn-alergi-simpan" style="background:#006a38;color:#fff;">Simpan</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL CATAT PENGUKURAN ANAK -->
+    <!-- ========================================== -->
+    <div id="modal-ukur-ortu" class="modal-overlay" style="display: none;">
+        <div class="modal-card ukur-ortu-card">
+            <div class="modal-header">
+                <h3>Catat Pengukuran Anak</h3>
+            </div>
+            <form id="form-ukur-ortu">
+                <div class="modal-body">
+                    <p class="modal-question">Masukkan hasil pengukuran tinggi dan berat badan anak.</p>
+
+                    <div class="ukur-ortu-grid">
+                        <div class="ukur-ortu-field">
+                            <label for="ukur-ortu-tinggi">Tinggi Badan (cm)</label>
+                            <input type="number" id="ukur-ortu-tinggi" step="0.1" min="30" max="150" placeholder="0.0" required>
+                        </div>
+                        <div class="ukur-ortu-field">
+                            <label for="ukur-ortu-berat">Berat Badan (kg)</label>
+                            <input type="number" id="ukur-ortu-berat" step="0.1" min="0.5" max="40" placeholder="0.0" required>
+                        </div>
+                    </div>
+
+                    <div class="ukur-ortu-field">
+                        <label for="ukur-ortu-posisi">Posisi Ukur</label>
+                        <select id="ukur-ortu-posisi" required>
+                            <option value="">Pilih posisi ukur...</option>
+                            <option value="terlentang">Terlentang (tidur)</option>
+                            <option value="berdiri">Berdiri</option>
+                        </select>
+                        <span class="ukur-ortu-helper">Posisi ukur membantu koreksi tinggi badan.</span>
+                    </div>
+
+                    <div class="ukur-ortu-field">
+                        <label for="ukur-ortu-tanggal">Tanggal Ukur</label>
+                        <input type="date" id="ukur-ortu-tanggal" required>
+                    </div>
+
+                    <p class="ukur-ortu-error" id="ukur-ortu-error" style="display: none;" role="alert"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-cancel" id="btn-ukur-ortu-batal">Batal</button>
+                    <button type="submit" class="btn-modal-cancel ukur-ortu-submit" id="btn-ukur-ortu-simpan">Simpan Pengukuran</button>
+                </div>
+            </form>
         </div>
     </div>
 

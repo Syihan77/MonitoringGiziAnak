@@ -161,7 +161,7 @@
         <tr>
           <td class="cell-title">${esc(item.nama_resep || '-')}</td>
           <td><span class="badge badge-category">${esc(formatKategori(item.kategori_gizi))}</span></td>
-          <td class="cell-number">${formatNumber(item.jumlah_porsi_hasil || item.porsi_saji)}</td>
+          <td class="cell-number">${formatNumber(item.jumlah_porsi_hasil)}</td>
           <td class="cell-number">${formatAge(item.usia_min_bulan, item.usia_maks_bulan)}</td>
           <td>${esc(item.tekstur_sajian || '-')}</td>
           <td class="cell-number">${formatNumber(item.jumlah_bahan)}</td>
@@ -468,7 +468,7 @@
       setValue('resep-nama', detail.nama_resep);
       setValue('resep-langkah', detail.cara_memasak);
       setValue('resep-kategori', detail.kategori_gizi || '');
-      setValue('resep-porsi', detail.jumlah_porsi_hasil || detail.porsi_saji || 1);
+      setValue('resep-porsi', detail.jumlah_porsi_hasil || 1);
       setValue('resep-kesulitan', detail.tingkat_kesulitan || '');
       setValue('resep-tekstur', detail.tekstur_sajian || '');
       setValue('resep-usia-min', detail.usia_min_bulan);
@@ -538,8 +538,13 @@
       .split(',')
       .map((item) => item.trim())
       .filter(Boolean);
+    const id = valueOf('resep-id');
+    const statusValue = valueOf('resep-status');
+    const statusPayload = id
+      ? (statusValue && statusValue !== state.resep.statusAsli ? statusValue : null)
+      : (statusValue || 'PERLU_VERIFIKASI');
 
-    return {
+    const payload = {
       nama_resep: valueOf('resep-nama'),
       cara_memasak: valueOf('resep-langkah'),
       kategori_gizi: valueOf('resep-kategori') || null,
@@ -565,9 +570,14 @@
       catatan_resep: valueOf('resep-catatan') || null,
       tekstur_sajian: valueOf('resep-tekstur') || null,
       sumber_resep: valueOf('resep-sumber') || null,
-      status_verifikasi_data: valueOf('resep-status') || state.resep.statusAsli || 'PERLU_VERIFIKASI',
       bahans: collectBahanRows(),
     };
+
+    if (statusPayload) {
+      payload.status_verifikasi_data = statusPayload;
+    }
+
+    return payload;
   }
 
   async function submitResep(event) {

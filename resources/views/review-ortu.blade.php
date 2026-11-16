@@ -274,7 +274,6 @@
           ['regAkun', 'ortuDataStep1', 'anakDataStep2', 'pertumbuhanDataStep3', 'registrationComplete']
             .forEach((k) => sessionStorage.removeItem(k));
           sessionStorage.setItem('lastAnakId', anak.anak_id);
-          sessionStorage.setItem('lastStatusGizi', ukur.status_gizi_antropometri);
 
           window.location.href = '/db-ortu';
         } catch (err) {

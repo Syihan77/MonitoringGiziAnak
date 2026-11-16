@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:js": "node --test tests/js/*.test.js"
     },
     "devDependencies": {
         "concurrently": "^10.0.3",
@@ -13,5 +14,8 @@
     },
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.1"
+    },
+    "dependencies": {
+        "chart.js": "^4.6.1"
     }
 }
