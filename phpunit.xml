@@ -40,5 +40,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="NUTRITION_DEMO_ALLOW_DATA_LENGKAP" value="false"/>
+        <env name="ML_ENABLED" value="false"/>
     </php>
 </phpunit>
