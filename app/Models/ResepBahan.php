@@ -16,7 +16,6 @@ class ResepBahan extends Model
     protected $fillable = [
         'resep_id',
         'bahan_id',
-        'takaran_gram',
         'takaran_jumlah',
         'takaran_satuan',
         'takaran_gram_ekuivalen',
@@ -29,7 +28,6 @@ class ResepBahan extends Model
     protected function casts(): array
     {
         return [
-            'takaran_gram' => 'float',
             'takaran_jumlah' => 'float',
             'takaran_gram_ekuivalen' => 'float',
         ];

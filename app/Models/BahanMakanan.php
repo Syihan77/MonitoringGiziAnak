@@ -22,7 +22,6 @@ class BahanMakanan extends Model
         'lemak_per100g',
         'zat_besi_per100g',
         'zinc_per100g',
-        'estimasi_harga_per100g',
         'sumber_rujukan',
     ];
 
@@ -38,7 +37,6 @@ class BahanMakanan extends Model
             'lemak_per100g' => 'float',
             'zat_besi_per100g' => 'float',
             'zinc_per100g' => 'float',
-            'estimasi_harga_per100g' => 'float',
         ];
     }
 }
