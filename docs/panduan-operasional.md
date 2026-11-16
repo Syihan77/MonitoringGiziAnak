@@ -22,7 +22,11 @@ npm ci && npm run build
 Urutan seeder: admin (`admin@gizi.local`, password admin dari `ADMIN_PASSWORD`
 di `.env` — wajib diisi sebelum seed), wilayah
 (`config/wilayah.php` → **ganti daftar dengan data resmi desa sebelum seed**),
-729 baris WHO, 1146 bahan TKPI, 3 resep awal.
+729 baris WHO, 1146 bahan TKPI, 93 resep (62 `DATA_LENGKAP`, 31
+`PERLU_VERIFIKASI`, 0 `TERVERIFIKASI`). `DATA_LENGKAP` mensyaratkan energi,
+karbohidrat, protein, dan lemak per porsi tidak NULL; 14 resep tanpa gizi
+diturunkan ke `PERLU_VERIFIKASI` dengan catatan alasan. Verifikasi resep
+dilakukan admin lewat API resmi, bukan lewat seeder.
 
 ## 3. Variabel `.env` penting
 
@@ -31,6 +35,7 @@ DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=5432
 DB_DATABASE=gizi_db DB_USERNAME=... DB_PASSWORD=...
 DESA_NAMA="Nama Desa"   # tampil di seed wilayah
 APP_TIMEZONE biarkan UTC (kontrak: timestamp ISO-8601 UTC)
+NUTRITION_DEMO_ALLOW_DATA_LENGKAP=false   # wajib false di production
 ```
 
 ## 4. Backup (SKPL 4.3.2: minimal 1×/bulan; disarankan harian)
@@ -50,11 +55,219 @@ Restore: `gunzip -c <file> | psql -U <user> -h 127.0.0.1 gizi_db`.
 - Rate limit 120 req/menit/token; log audit di tabel `audit_logs`
   (register, login, logout, anak_*, pertumbuhan_create, konsumsi_create,
   rekomendasi_minta, logbook_view, impor_*, bahan_*, resep_*).
-- Status gizi sistem bersifat **indikatif** — diagnosis tetap oleh nakes.
+- Kategori pemantauan bersifat **indikatif** — diagnosis tetap oleh nakes.
 
-## 6. Verifikasi serah terima
+## 6. Verifikasi resep untuk production
+
+Seed awal tidak berisi resep `TERVERIFIKASI`, sehingga production tanpa demo
+akan menampilkan “Belum ada resep terverifikasi ...”. Minta ahli gizi
+memverifikasi beberapa resep melalui:
+
+```http
+PATCH /api/v1/admin/resep/{resepId}/status
+Authorization: Bearer <token admin>
+Content-Type: application/json
+
+{
+  "status_verifikasi_data": "TERVERIFIKASI",
+  "nama_pemverifikasi": "Nama Ahli Gizi",
+  "tanggal_verifikasi": "YYYY-MM-DD"
+}
+```
+
+Endpoint akan menolak verifikasi bila takaran/satuan/bahan belum lengkap atau
+salah satu dari energi, karbohidrat, protein, dan lemak per porsi masih NULL.
+Resep yang tidak memenuhi empat makro otomatis diturunkan ke
+`PERLU_VERIFIKASI` dengan catatan alasan.
+
+## 7. Mode demo untuk presentasi
+
+- Jangan memakai `APP_ENV=production` untuk demo. Flag demo sengaja diabaikan
+  di production.
+- Gunakan `APP_ENV=staging` atau `APP_ENV=demo`, lalu set
+  `NUTRITION_DEMO_ALLOW_DATA_LENGKAP=true`, kemudian:
+  ```sh
+  php artisan config:clear
+  ```
+- Mode ini menampilkan label `DEMO_BELUM_TERVERIFIKASI` dan peringatan demo.
+  Setelah presentasi, kembalikan flag ke `false` dan `APP_ENV=production`.
+- Alternatif yang lebih aman: verifikasi resep resmi seperti bagian 6.
+
+## 8. Sumber gizi TKPI, muat ulang, verifikasi basis ML2, dan smoke test
+
+Sumber gizi resep adalah
+`database/seeders/data/dataset_resep_gizi_terstandarisasi_berlabelusia_tkpi.csv`
+(93 resep, 26 kolom, 10 kolom gizi). CSV lama
+`dataset_resep_gizi_terstandarisasi_berlabelusia.csv` hanya arsip dan tidak
+dibaca seeder. Audit nilai ada di `docs/audit_gizi_tkpi_semua_resep.csv`
+(930 baris: 736 `terhitung`, 194 `tidak_terhitung`). Komposisi: 33 resep
+lengkap, 46 sebagian, 14 kosong semua. Ke-14 resep kosong berstatus
+`PERLU_VERIFIKASI` dengan catatan alasan karena empat makro tidak lengkap;
+jangan menganggap gizi NULL sebagai nol atau defisiensi.
+
+Kolom `*_per_porsi` pada `reseps` sudah nullable; tidak ada migrasi baru.
+Deploy baru cukup `php artisan migrate --force` lalu `php artisan db:seed --force`.
+Untuk database yang sudah terisi, muat ulang hanya kolom gizi dan catatan:
 
 ```sh
-php artisan test     # wajib hijau (74 test)
+php artisan resep:muat-gizi-tkpi --dry-run
+php artisan resep:muat-gizi-tkpi
+```
+
+Perintah ini idempoten, tidak mengubah `resep_bahans`, dan mengganti catatan
+normalisasi lama dengan `Gizi dihitung dari TKPI 2020 (estimasi), belum
+diverifikasi ahli gizi`. Status hanya diturunkan ke `PERLU_VERIFIKASI` bila
+empat makro tidak lengkap, disertai catatan alasan. Pada database yang sudah
+terisi, 14 resep all-NULL diturunkan sehingga komposisi menjadi 62
+`DATA_LENGKAP` / 31 `PERLU_VERIFIKASI`; dry-run berikutnya 0/0/0.
+
+Basis ML2 tetap milik paket ML dan tidak boleh diubah dari Laravel. Seeder dan
+command lama `resep:normalisasi-gizi` sudah dihapus. Basis sudah dibangun ulang
+dari CSV TKPI (versi `1.1.0-tkpi`, 93 resep):
+
+```sh
+php artisan ml:verify-basis
+```
+
+Perintah read-only ini membandingkan 10 kolom gizi. Hasil 15 November 2026:
+93 baris, 93 cocok, 0 selisih, exit code 0. Jangan melonggarkan gate.
+
+Cek kesiapan layanan dan kedua modul (exit non-zero hanya bila service/modul
+tidak siap; catatan kompatibilitas scikit-learn hanya peringatan):
+
+```sh
+php artisan ml:health
+```
+
+Label dan metrik K-Means masih berasal dari basis lama. `config_model.json`
+menandainya `status_cluster: "USANG_DATA_LAMA"`; refit menunggu kebijakan nilai
+kosong. Jangan menampilkan label cluster sebagai analisis gizi di Laravel.
+`ML_ENABLED` tetap `false` dan flag demo `false` sampai integrasi disetujui;
+rekomendasi memakai fallback aturan.
+
+Smoke test ML2 dengan FastAPI boleh dijalankan karena gate basis sudah exit 0,
+tetapi bukan alasan untuk mengaktifkan `ML_ENABLED` pada aplikasi Laravel.
+
+## 9. Migrasi `konsumsis.kondisi_id`
+
+Migration baru mengubah `kondisi_id` menjadi NOT NULL dan memakai
+`ON DELETE RESTRICT`. Sebelum deploy, cek:
+
+```sql
+SELECT COUNT(*) FROM konsumsis WHERE kondisi_id IS NULL;
+```
+
+Jika hasilnya > 0, migration akan berhenti dengan pesan diagnostik. Backfill
+data lama terlebih dahulu; jangan memaksa NOT NULL pada data yang belum siap.
+
+## 10. Verifikasi serah terima
+
+```sh
+php artisan test     # seluruh test harus hijau
 curl https://<host>/api/v1/ping
 ```
+
+## 11. Serah terima: layanan ML
+
+Lokasi paket ML dipertahankan di `ml-monitoring-gizi/ml-monitoring-gizi/`
+(Windows: `ml-monitoring-gizi\ml-monitoring-gizi\`). Layanan ML adalah proses
+Python terpisah dari Laravel.
+
+**(a) Perubahan proyek**
+
+- Gizi resep memakai estimasi dataset TKPI 2020: 93 resep, 62 `DATA_LENGKAP`,
+  31 `PERLU_VERIFIKASI`, 0 `TERVERIFIKASI`.
+- `DATA_LENGKAP` mensyaratkan energi, karbohidrat, protein, dan lemak per porsi
+  tidak NULL. Resep tanpa empat makro tidak pernah direkomendasikan.
+- Command baru: `resep:muat-gizi-tkpi`, `ml:verify-basis`, dan `ml:health`.
+- Integrasi ML bersifat opsional: `ML_ENABLED=false` tetap memakai ranking
+  aturan lokal. Jika diaktifkan, Laravel memakai ranking ML2 hanya untuk
+  resep yang lolos filter lokal.
+
+**(b) Variabel `.env` Laravel (default aman)**
+
+```dotenv
+ML_ENABLED=false
+ML1_BASE_URL=http://127.0.0.1:8000
+ML1_CONNECT_TIMEOUT=1
+ML1_TIMEOUT=2
+ML2_BASE_URL=http://127.0.0.1:8000
+ML2_CONNECT_TIMEOUT=1
+ML2_TIMEOUT=5
+NUTRITION_DEMO_ALLOW_DATA_LENGKAP=false
+```
+
+Layanan Python memakai environment proses (bukan `.env` Laravel):
+
+```dotenv
+API_DOCS_ENABLED=false
+LOG_LEVEL=INFO
+```
+
+`ML1_MODEL_DIR` dan `ML2_MODEL_DIR` opsional; biarkan kosong untuk memakai
+folder model di dalam paket.
+
+**(c) Kebutuhan layanan ML**
+
+- Python 3.13 (diuji 3.13.18); scikit-learn `1.9.1`; `pygrowup 0.8.2`.
+- Windows:
+  ```bat
+  cd ml-monitoring-gizi\ml-monitoring-gizi
+  py -3.13 -m venv .venv
+  .venv\Scripts\activate
+  python -m pip install --upgrade pip
+  python -m pip install setuptools six wheel
+  python -m pip install --no-build-isolation -r requirements.txt
+  python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+  ```
+- Linux:
+  ```sh
+  cd ml-monitoring-gizi/ml-monitoring-gizi
+  python3.13 -m venv .venv
+  source .venv/bin/activate
+  python -m pip install --upgrade pip
+  python -m pip install setuptools six wheel
+  python -m pip install --no-build-isolation -r requirements.txt
+  python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+  ```
+- **Layanan ML tidak memiliki autentikasi.** Jangan buka port `8000` ke publik;
+  gunakan `127.0.0.1` atau jaringan privat. Aktifkan Swagger hanya saat
+  debugging lokal (`API_DOCS_ENABLED=false` di server).
+
+**(d) Urutan setelah deploy kode**
+
+```sh
+php artisan migrate --force
+php artisan resep:muat-gizi-tkpi --dry-run
+php artisan resep:muat-gizi-tkpi
+php artisan ml:verify-basis   # harus 93 cocok / 0 selisih / exit 0
+php artisan ml:health         # exit 0 hanya bila service + ML1 + ML2 siap
+```
+
+Di lingkungan baru boleh memakai `php artisan migrate:fresh --seed --force`
+sebagai pengganti dua langkah pertama, lalu lanjutkan ke `ml:verify-basis`.
+Jalankan `ml:health` setelah layanan Python hidup. Jangan melonggarkan gate
+`ml:verify-basis`.
+
+**(e) Bila layanan ML mati**
+
+- Rekomendasi tetap berjalan memakai ranking aturan lokal
+  (`BASELINE_ATURAN`); pengguna tidak menerima error karena ML.
+- Blok `ml2` berisi `tersedia=false` beserta `alasan_tidak_tersedia`;
+  prediksi pertumbuhan juga memakai fallback dan menandai ML tidak tersedia.
+- `ml:health` boleh exit non-zero untuk operator; ini bukan error aplikasi
+  pengguna.
+
+**(f) Aktivasi ML**
+
+`ML_ENABLED=true` hanya diputuskan tim deploy setelah `ml:verify-basis` dan
+`ml:health` lulus. Proyek diserahkan dalam keadaan `ML_ENABLED=false`.
+
+**(g) Status data dan demo**
+
+- Semua nilai gizi resep adalah estimasi TKPI 2020, belum divalidasi ahli gizi.
+- Tidak ada resep `TERVERIFIKASI` dari seeder; verifikasi lewat endpoint admin.
+- `NUTRITION_DEMO_ALLOW_DATA_LENGKAP=true` hanya untuk non-production dan
+  diabaikan saat `APP_ENV=production`.
+- Resep tanpa empat makro dibuang oleh `filterWajib()`; resep tersebut tidak
+  dapat direkomendasikan, termasuk dalam mode demo.
