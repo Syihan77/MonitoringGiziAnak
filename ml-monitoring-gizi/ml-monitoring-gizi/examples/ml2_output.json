@@ -1,0 +1,150 @@
+{
+  "meta": {
+    "versi_modul": "1.0.0",
+    "versi_model": "1.1.0-tkpi",
+    "metode": "baseline",
+    "bobot_ternormalisasi": {
+      "protein": 0.5,
+      "zat_besi": 0.5
+    },
+    "mode_bahan": "sebagian",
+    "kebijakan_nilai_hilang": "penalti",
+    "top_n": 3,
+    "jumlah_kandidat_layak": 50,
+    "jumlah_resep_total": 93,
+    "dikeluarkan": {
+      "waktu_masak": 0,
+      "bahan_dihindari": 0,
+      "bahan_tidak_cukup": 43,
+      "bahan_wajib_tidak_terdeteksi": 0,
+      "nutrisi_prioritas_tidak_tersedia": 0
+    },
+    "peringatan": [
+      "Skor adalah peringkat RELATIF terhadap resep dalam dataset (persentil), bukan penilaian kecukupan gizi.",
+      "Hasil adalah alat bantu memilih menu; bukan diagnosis, bukan saran klinis, dan bukan catatan konsumsi anak.",
+      "Kualitas rekomendasi belum divalidasi terhadap penilaian ahli gizi atau pengguna."
+    ]
+  },
+  "hasil": [
+    {
+      "rank": 1,
+      "id_resep": "R031",
+      "nama_menu": "Nasi Bakar Ayam Santan",
+      "score": 0.9681,
+      "skor_seleksi": null,
+      "cluster": 2,
+      "porsi": 3,
+      "waktu_menit": 60.0,
+      "ketersediaan_data_prioritas": 1.0,
+      "nutrisi_prioritas": {
+        "protein": {
+          "nilai": 20.5,
+          "satuan": "g",
+          "persentil": 0.981,
+          "tersedia": true
+        },
+        "zat_besi": {
+          "nilai": 3.71,
+          "satuan": "mg",
+          "persentil": 0.955,
+          "tersedia": true
+        }
+      },
+      "nutrisi_tidak_tersedia": [],
+      "kecocokan_bahan": {
+        "diperiksa": true,
+        "jumlah_wajib": 6,
+        "wajib_cocok": 5,
+        "fraksi_cocok": 0.8333333333333334,
+        "wajib_kurang": [
+          "Daun bayam"
+        ]
+      },
+      "alasan": [
+        "Protein 20.5 g/porsi — tinggi dibanding resep lain (persentil 98).",
+        "Zat besi 3.7 mg/porsi — tinggi dibanding resep lain (persentil 96).",
+        "Bahan wajib cocok 5/6; belum ada: Daun bayam"
+      ]
+    },
+    {
+      "rank": 2,
+      "id_resep": "R032",
+      "nama_menu": "Nasi Cah Tahu Ayam",
+      "score": 0.9299,
+      "skor_seleksi": null,
+      "cluster": 2,
+      "porsi": 3,
+      "waktu_menit": 60.0,
+      "ketersediaan_data_prioritas": 1.0,
+      "nutrisi_prioritas": {
+        "protein": {
+          "nilai": 17.72,
+          "satuan": "g",
+          "persentil": 0.93,
+          "tersedia": true
+        },
+        "zat_besi": {
+          "nilai": 3.62,
+          "satuan": "mg",
+          "persentil": 0.929,
+          "tersedia": true
+        }
+      },
+      "nutrisi_tidak_tersedia": [],
+      "kecocokan_bahan": {
+        "diperiksa": true,
+        "jumlah_wajib": 5,
+        "wajib_cocok": 4,
+        "fraksi_cocok": 0.8,
+        "wajib_kurang": [
+          "Labu siam dipotong dadu"
+        ]
+      },
+      "alasan": [
+        "Protein 17.7 g/porsi — tinggi dibanding resep lain (persentil 93).",
+        "Zat besi 3.6 mg/porsi — tinggi dibanding resep lain (persentil 93).",
+        "Bahan wajib cocok 4/5; belum ada: Labu siam dipotong dadu"
+      ]
+    },
+    {
+      "rank": 3,
+      "id_resep": "R091",
+      "nama_menu": "Nasi Arsik Ikan MAs",
+      "score": 0.9298,
+      "skor_seleksi": null,
+      "cluster": 2,
+      "porsi": 3,
+      "waktu_menit": 60.0,
+      "ketersediaan_data_prioritas": 1.0,
+      "nutrisi_prioritas": {
+        "protein": {
+          "nilai": 18.68,
+          "satuan": "g",
+          "persentil": 0.956,
+          "tersedia": true
+        },
+        "zat_besi": {
+          "nilai": 2.88,
+          "satuan": "mg",
+          "persentil": 0.904,
+          "tersedia": true
+        }
+      },
+      "nutrisi_tidak_tersedia": [],
+      "kecocokan_bahan": {
+        "diperiksa": true,
+        "jumlah_wajib": 4,
+        "wajib_cocok": 3,
+        "fraksi_cocok": 0.75,
+        "wajib_kurang": [
+          "Kacang panjang"
+        ]
+      },
+      "alasan": [
+        "Protein 18.7 g/porsi — tinggi dibanding resep lain (persentil 96).",
+        "Zat besi 2.9 mg/porsi — tinggi dibanding resep lain (persentil 90).",
+        "Bahan wajib cocok 3/4; belum ada: Kacang panjang"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "kelas": {
+    "0": {
+      "nama": "Normal",
+      "deskripsi": "Normal / Low Risk"
+    },
+    "1": {
+      "nama": "At Risk",
+      "deskripsi": "At Risk / Needs Monitoring"
+    },
+    "2": {
+      "nama": "High Risk",
+      "deskripsi": "High Risk / Referral"
+    }
+  },
+  "aturan": "Indikator terburuk = min(waz, haz, whz). < -3.0 → High Risk; < -2.0 → At Risk; selain itu Normal.",
+  "peringatan": "Rancangan kategori sistem (v0-provisional), bukan diagnosis dan bukan kategori WHO."
+}

@@ -1,0 +1,15 @@
+{
+  "status": "error",
+  "kode": "input_tidak_valid",
+  "pesan": "Input tidak valid.",
+  "errors": [
+    {
+      "field": "jk",
+      "pesan": "Input should be 'L' or 'P'"
+    },
+    {
+      "field": "tb_cm",
+      "pesan": "Field required"
+    }
+  ]
+}

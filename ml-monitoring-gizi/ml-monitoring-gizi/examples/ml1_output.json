@@ -1,0 +1,28 @@
+{
+  "status": "ok",
+  "versi_model": "ml1-rf-fitur-mentah-1.0.0",
+  "status_model": "EKSPERIMEN - belum lolos evaluasi/validasi, jangan dipakai sebagai kategori di tampilan pengguna",
+  "acuan": {
+    "aturan_versi": "v0-provisional",
+    "kategori_id": 1,
+    "kategori": "At Risk",
+    "zscore": {
+      "waz": -1.46,
+      "haz": -2.04,
+      "whz": -0.51
+    },
+    "indikator_terburuk": "haz"
+  },
+  "prediksi_ml": {
+    "kategori_id": 1,
+    "kategori": "At Risk",
+    "probabilitas": {
+      "Normal": 0.0967,
+      "At Risk": 0.9033,
+      "High Risk": 0.0
+    }
+  },
+  "ml_sama_dengan_acuan": true,
+  "peringatan": [],
+  "catatan": "Alat bantu pemantauan, BUKAN diagnosis stunting dan bukan kategori WHO. Kategori adalah rancangan sistem dari aturan sementara v0-provisional (belum divalidasi ahli gizi, KONF-02). Model ML hanya mereplikasi aturan tersebut dan belum lolos evaluasi/validasi; tampilkan kategori acuan kepada pengguna."
+}
