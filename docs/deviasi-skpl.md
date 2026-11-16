@@ -63,7 +63,7 @@ Semua deviasi harus disetujui pemilik produk sebelum pilot.
   mentah ML2 pada `top_n=50` yang hanya memprioritaskan vitamin C masih dapat
   memuat mereka di ekor; Laravel membuangnya lewat `filterWajib()` sebelum
   kandidat dikirim maupun dipakai. Ini diuji pada skenario vitamin C `top_n=50`.
-  
+
 - Label dan metrik K-Means masih berasal dari basis lama dan ditandai
   `status_cluster: "USANG_DATA_LAMA"`. Refit KMeans menunggu kebijakan nilai
   kosong yang disetujui; label cluster tidak boleh ditampilkan sebagai analisis

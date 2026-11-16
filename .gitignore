@@ -1,4 +1,9 @@
 *.log
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.venv/
+ml-monitoring-gizi/ml-monitoring-gizi/docs/hasil_pytest_*.txt
 .DS_Store
 .env
 .env.backup
