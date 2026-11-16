@@ -22,7 +22,6 @@ class RekomendasiLog extends Model
         'resep_id',
         'tanggal_minta',
         'masukan',
-        'defisiensi',
         'fokus_gizi',
         'jumlah_hasil',
         'peringkat',
@@ -44,7 +43,6 @@ class RekomendasiLog extends Model
         return [
             'tanggal_minta' => 'date',
             'masukan' => 'array',
-            'defisiensi' => 'array',
             'jumlah_hasil' => 'integer',
             'peringkat' => 'integer',
             'skor_gizi_umum' => 'float',

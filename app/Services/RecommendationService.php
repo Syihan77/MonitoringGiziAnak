@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Anak;
+use App\Models\BahanMakanan;
 use App\Models\KondisiHarian;
 use App\Models\RekomendasiLog;
 use App\Models\Resep;
@@ -25,7 +26,29 @@ class RecommendationService
         'zinc' => 'seng',
     ];
 
-    public function __construct(private readonly NutritionService $gizi) {}
+    /**
+     * Nutrisi yang dikenal kontrak ML2. Defisiensi di luar AKG lokal tetap dapat
+     * diteruskan sebagai prioritas ML2 (mis. vitamin C) tanpa mengubah skor lokal.
+     *
+     * @var list<string>
+     */
+    private const NUTRISI_ML2 = [
+        'energi',
+        'protein',
+        'lemak',
+        'karbohidrat',
+        'zat_besi',
+        'zinc',
+        'vitamin_c',
+        'kalsium',
+        'vitamin_a',
+        'serat',
+    ];
+
+    public function __construct(
+        private readonly NutritionService $gizi,
+        private readonly MlClient $ml,
+    ) {}
 
     /**
      * @param  list<string>  $bahanTersedia
@@ -48,7 +71,7 @@ class RecommendationService
         $defisiensi = $sakit || $analisis['status_analisis'] !== NutritionService::STATUS_DIANALISIS
             ? []
             : collect($analisis['ringkasan'])
-                ->where('status', '!==', 'cukup')
+                ->whereIn('status', ['kurang', 'sangat_kurang'])
                 ->pluck('zat_gizi')
                 ->values()
                 ->all();
@@ -70,6 +93,11 @@ class RecommendationService
             ->values()
             ->all();
         $punyaPantangan = $anak->pantangan->isNotEmpty();
+        $namaBahanTersedia = $this->namaBahan($bahanTersedia);
+        $bahanDihindari = $this->bahanDihindari($anak, $bahanPantangan);
+        $bolehDemo = ! app()->environment('production')
+            && (bool) config('nutrition.rekomendasi.demo_allow_data_lengkap', false);
+        $demoDigunakan = false;
         $kandidat = [];
         $reseps = Resep::query()
             ->with('bahans.bahan')
@@ -77,7 +105,14 @@ class RecommendationService
             ->get();
 
         foreach ($reseps as $resep) {
-            $filter = $this->filterWajib($resep, $umurBulan, $alergenAnak, $bahanPantangan, $punyaPantangan);
+            $filter = $this->filterWajib(
+                $resep,
+                $umurBulan,
+                $alergenAnak,
+                $bahanPantangan,
+                $punyaPantangan,
+                $bolehDemo,
+            );
 
             if (! $filter['lolos']) {
                 continue;
@@ -119,11 +154,36 @@ class RecommendationService
                 <=> [$a['skor_akhir'], $a['kecocokan'] ?? 0, $b['resep']->nama_resep];
         });
 
-        $kandidat = array_slice($kandidat, 0, $topK);
+        $kandidatLokal = $kandidat;
+        $ml2 = $this->panggilMl2(
+            $namaBahanTersedia,
+            $bahanDihindari,
+            $defisiensi,
+            $kandidatLokal,
+        );
+        $terpilih = $this->pilihMenu($kandidatLokal, $ml2['items'], $topK);
+        $ml2Mendominasi = collect($terpilih)->contains(
+            fn (array $k) => $k['sumber_ranking'] === 'ML2'
+        );
+        $metode = $ml2Mendominasi
+            ? RekomendasiLog::METODE_MODEL_ML
+            : RekomendasiLog::METODE_BASELINE_ATURAN;
+        $jumlahMl2 = collect($terpilih)->where('sumber_ranking', 'ML2')->count();
+        $blokMl2 = [
+            'tersedia' => $ml2Mendominasi,
+            'alasan_tidak_tersedia' => $ml2Mendominasi ? null : $ml2['alasan'],
+            'status_model' => 'EKSPERIMEN',
+            'jenis_ranking' => 'PERSENTIL_CONTENT_BASED',
+            'status_validasi' => 'BELUM_DIVALIDASI_AHLI_GIZI',
+            'versi_model' => $ml2['versi_model'],
+            'metode' => 'baseline',
+            'jumlah_dikembalikan' => $ml2['jumlah_dikembalikan'],
+            'jumlah_dipakai' => $jumlahMl2,
+        ];
         $fokus = $defisiensi[0] ?? null;
         $menu = [];
 
-        foreach ($kandidat as $index => $k) {
+        foreach ($terpilih as $index => $k) {
             $item = [
                 'peringkat' => $index + 1,
                 'resep_id' => $k['resep']->id,
@@ -135,15 +195,30 @@ class RecommendationService
                 'skor_gizi_umum' => $k['skor_gizi_umum'],
                 'skor_relevansi' => $k['skor_relevansi'],
                 'skor_akhir' => $k['skor_akhir'],
+                'sumber_ranking' => $k['sumber_ranking'],
                 'alasan_peringkat' => $this->alasanPeringkat(
                     $k['skor_gizi_umum'],
                     $k['skor_relevansi'],
                     $fokus,
                     $k['kecocokan'],
-                ),
+                ).($k['sumber_ranking'] === 'ML2' ? ' Diurutkan oleh ML2.' : ''),
                 'alergen' => $k['resep']->alergen ?? [],
                 'usia_min_bulan' => $k['resep']->usia_min_bulan,
+                'usia_label_bulan' => $k['resep']->usia_label_bulan,
                 'usia_minimal_bulan_jika_dimodifikasi' => $k['resep']->usia_minimal_bulan_jika_dimodifikasi,
+                'label_data' => $k['resep']->dataLengkap()
+                    ? 'DEMO_BELUM_TERVERIFIKASI'
+                    : 'TERVERIFIKASI',
+                'status_verifikasi_data' => $k['resep']->status_verifikasi_data,
+                'cara_memasak' => $k['resep']->cara_memasak,
+                'bahans' => $k['resep']->bahans->map(fn ($rb) => [
+                    'bahan_id' => $rb->bahan_id,
+                    'nama_bahan' => $rb->bahan->nama_bahan,
+                    'takaran_jumlah' => $rb->takaran_jumlah,
+                    'takaran_satuan' => $rb->takaran_satuan,
+                    'takaran_gram_ekuivalen' => $rb->takaran_gram_ekuivalen,
+                    'catatan_bahan' => $rb->catatan_bahan,
+                ])->values(),
                 'perlu_modifikasi' => $k['perlu_modifikasi'],
                 'instruksi_modifikasi' => $k['perlu_modifikasi']
                     ? $k['resep']->modifikasi_untuk_turunkan_usia
@@ -160,11 +235,19 @@ class RecommendationService
                 $item['kecocokan_bahan'] = $k['kecocokan'].'%';
             }
 
+            if (($k['skor_ml2'] ?? null) !== null) {
+                $item['skor_ml2'] = $k['skor_ml2'];
+            }
+
+            if ($k['resep']->dataLengkap()) {
+                $demoDigunakan = true;
+            }
+
             $menu[] = $item;
         }
 
         $saran = $menu === []
-            ? 'Tidak ada resep berstatus data lengkap yang cocok untuk kriteria ini.'
+            ? 'Belum ada resep terverifikasi yang cocok untuk kriteria ini.'
             : null;
 
         $peringatan = $sakit
@@ -176,22 +259,31 @@ class RecommendationService
             $tanggal,
             $bahanTersedia,
             $topK,
-            $defisiensi,
             $menu,
             $dimintaOleh,
             $saran,
             $fokus,
+            $metode,
+            $ml2,
+            $bahanDihindari,
         ) {
-            $versi = config('nutrition.rekomendasi.versi_aturan', 'hybrid-baseline-v1');
-            $metode = RekomendasiLog::METODE_BASELINE_ATURAN;
+            $versi = $metode === RekomendasiLog::METODE_MODEL_ML
+                ? 'ml2-'.($ml2['versi_model'] ?? 'unknown')
+                : (string) config('nutrition.rekomendasi.versi_aturan', 'hybrid-baseline-v1');
+            $masukan = [
+                'bahan_tersedia' => $bahanTersedia,
+                'bahan_dihindari' => $bahanDihindari,
+                'top_k' => $topK,
+                'ml2_tersedia' => $ml2['tersedia'],
+                'ml2_alasan_tidak_tersedia' => $ml2['alasan'],
+            ];
             $jumlah = count($menu);
 
             if ($menu === []) {
                 RekomendasiLog::create([
                     'anak_id' => $anak->id,
                     'tanggal_minta' => $tanggal,
-                    'masukan' => ['bahan_tersedia' => $bahanTersedia, 'top_k' => $topK],
-                    'defisiensi' => $defisiensi,
+                    'masukan' => $masukan,
                     'fokus_gizi' => $fokus,
                     'jumlah_hasil' => 0,
                     'metode_ranking' => $metode,
@@ -209,8 +301,7 @@ class RecommendationService
                     'anak_id' => $anak->id,
                     'resep_id' => $item['resep_id'],
                     'tanggal_minta' => $tanggal,
-                    'masukan' => ['bahan_tersedia' => $bahanTersedia, 'top_k' => $topK],
-                    'defisiensi' => $defisiensi,
+                    'masukan' => $masukan,
                     'fokus_gizi' => $fokus,
                     'jumlah_hasil' => $jumlah,
                     'peringkat' => $item['peringkat'],
@@ -226,15 +317,24 @@ class RecommendationService
             }
         });
 
-        return [
+        $hasil = [
             'jumlah_rekomendasi' => count($menu),
-            'metode_ranking' => RekomendasiLog::METODE_BASELINE_ATURAN,
+            'metode_ranking' => $metode,
             'menu' => $menu,
             'defisiensi_terdeteksi' => $defisiensi,
             'saran' => $saran,
             'peringatan' => $peringatan,
             'pemeriksaan_pantangan' => $punyaPantangan ? 'dilakukan' : 'tidak_dilakukan',
+            'ml2' => $blokMl2,
         ];
+
+        if ($demoDigunakan) {
+            $hasil['mode_demo'] = true;
+            $hasil['label_data'] = 'DEMO_BELUM_TERVERIFIKASI';
+            $hasil['peringatan_demo'] = 'Sebagian resep belum terverifikasi tenaga kesehatan; hasil ini hanya untuk demo non-produksi.';
+        }
+
+        return $hasil;
     }
 
     private function batasiTopK(?int $topK): int
@@ -243,6 +343,220 @@ class RecommendationService
         $nilai = $topK ?? (int) config('nutrition.rekomendasi.top_k_default', 5);
 
         return max(1, min($nilai, $maks));
+    }
+
+    /**
+     * @param  list<string>  $bahanTersedia
+     * @return list<string>
+     */
+    private function namaBahan(array $bahanTersedia): array
+    {
+        if ($bahanTersedia === []) {
+            return [];
+        }
+
+        $nama = BahanMakanan::query()
+            ->whereIn('id', $bahanTersedia)
+            ->pluck('nama_bahan', 'id');
+        $hasil = [];
+
+        foreach (array_values(array_unique($bahanTersedia)) as $id) {
+            $nilai = $nama->get($id);
+
+            if (is_string($nilai) && trim($nilai) !== '') {
+                $hasil[] = trim($nilai);
+            }
+        }
+
+        return $hasil;
+    }
+
+    /**
+     * Nama bahan pantangan/alergen diteruskan ke ML2 sebagai lapisan tambahan.
+     * filterWajib() tetap penentu akhir; bahan_dihindari tidak menggantikannya.
+     *
+     * @param  list<string>  $bahanPantangan
+     * @return list<string>
+     */
+    private function bahanDihindari(Anak $anak, array $bahanPantangan): array
+    {
+        $alergen = $anak->pantangan
+            ->pluck('alergen')
+            ->filter(fn ($nilai) => is_string($nilai) && trim($nilai) !== '')
+            ->map(fn ($nilai) => mb_strtolower(trim((string) $nilai)))
+            ->values()
+            ->all();
+
+        return array_values(array_unique(array_merge($this->namaBahan($bahanPantangan), $alergen)));
+    }
+
+    /**
+     * @param  list<string>  $namaBahanTersedia
+     * @param  list<string>  $bahanDihindari
+     * @param  list<string>  $defisiensi
+     * @param  list<array<string, mixed>>  $kandidatLokal
+     * @return array{tersedia: bool, alasan: string|null, versi_model: string|null, jumlah_dikembalikan: int, items: list<array{id_resep: string, skor_ml2: float|null}>}
+     */
+    private function panggilMl2(
+        array $namaBahanTersedia,
+        array $bahanDihindari,
+        array $defisiensi,
+        array $kandidatLokal,
+    ): array {
+        if (! filter_var(config('services.ml.enabled'), FILTER_VALIDATE_BOOLEAN)) {
+            return $this->tanpaMl2('disabled');
+        }
+
+        if ($defisiensi === []) {
+            return $this->tanpaMl2('tanpa_defisiensi');
+        }
+
+        $prioritas = [];
+        foreach ($defisiensi as $zat) {
+            $kunci = $this->kunciGizi((string) $zat);
+
+            if (in_array($kunci, self::NUTRISI_ML2, true)) {
+                $prioritas[$kunci] = ($prioritas[$kunci] ?? 0.0) + 1.0;
+            }
+        }
+
+        if ($prioritas === []) {
+            return $this->tanpaMl2('tanpa_defisiensi');
+        }
+
+        $respons = $this->ml->rekomendasiMl2([
+            // Prioritas dari defisiensi lokal; seng dipetakan ke zinc sesuai kontrak ML2.
+            'prioritas_gizi' => $prioritas,
+            'bahan_tersedia' => $namaBahanTersedia,
+            'mode_bahan' => $namaBahanTersedia === [] ? 'nonaktif' : 'sebagian',
+            'top_n' => 50,
+            'metode' => 'baseline',
+            'kebijakan_nilai_hilang' => 'penalti',
+            'bahan_dihindari' => $bahanDihindari,
+        ]);
+
+        if (! $respons['ok'] || ! is_array($respons['data'])) {
+            return $this->tanpaMl2((string) ($respons['alasan'] ?? 'respons_tidak_valid'));
+        }
+
+        $data = $respons['data'];
+        $versi = is_string($data['meta']['versi_model'] ?? null)
+            ? $data['meta']['versi_model']
+            : null;
+        $hasil = is_array($data['hasil'] ?? null) ? $data['hasil'] : [];
+        $jumlahDikembalikan = count($hasil);
+
+        if ($jumlahDikembalikan === 0) {
+            return $this->tanpaMl2('hasil_kosong', $versi);
+        }
+
+        $idLokal = [];
+        foreach ($kandidatLokal as $kandidat) {
+            $idLokal[$this->kunciResep($kandidat['resep'])] = true;
+        }
+
+        $items = [];
+        $dipakai = [];
+        foreach ($hasil as $item) {
+            $id = (string) ($item['id_resep'] ?? '');
+
+            if ($id === '' || ! isset($idLokal[$id]) || isset($dipakai[$id])) {
+                continue;
+            }
+
+            $skor = $item['score'] ?? null;
+            $items[] = [
+                'id_resep' => $id,
+                'skor_ml2' => is_numeric($skor) ? (float) $skor : null,
+            ];
+            $dipakai[$id] = true;
+        }
+
+        if ($items === []) {
+            return $this->tanpaMl2('hasil_tidak_cocok', $versi, $jumlahDikembalikan);
+        }
+
+        return [
+            'tersedia' => true,
+            'alasan' => null,
+            'versi_model' => $versi,
+            'jumlah_dikembalikan' => $jumlahDikembalikan,
+            'items' => $items,
+        ];
+    }
+
+    /**
+     * @return array{tersedia: false, alasan: string, versi_model: string|null, jumlah_dikembalikan: int, items: list<array{id_resep: string, skor_ml2: float|null}>}
+     */
+    private function tanpaMl2(string $alasan, ?string $versi = null, int $jumlahDikembalikan = 0): array
+    {
+        return [
+            'tersedia' => false,
+            'alasan' => $alasan,
+            'versi_model' => $versi,
+            'jumlah_dikembalikan' => $jumlahDikembalikan,
+            'items' => [],
+        ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $kandidatLokal
+     * @param  list<array{id_resep: string, skor_ml2: float|null}>  $itemsMl2
+     * @return list<array<string, mixed>>
+     */
+    private function pilihMenu(array $kandidatLokal, array $itemsMl2, int $topK): array
+    {
+        $lokalById = [];
+        foreach ($kandidatLokal as $kandidat) {
+            $lokalById[$this->kunciResep($kandidat['resep'])] = $kandidat;
+        }
+
+        $terpilih = [];
+        $dipakai = [];
+
+        foreach ($itemsMl2 as $item) {
+            if (! isset($lokalById[$item['id_resep']]) || isset($dipakai[$item['id_resep']])) {
+                continue;
+            }
+
+            $kandidat = $lokalById[$item['id_resep']];
+            $kandidat['sumber_ranking'] = 'ML2';
+            $kandidat['skor_ml2'] = $item['skor_ml2'];
+            $terpilih[] = $kandidat;
+            $dipakai[$item['id_resep']] = true;
+
+            if (count($terpilih) >= $topK) {
+                break;
+            }
+        }
+
+        foreach ($kandidatLokal as $kandidat) {
+            if (count($terpilih) >= $topK) {
+                break;
+            }
+
+            $id = $this->kunciResep($kandidat['resep']);
+
+            if (isset($dipakai[$id])) {
+                continue;
+            }
+
+            $kandidat['sumber_ranking'] = 'LOKAL';
+            $kandidat['skor_ml2'] = null;
+            $terpilih[] = $kandidat;
+            $dipakai[$id] = true;
+
+            if (count($terpilih) >= $topK) {
+                break;
+            }
+        }
+
+        return $terpilih;
+    }
+
+    private function kunciResep(Resep $resep): string
+    {
+        return (string) ($resep->id_resep ?: $resep->id);
     }
 
     /**
@@ -256,13 +570,19 @@ class RecommendationService
         array $alergenAnak,
         array $bahanPantangan,
         bool $punyaPantangan,
+        bool $bolehDemo,
     ): array {
-        $wajibDataLengkap = (bool) config('nutrition.rekomendasi.wajib_data_lengkap', true);
+        if (! $resep->makroLengkap()) {
+            return ['lolos' => false, 'modifikasi' => false];
+        }
 
-        if ($wajibDataLengkap && ! in_array($resep->status_verifikasi_data, [
-            Resep::VERIFIKASI_DATA_LENGKAP,
-            Resep::VERIFIKASI_TERVERIFIKASI,
-        ], true)) {
+        if (! $resep->layakRekomendasi($bolehDemo)) {
+            return ['lolos' => false, 'modifikasi' => false];
+        }
+
+        if ($resep->bahans->isEmpty()
+            || blank($resep->cara_memasak)
+            || $resep->bahans->contains(fn ($rb) => blank($rb->takaran_satuan))) {
             return ['lolos' => false, 'modifikasi' => false];
         }
 
@@ -289,12 +609,6 @@ class RecommendationService
 
         if ($resep->jumlah_porsi_hasil === null || (int) $resep->jumlah_porsi_hasil < 1) {
             return ['lolos' => false, 'modifikasi' => false];
-        }
-
-        foreach ($resep->giziPerPorsi() as $nilai) {
-            if ($nilai === null) {
-                return ['lolos' => false, 'modifikasi' => false];
-            }
         }
 
         if ($punyaPantangan) {
