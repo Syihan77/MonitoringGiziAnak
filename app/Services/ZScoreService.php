@@ -18,8 +18,6 @@ use Illuminate\Validation\ValidationException;
  */
 class ZScoreService
 {
-    public const VERSI_ATURAN = 'permenkes-2-2020-baseline-v1';
-
     public const PESAN_NORMAL = 'Hasil ini bukan diagnosis. Lanjutkan pemantauan rutin dan konsultasikan dengan kader atau tenaga kesehatan bila diperlukan.';
 
     public const PESAN_AT_RISK = 'Hasil ini bukan diagnosis. Lakukan pemantauan lebih dekat dan konsultasikan dengan kader atau tenaga kesehatan.';
@@ -29,15 +27,18 @@ class ZScoreService
     public const PESAN_UMUM = 'Hasil ini bukan diagnosis. Konsultasikan dengan kader atau tenaga kesehatan bila diperlukan.';
 
     /**
-     * @return array{umur_bulan: int, tinggi_koreksi_cm: float, z_bb_u: float, z_tb_u: float, z_bb_tb: float, status_bb_u: string, status_tb_u: string, status_bb_tb: string, status_gizi_antropometri: string, kategori_pemantauan: string, metode_klasifikasi: string, versi_aturan: string, pesan: string}
+     * @return array{umur_bulan: int, tinggi_koreksi_cm: float, z_bb_u: float, z_tb_u: float, z_bb_tb: float, status_bb_u: string, status_tb_u: string, status_bb_tb: string, kategori_pemantauan: string, metode_klasifikasi: string, versi_aturan: string, pesan: string}
      */
     public function hitung(Anak $anak, float $beratKg, float $tinggiCm, string $tanggalUkur, ?string $posisiUkur): array
     {
         $umur = self::umurBulanPenuh($anak->tanggal_lahir->toDateString(), $tanggalUkur);
 
-        if ($umur < 0 || $umur > 60) {
+        $umurMin = (int) config('nutrition.zscore.umur_min_bulan', 0);
+        $umurMax = (int) config('nutrition.zscore.umur_max_bulan', 60);
+
+        if ($umur < $umurMin || $umur > $umurMax) {
             throw ValidationException::withMessages([
-                'tanggal_ukur' => ['Umur anak saat pengukuran di luar rentang 0-60 bulan.'],
+                'tanggal_ukur' => ["Umur anak saat pengukuran di luar rentang {$umurMin}-{$umurMax} bulan."],
             ]);
         }
 
@@ -64,12 +65,16 @@ class ZScoreService
             'status_bb_u' => $statusBbU,
             'status_tb_u' => $statusTbU,
             'status_bb_tb' => $statusBbTb,
-            'status_gizi_antropometri' => self::agregat($statusBbU, $statusTbU, $statusBbTb),
             'kategori_pemantauan' => $kategori,
             'metode_klasifikasi' => Pertumbuhan::METODE_ACUAN_ATURAN,
-            'versi_aturan' => self::VERSI_ATURAN,
+            'versi_aturan' => self::versiAturan(),
             'pesan' => self::pesanKategori($kategori),
         ];
+    }
+
+    public static function versiAturan(): string
+    {
+        return (string) config('nutrition.zscore.versi_aturan', 'permenkes-2-2020-baseline-v1');
     }
 
     /**
@@ -79,11 +84,19 @@ class ZScoreService
      */
     public static function kategoriPemantauan(float $zBbU, float $zTbU, float $zBbTb): string
     {
-        if ($zBbU < -3 || $zTbU < -3 || $zBbTb < -3) {
+        $ambang = config('nutrition.zscore.ambang.pemantauan');
+
+        if ($zBbU < $ambang['high_risk_max']
+            || $zTbU < $ambang['high_risk_max']
+            || $zBbTb < $ambang['high_risk_max']) {
             return Pertumbuhan::KATEGORI_HIGH_RISK_REFERRAL;
         }
 
-        if ($zBbU < -2 || $zTbU < -2 || $zBbTb < -2 || $zBbTb > 2 || $zBbU > 1) {
+        if ($zBbU < $ambang['at_risk_max']
+            || $zTbU < $ambang['at_risk_max']
+            || $zBbTb < $ambang['at_risk_max']
+            || $zBbTb > $ambang['bb_tb_at_risk_max']
+            || $zBbU > $ambang['bb_u_at_risk_max']) {
             return Pertumbuhan::KATEGORI_AT_RISK_MONITORING;
         }
 
@@ -135,13 +148,15 @@ class ZScoreService
 
     public static function kategoriBbU(float $z): string
     {
-        if ($z < -3) {
+        $ambang = config('nutrition.zscore.ambang.bb_u');
+
+        if ($z < $ambang['sangat_kurang_max']) {
             return 'berat_badan_sangat_kurang';
         }
-        if ($z < -2) {
+        if ($z < $ambang['kurang_max']) {
             return 'berat_badan_kurang';
         }
-        if ($z <= 1) {
+        if ($z <= $ambang['normal_max']) {
             return 'berat_badan_normal';
         }
 
@@ -150,13 +165,15 @@ class ZScoreService
 
     public static function kategoriTbU(float $z): string
     {
-        if ($z < -3) {
+        $ambang = config('nutrition.zscore.ambang.tb_u');
+
+        if ($z < $ambang['sangat_pendek_max']) {
             return 'sangat_pendek';
         }
-        if ($z < -2) {
+        if ($z < $ambang['pendek_max']) {
             return 'pendek';
         }
-        if ($z <= 3) {
+        if ($z <= $ambang['normal_max']) {
             return 'normal';
         }
 
@@ -165,49 +182,25 @@ class ZScoreService
 
     public static function kategoriBbTb(float $z): string
     {
-        if ($z < -3) {
+        $ambang = config('nutrition.zscore.ambang.bb_tb');
+
+        if ($z < $ambang['gizi_buruk_max']) {
             return 'gizi_buruk';
         }
-        if ($z < -2) {
+        if ($z < $ambang['gizi_kurang_max']) {
             return 'gizi_kurang';
         }
-        if ($z <= 1) {
+        if ($z <= $ambang['normal_max']) {
             return 'gizi_baik';
         }
-        if ($z <= 2) {
+        if ($z <= $ambang['berisiko_lebih_max']) {
             return 'berisiko_gizi_lebih';
         }
-        if ($z <= 3) {
+        if ($z <= $ambang['gizi_lebih_max']) {
             return 'gizi_lebih';
         }
 
         return 'obesitas';
-    }
-
-    public static function agregat(string $statusBbU, string $statusTbU, string $statusBbTb): string
-    {
-        if ($statusBbTb === 'gizi_buruk') {
-            return 'gizi_buruk';
-        }
-
-        if (in_array($statusTbU, ['sangat_pendek', 'pendek'], true)) {
-            return 'stunting_terindikasi';
-        }
-
-        if ($statusBbTb === 'gizi_kurang'
-            || in_array($statusBbU, ['berat_badan_sangat_kurang', 'berat_badan_kurang'], true)
-        ) {
-            return 'kurang';
-        }
-
-        if (in_array($statusBbU, ['risiko_berat_badan_lebih'], true)
-            || in_array($statusBbTb, ['berisiko_gizi_lebih', 'gizi_lebih', 'obesitas'], true)
-            || $statusTbU === 'tinggi'
-        ) {
-            return 'lebih';
-        }
-
-        return 'normal';
     }
 
     private function zDariUmur(string $indikator, string $jk, ?string $varian, int $umur, float $nilai): float

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\KondisiHarianController;
 use App\Http\Controllers\Api\V1\KonsumsiController;
 use App\Http\Controllers\Api\V1\PertumbuhanController;
 use App\Http\Controllers\Api\V1\RekomendasiController;
+use App\Http\Controllers\Api\V1\WilayahController;
 use App\Support\ApiResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,8 @@ Route::prefix('v1')->middleware('throttle:120,1')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
 
+        Route::get('/wilayah', [WilayahController::class, 'index']);
+
         // SKPL-F-03 & F-04: modul anak & pertumbuhan (Tahap C).
         Route::get('/anak', [AnakController::class, 'index']);
         Route::post('/anak', [AnakController::class, 'store']);
@@ -34,6 +37,7 @@ Route::prefix('v1')->middleware('throttle:120,1')->group(function () {
 
         Route::post('/anak/{anakId}/pertumbuhan', [PertumbuhanController::class, 'store']);
         Route::get('/anak/{anakId}/pertumbuhan', [PertumbuhanController::class, 'index']);
+        Route::get('/anak/{anakId}/tren-pertumbuhan', [PertumbuhanController::class, 'tren']);
 
         // SKPL-F-10: dashboard & logbook kader (Fase 2).
         Route::get('/kader/dashboard', [KaderController::class, 'dashboard']);
@@ -65,5 +69,6 @@ Route::prefix('v1')->middleware('throttle:120,1')->group(function () {
         Route::post('/resep', [AdminReferensiController::class, 'resepStore']);
         Route::match(['put', 'patch'], '/resep/{id}', [AdminReferensiController::class, 'resepUpdate']);
         Route::delete('/resep/{id}', [AdminReferensiController::class, 'resepDestroy']);
+        Route::patch('/admin/resep/{id}/status', [AdminReferensiController::class, 'verifikasiResep']);
     });
 });

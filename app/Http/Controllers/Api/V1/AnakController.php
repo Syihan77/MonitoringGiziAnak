@@ -169,7 +169,8 @@ class AnakController extends Controller
                 continue;
             }
 
-            $jenis = $item['jenis'] ?? PantanganAnak::JENIS_ALERGI;
+            $jenis = $item['jenis']
+                ?? ($bahanId !== null ? PantanganAnak::JENIS_PANTANGAN : PantanganAnak::JENIS_ALERGI);
             $kunci = ($bahanId ?? '').'|'.($alergen ?? '').'|'.$jenis;
             if (isset($unik[$kunci])) {
                 continue;
@@ -216,7 +217,6 @@ class AnakController extends Controller
                 'versi_aturan' => $ukur->versiAturanEfektif(),
                 'status_validitas_pengukuran' => $ukur->statusValiditasEfektif(),
                 'pesan' => $ukur->pesanEfektif(),
-                'status_gizi_antropometri' => $ukur->status_gizi_antropometri,
             ];
         }
 

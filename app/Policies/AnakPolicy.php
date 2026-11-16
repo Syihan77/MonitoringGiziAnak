@@ -23,15 +23,29 @@ class AnakPolicy
     }
 
     /**
-     * Ubah/hapus hanya pemilik (SKPL: PUT oleh Orang Tua) atau admin.
+     * Ubah/hapus hanya pemilik; admin bersifat baca-saja untuk data anak.
      */
     public function update(User $user, Anak $anak): bool
     {
-        return $user->isAdmin() || $anak->user_id === $user->id;
+        return $anak->user_id === $user->id;
     }
 
     public function delete(User $user, Anak $anak): bool
     {
-        return $user->isAdmin() || $anak->user_id === $user->id;
+        return $anak->user_id === $user->id;
+    }
+
+    /**
+     * Pengukuran oleh pemilik atau kader di wilayah binaan yang sama.
+     */
+    public function ukur(User $user, Anak $anak): bool
+    {
+        if ($anak->user_id === $user->id) {
+            return true;
+        }
+
+        return $user->isKader()
+            && $user->wilayah_posyandu !== null
+            && $anak->user->wilayah_posyandu === $user->wilayah_posyandu;
     }
 }

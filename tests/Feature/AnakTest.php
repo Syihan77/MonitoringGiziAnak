@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Anak;
+use App\Models\Pertumbuhan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -162,6 +163,47 @@ class AnakTest extends TestCase
             ->assertBadRequest()->assertJsonPath('error_code', 'VALIDATION_ERROR');
     }
 
+    public function test_admin_hanya_boleh_membaca_data_anak(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $ortu = User::factory()->create();
+        $anak = Anak::create([...$this->anakPayload(), 'user_id' => $ortu->id]);
+        $h = $this->as($admin);
+
+        $this->getJson("/api/v1/anak/{$anak->id}", $h)->assertOk();
+        $this->getJson('/api/v1/anak', $h)->assertOk();
+
+        $this->postJson('/api/v1/anak', $this->anakPayload(['nama' => 'Admin Buat']), $h)
+            ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+        $this->putJson("/api/v1/anak/{$anak->id}", ['nama' => 'Diubah Admin'], $h)
+            ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+        $this->deleteJson("/api/v1/anak/{$anak->id}", [], $h)
+            ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+
+        $this->assertDatabaseHas('anaks', ['id' => $anak->id, 'nama' => 'Budi Santoso']);
+    }
+
+    public function test_kader_tidak_boleh_membuat_anak(): void
+    {
+        $kader = User::factory()->kader()->create(['wilayah_posyandu' => 'Posyandu Melati']);
+
+        $this->postJson('/api/v1/anak', $this->anakPayload(), $this->as($kader))
+            ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+    }
+
+    public function test_daftar_wilayah_unik_terurut(): void
+    {
+        $ortu = User::factory()->create();
+        User::factory()->create(['wilayah_posyandu' => 'Posyandu Mawar']);
+        User::factory()->create(['wilayah_posyandu' => 'Posyandu Melati']);
+        User::factory()->create(['wilayah_posyandu' => 'Posyandu Melati']);
+        User::factory()->create(['wilayah_posyandu' => null]);
+
+        $this->getJson('/api/v1/wilayah', $this->as($ortu))
+            ->assertOk()
+            ->assertJsonPath('data', ['Posyandu Mawar', 'Posyandu Melati']);
+    }
+
     public function test_ringkas_ukur_dan_pemilik(): void
     {
         $ortu = User::factory()->create(['nama' => 'Ibu Ratna', 'wilayah_posyandu' => 'Posyandu Melati']);
@@ -178,17 +220,17 @@ class AnakTest extends TestCase
         $this->assertNull($res->json('data.data.0.ukur_terakhir'));
 
         // Dengan ukur -> terisi.
-        \App\Models\Pertumbuhan::create([
+        Pertumbuhan::create([
             'anak_id' => $anak->id, 'tanggal_ukur' => '2026-01-15', 'umur_bulan' => 24,
             'berat_kg' => 12.5, 'tinggi_cm' => 85.2, 'tinggi_koreksi_cm' => 85.2,
             'z_bb_u' => 0.21, 'z_tb_u' => -0.63, 'z_bb_tb' => 0.76,
             'status_bb_u' => 'berat_badan_normal', 'status_tb_u' => 'normal',
-            'status_bb_tb' => 'gizi_baik', 'status_gizi_antropometri' => 'normal',
+            'status_bb_tb' => 'gizi_baik',
             'dicatat_oleh' => $ortu->id,
         ]);
 
         $res = $this->getJson('/api/v1/anak?ringkas_ukur=1', $this->as($ortu))->assertOk();
         $this->assertSame('2026-01-15', $res->json('data.data.0.ukur_terakhir.tanggal_ukur'));
-        $this->assertSame('normal', $res->json('data.data.0.ukur_terakhir.status_gizi_antropometri'));
+        $this->assertSame('NORMAL_LOW_RISK', $res->json('data.data.0.ukur_terakhir.kategori_pemantauan'));
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Anak;
+use App\Models\Pertumbuhan;
 use App\Models\User;
 use App\Models\WhoStandard;
 use App\Services\ZScoreService;
@@ -112,7 +113,7 @@ class ZScoreServiceTest extends TestCase
         $this->assertEqualsWithDelta(0.21, $hasil['z_bb_u'], 0.01);
         $this->assertEqualsWithDelta(-0.63, $hasil['z_tb_u'], 0.01);
         $this->assertEqualsWithDelta(0.76, $hasil['z_bb_tb'], 0.01);
-        $this->assertSame('normal', $hasil['status_gizi_antropometri']);
+        $this->assertSame(Pertumbuhan::KATEGORI_NORMAL_LOW_RISK, $hasil['kategori_pemantauan']);
     }
 
     public function test_hitung_stunting_terindikasi(): void
@@ -130,6 +131,6 @@ class ZScoreServiceTest extends TestCase
         $hasil = app(ZScoreService::class)->hitung($anak, 8.7, 75.0, '2026-01-15', null);
 
         $this->assertSame('sangat_pendek', $hasil['status_tb_u']);
-        $this->assertSame('stunting_terindikasi', $hasil['status_gizi_antropometri']);
+        $this->assertSame(Pertumbuhan::KATEGORI_HIGH_RISK_REFERRAL, $hasil['kategori_pemantauan']);
     }
 }

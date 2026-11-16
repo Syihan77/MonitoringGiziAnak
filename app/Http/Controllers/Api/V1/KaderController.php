@@ -14,6 +14,7 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 
 class KaderController extends Controller
@@ -34,6 +35,7 @@ class KaderController extends Controller
 
         $filter = $request->validate([
             'wilayah' => ['required', 'string', 'max:100'],
+            'bulan' => ['sometimes', 'integer', 'min:1', 'max:'.config('nutrition.kader.bulan_maks', 12)],
         ]);
 
         // UT-09: kader di luar wilayahnya ditolak.
@@ -51,8 +53,10 @@ class KaderController extends Controller
             'total_anak_binaan' => count($anakIds),
             'anak_terukur' => count($terakhir),
             'distribusi_kategori_pemantauan' => $this->distribusiKategori($terakhir),
-            'distribusi_status_gizi' => $this->distribusiGizi($terakhir),
-            'distribusi_stunting_indikatif' => $this->distribusiStunting($terakhir),
+            'tren_prevalensi' => $this->trenPrevalensi(
+                $anakIds,
+                (int) ($filter['bulan'] ?? config('nutrition.kader.bulan_default', 6)),
+            ),
         ], 'Dashboard kader');
     }
 
@@ -99,7 +103,6 @@ class KaderController extends Controller
                 'versi_aturan' => $p->versiAturanEfektif(),
                 'status_validitas_pengukuran' => $p->statusValiditasEfektif(),
                 'pesan' => $p->pesanEfektif(),
-                'status_gizi_antropometri' => $p->status_gizi_antropometri,
             ]);
 
         AuditLogger::log($user, 'logbook_view', ['anak_id' => $anak->id]);
@@ -167,6 +170,94 @@ class KaderController extends Controller
     }
 
     /**
+     * Prevalensi bulanan memakai pengukuran terakhir tiap anak pada bulan itu.
+     *
+     * @param  list<string>  $anakIds
+     * @return list<array{bulan: string, label: string, normal: int, at_risk: int, high_risk: int, tidak_terklasifikasi: int, total_diukur: int, persen_perlu_perhatian: float|null, denominator_kecil: bool}>
+     */
+    private function trenPrevalensi(array $anakIds, int $jumlahBulan): array
+    {
+        $zona = config('nutrition.kader.zona_waktu', 'Asia/Jakarta');
+        $bulanTerakhir = Carbon::now($zona)->startOfMonth();
+        $bulanPertama = $bulanTerakhir->copy()->subMonths($jumlahBulan - 1);
+        $batasAkhir = $bulanTerakhir->copy()->endOfMonth();
+
+        $namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+        $buckets = [];
+        for ($i = 0; $i < $jumlahBulan; $i++) {
+            $bulan = $bulanPertama->copy()->addMonths($i);
+            $kunci = $bulan->format('Y-m');
+
+            $buckets[$kunci] = [
+                'bulan' => $kunci,
+                'label' => $namaBulan[$bulan->month - 1].' '.$bulan->year,
+                'normal' => 0,
+                'at_risk' => 0,
+                'high_risk' => 0,
+                'tidak_terklasifikasi' => 0,
+                'total_diukur' => 0,
+                'persen_perlu_perhatian' => null,
+                'denominator_kecil' => false,
+            ];
+        }
+
+        if ($anakIds !== []) {
+            $rows = Pertumbuhan::query()
+                ->whereIn('anak_id', $anakIds)
+                ->whereDate('tanggal_ukur', '>=', $bulanPertama->toDateString())
+                ->whereDate('tanggal_ukur', '<=', $batasAkhir->toDateString())
+                ->orderBy('tanggal_ukur')
+                ->orderBy('created_at')
+                ->get();
+
+            $terakhir = [];
+            foreach ($rows as $row) {
+                $kunci = $row->tanggal_ukur->format('Y-m');
+                $terakhir[$row->anak_id][$kunci] = $row;
+            }
+
+            foreach ($terakhir as $perBulan) {
+                foreach ($perBulan as $kunci => $pengukuran) {
+                    if (! isset($buckets[$kunci])) {
+                        continue;
+                    }
+
+                    match ($pengukuran->kategoriEfektif()) {
+                        Pertumbuhan::KATEGORI_NORMAL_LOW_RISK => $buckets[$kunci]['normal']++,
+                        Pertumbuhan::KATEGORI_AT_RISK_MONITORING => $buckets[$kunci]['at_risk']++,
+                        Pertumbuhan::KATEGORI_HIGH_RISK_REFERRAL => $buckets[$kunci]['high_risk']++,
+                        default => $buckets[$kunci]['tidak_terklasifikasi']++,
+                    };
+                }
+            }
+        }
+
+        $denominatorMin = (int) config('nutrition.kader.denominator_min', 5);
+
+        foreach ($buckets as &$bucket) {
+            $bucket['total_diukur'] = $bucket['normal']
+                + $bucket['at_risk']
+                + $bucket['high_risk']
+                + $bucket['tidak_terklasifikasi'];
+
+            if ($bucket['total_diukur'] > 0) {
+                $bucket['persen_perlu_perhatian'] = round(
+                    (($bucket['at_risk'] + $bucket['high_risk']) / $bucket['total_diukur']) * 100,
+                    1,
+                );
+            }
+
+            $bucket['denominator_kecil'] = $bucket['total_diukur'] > 0
+                && $bucket['total_diukur'] < $denominatorMin;
+        }
+        unset($bucket);
+
+        return array_values($buckets);
+    }
+
+    /**
      * @return list<string>
      */
     private function anakBinaanIds(string $wilayah): array
@@ -221,48 +312,6 @@ class KaderController extends Controller
             if ($kategori !== null && isset($dist[$kategori])) {
                 $dist[$kategori]++;
             }
-        }
-
-        return $dist;
-    }
-
-    /**
-     * @param  list<Pertumbuhan>  $terakhir
-     * @return array<string, int>
-     */
-    private function distribusiGizi(array $terakhir): array
-    {
-        $dist = ['baik' => 0, 'kurang' => 0, 'sangat_kurang' => 0, 'lebih' => 0];
-
-        foreach ($terakhir as $p) {
-            match ($p->status_bb_tb) {
-                'gizi_baik' => $dist['baik']++,
-                'gizi_kurang' => $dist['kurang']++,
-                'gizi_buruk' => $dist['sangat_kurang']++,
-                'berisiko_gizi_lebih', 'gizi_lebih', 'obesitas' => $dist['lebih']++,
-                default => null,
-            };
-        }
-
-        return $dist;
-    }
-
-    /**
-     * @param  list<Pertumbuhan>  $terakhir
-     * @return array<string, int>
-     */
-    private function distribusiStunting(array $terakhir): array
-    {
-        $dist = ['normal' => 0, 'pendek' => 0, 'sangat_pendek' => 0, 'tinggi' => 0];
-
-        foreach ($terakhir as $p) {
-            match ($p->status_tb_u) {
-                'normal' => $dist['normal']++,
-                'pendek' => $dist['pendek']++,
-                'sangat_pendek' => $dist['sangat_pendek']++,
-                'tinggi' => $dist['tinggi']++,
-                default => null,
-            };
         }
 
         return $dist;

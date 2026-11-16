@@ -41,14 +41,24 @@ class KonsumsiTest extends TestCase
         ]);
     }
 
+    private function kondisi(User $user, Anak $anak, string $tanggal, string $status = 'TIDAK_SAKIT'): void
+    {
+        $this->postJson("/api/v1/anak/{$anak->id}/kondisi-harian", [
+            'tanggal' => $tanggal,
+            'status_kondisi' => $status,
+        ], $this->as($user))->assertSuccessful();
+    }
+
     public function test_catat_multi_item_201_dan_satuan_kg_dikonversi(): void
     {
         $ortu = User::factory()->create();
         $anak = $this->anak24($ortu);
         $bahan = $this->bahanProtein();
+        $this->kondisi($ortu, $anak, '2026-01-15');
 
         $res = $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
             'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
             'items' => [
                 ['bahan_id' => $bahan->id, 'porsi_gram' => 100],
                 ['bahan_id' => $bahan->id, 'porsi_gram' => 0.5, 'satuan' => 'kg'],
@@ -70,6 +80,7 @@ class KonsumsiTest extends TestCase
 
         $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
             'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
             'items' => [['bahan_id' => '00000000-0000-0000-0000-000000000000', 'porsi_gram' => 100]],
         ], $this->as($ortu))
             ->assertBadRequest()->assertJsonPath('error_code', 'VALIDATION_ERROR');
@@ -81,9 +92,11 @@ class KonsumsiTest extends TestCase
         $anak = $this->anak24($ortu);
         $bahan = $this->bahanProtein();
         $kader = User::factory()->kader()->create(['wilayah_posyandu' => 'Posyandu Melati']);
+        $this->kondisi($ortu, $anak, '2026-01-15');
 
         $payload = [
             'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
             'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
         ];
 
@@ -105,6 +118,7 @@ class KonsumsiTest extends TestCase
 
         $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
             'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
             'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
         ], $this->as($ortuB))
             ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
@@ -116,9 +130,11 @@ class KonsumsiTest extends TestCase
         $ortu = User::factory()->create();
         $anak = $this->anak24($ortu);
         $bahan = $this->bahanProtein();
+        $this->kondisi($ortu, $anak, '2026-01-15');
 
         $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
             'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
             'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
         ], $this->as($ortu))->assertCreated();
 
@@ -137,9 +153,11 @@ class KonsumsiTest extends TestCase
         $ortu = User::factory()->create();
         $anak = $this->anak24($ortu);
         $bahan = $this->bahanProtein();
+        $this->kondisi($ortu, $anak, '2026-01-15');
 
         $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
             'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
             'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 150]],
         ], $this->as($ortu))->assertCreated();
 
@@ -177,8 +195,10 @@ class KonsumsiTest extends TestCase
 
         // Hari 1: protein 10g/20g = 50%. Hari 2: 20g/20g = 100%. Rata protein 75%.
         foreach ([['2026-01-10', 100], ['2026-01-20', 200]] as [$tgl, $gram]) {
+            $this->kondisi($ortu, $anak, $tgl);
             $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
                 'tanggal_konsumsi' => $tgl,
+                'metode_input' => 'MANUAL',
                 'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => $gram]],
             ], $h)->assertCreated();
         }
@@ -202,12 +222,14 @@ class KonsumsiTest extends TestCase
         $h = $this->as($ortu);
 
         // Bahan super-seng: 300mg/100g x 100g = 10000% AKG (3mg) -> di-cap 100%.
-        $bahan = \App\Models\BahanMakanan::create([
+        $bahan = BahanMakanan::create([
             'nama_bahan' => 'Super Seng', 'kelompok_gizi' => 'Uji', 'zinc_per100g' => 300,
         ]);
+        $this->kondisi($ortu, $anak, '2026-02-10');
 
         $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
             'tanggal_konsumsi' => '2026-02-10',
+            'metode_input' => 'MANUAL',
             'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
         ], $h)->assertCreated();
 
@@ -215,8 +237,144 @@ class KonsumsiTest extends TestCase
 
         $this->assertEqualsWithDelta(100.0, (float) $res->json('data.rata_per_zat.seng'), 0.01);
         $this->assertLessThanOrEqual(100.0, (float) $res->json('data.rata_persen_akg'));
-        // Tanpa cap, rata akan meledak (>1000%). Status ikut zat lain yang nol.
-        $this->assertSame('TIDAK TERPENUHI', $res->json('data.status'));
+        // Tanpa cap, rata akan meledak (>1000%). Zat lain NULL = tidak tersedia,
+        // sehingga tidak ikut dirata-rata sebagai nol, dan status bulanan tidak
+        // boleh diklaim TERPENUHI penuh.
+        $this->assertNull($res->json('data.rata_per_zat.energi'));
+        $this->assertSame('DATA_TIDAK_LENGKAP', $res->json('data.status'));
+    }
+
+    public function test_analisis_zat_null_tidak_dianggap_nol(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = $this->anak24($ortu);
+        $bahan = BahanMakanan::create([
+            'nama_bahan' => 'Bahan Zinc Null',
+            'kelompok_gizi' => 'Uji',
+            'energi_per100g' => 150,
+            'karbohidrat_per100g' => 1,
+            'protein_per100g' => 10,
+            'lemak_per100g' => 11,
+            'zat_besi_per100g' => 2,
+            'zinc_per100g' => null,
+        ]);
+        $this->kondisi($ortu, $anak, '2026-01-15');
+
+        $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
+            'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
+            'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
+        ], $this->as($ortu))->assertCreated();
+
+        $res = $this->getJson(
+            "/api/v1/anak/{$anak->id}/analisis-gizi?tanggal=2026-01-15",
+            $this->as($ortu)
+        )->assertOk();
+
+        $zinc = collect($res->json('data.ringkasan'))->firstWhere('zat_gizi', 'seng');
+        $protein = collect($res->json('data.ringkasan'))->firstWhere('zat_gizi', 'protein');
+
+        $this->assertNull($zinc['total']);
+        $this->assertNull($zinc['persentase_akg']);
+        $this->assertSame('tidak_tersedia', $zinc['status']);
+        $this->assertSame(50.0, (float) $protein['persentase_akg']);
+        $this->assertTrue($res->json('data.rekomendasi_tersedia'));
+    }
+
+    public function test_agregat_bulanan_zat_null_tidak_dianggap_nol(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = $this->anak24($ortu);
+        $bahan = BahanMakanan::create([
+            'nama_bahan' => 'Bahan Zinc Null Bulanan',
+            'kelompok_gizi' => 'Uji',
+            'energi_per100g' => 150,
+            'karbohidrat_per100g' => 1,
+            'protein_per100g' => 10,
+            'lemak_per100g' => 11,
+            'zat_besi_per100g' => 2,
+            'zinc_per100g' => null,
+        ]);
+        $this->kondisi($ortu, $anak, '2026-01-15');
+
+        $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
+            'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
+            'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
+        ], $this->as($ortu))->assertCreated();
+
+        $res = $this->getJson(
+            "/api/v1/anak/{$anak->id}/gizi-bulanan?bulan=2026-01",
+            $this->as($ortu)
+        )->assertOk();
+
+        $this->assertNull($res->json('data.rata_per_zat.seng'));
+        $this->assertNotNull($res->json('data.rata_per_zat.protein'));
+        $this->assertNotNull($res->json('data.rata_persen_akg'));
+        $this->assertSame('DATA_TIDAK_LENGKAP', $res->json('data.status'));
+    }
+
+    public function test_agregat_bulanan_zat_null_di_salah_satu_hari_menandai_tidak_lengkap(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = $this->anak24($ortu);
+        $lengkap = $this->bahanProtein();
+        $zincNull = BahanMakanan::create([
+            'nama_bahan' => 'Bahan Zinc Null Hari Kedua',
+            'kelompok_gizi' => 'Uji',
+            'energi_per100g' => 150,
+            'karbohidrat_per100g' => 1,
+            'protein_per100g' => 10,
+            'lemak_per100g' => 11,
+            'zat_besi_per100g' => 2,
+            'zinc_per100g' => null,
+        ]);
+        $h = $this->as($ortu);
+
+        foreach ([[$lengkap, '2026-04-10'], [$zincNull, '2026-04-11']] as [$bahan, $tgl]) {
+            $this->kondisi($ortu, $anak, $tgl);
+            $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
+                'tanggal_konsumsi' => $tgl,
+                'metode_input' => 'MANUAL',
+                'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
+            ], $h)->assertCreated();
+        }
+
+        $res = $this->getJson("/api/v1/anak/{$anak->id}/gizi-bulanan?bulan=2026-04", $h)->assertOk();
+
+        $this->assertNotNull($res->json('data.rata_per_zat.seng'));
+        $this->assertSame('DATA_TIDAK_LENGKAP', $res->json('data.status'));
+    }
+
+    public function test_agregat_bulanan_data_lengkap_bisa_terpenuhi(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = $this->anak24($ortu);
+        $bahan = BahanMakanan::create([
+            'nama_bahan' => 'Bahan Lengkap AKG',
+            'kelompok_gizi' => 'Uji',
+            'energi_per100g' => 1350,
+            'karbohidrat_per100g' => 215,
+            'protein_per100g' => 20,
+            'lemak_per100g' => 45,
+            'zat_besi_per100g' => 7,
+            'zinc_per100g' => 3,
+        ]);
+        $this->kondisi($ortu, $anak, '2026-03-10');
+
+        $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
+            'tanggal_konsumsi' => '2026-03-10',
+            'metode_input' => 'MANUAL',
+            'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
+        ], $this->as($ortu))->assertCreated();
+
+        $res = $this->getJson(
+            "/api/v1/anak/{$anak->id}/gizi-bulanan?bulan=2026-03",
+            $this->as($ortu)
+        )->assertOk();
+
+        $this->assertEqualsWithDelta(100.0, (float) $res->json('data.rata_persen_akg'), 0.01);
+        $this->assertSame('TERPENUHI', $res->json('data.status'));
     }
 
     public function test_riwayat_rentang_tanggal(): void
@@ -227,8 +385,10 @@ class KonsumsiTest extends TestCase
         $h = $this->as($ortu);
 
         foreach (['2026-01-13', '2026-01-15'] as $tgl) {
+            $this->kondisi($ortu, $anak, $tgl);
             $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
                 'tanggal_konsumsi' => $tgl,
+                'metode_input' => 'MANUAL',
                 'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
             ], $h)->assertCreated();
         }

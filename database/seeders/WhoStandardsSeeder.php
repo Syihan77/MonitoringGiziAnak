@@ -80,6 +80,7 @@ class WhoStandardsSeeder extends Seeder
             if (preg_match('/^####\s*Tabel\s*(\d+)\./u', trim($line), $m)) {
                 $tableNo = (int) $m[1];
                 $sex = null;
+
                 continue;
             }
 
@@ -87,6 +88,7 @@ class WhoStandardsSeeder extends Seeder
                 && preg_match('/^\*\s*Anak\s+(Laki-Laki|Perempuan)\b/ui', trim($line), $m)
             ) {
                 $sex = mb_strtolower($m[1]) === 'laki-laki' ? 'L' : 'P';
+
                 continue;
             }
 

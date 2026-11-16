@@ -6,7 +6,9 @@ use App\Models\Anak;
 use App\Models\BahanMakanan;
 use App\Models\Resep;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PantanganAnakTest extends TestCase
@@ -32,11 +34,10 @@ class PantanganAnakTest extends TestCase
 
     private function resep(string $nama, array $atribut = []): Resep
     {
-        return Resep::create(array_merge([
+        $resep = Resep::create(array_merge([
             'nama_resep' => $nama,
             'cara_memasak' => 'Masak hingga matang.',
             'kategori_gizi' => 'umum',
-            'porsi_saji' => null,
             'jumlah_porsi_hasil' => 1,
             'energi_per_porsi' => 200,
             'protein_per_porsi' => 10,
@@ -50,9 +51,23 @@ class PantanganAnakTest extends TestCase
             'vitamin_c_per_porsi' => 5,
             'usia_min_bulan' => 6,
             'usia_maks_bulan' => null,
-            'status_verifikasi_data' => Resep::VERIFIKASI_DATA_LENGKAP,
+            'status_verifikasi_data' => Resep::VERIFIKASI_TERVERIFIKASI,
             'alergen' => [],
         ], $atribut));
+
+        $bahan = BahanMakanan::create([
+            'nama_bahan' => 'Bahan '.$resep->nama_resep,
+            'kelompok_gizi' => 'Uji',
+        ]);
+
+        $resep->bahans()->create([
+            'bahan_id' => $bahan->id,
+            'takaran_jumlah' => 50,
+            'takaran_satuan' => 'g',
+            'takaran_gram_ekuivalen' => 50,
+        ]);
+
+        return $resep;
     }
 
     public function test_pantangan_disimpan_di_create_dan_update(): void
@@ -89,6 +104,52 @@ class PantanganAnakTest extends TestCase
         $this->assertDatabaseMissing('pantangan_anaks', ['anak_id' => $anakId]);
     }
 
+    public function test_jenis_pantangan_default_sesuai_sumber(): void
+    {
+        $ortu = User::factory()->create();
+        $bahan = BahanMakanan::create([
+            'nama_bahan' => 'Bahan Default',
+            'kelompok_gizi' => 'Uji',
+        ]);
+
+        $res = $this->postJson('/api/v1/anak', [
+            'nama' => 'Budi',
+            'tanggal_lahir' => now()->subMonths(12)->toDateString(),
+            'jenis_kelamin' => 'L',
+            'pantangan' => [
+                ['bahan_id' => $bahan->id],
+                ['alergen' => 'telur'],
+            ],
+        ], $this->as($ortu))->assertCreated();
+
+        $anakId = $res->json('data.anak_id');
+
+        $this->assertDatabaseHas('pantangan_anaks', [
+            'anak_id' => $anakId,
+            'bahan_id' => $bahan->id,
+            'jenis' => 'PANTANGAN',
+        ]);
+        $this->assertDatabaseHas('pantangan_anaks', [
+            'anak_id' => $anakId,
+            'alergen' => 'telur',
+            'jenis' => 'ALERGI',
+        ]);
+    }
+
+    public function test_database_menolak_pantangan_tanpa_sumber(): void
+    {
+        if (DB::getDriverName() !== 'pgsql') {
+            $this->markTestSkipped('CHECK constraint hanya dibuat untuk PostgreSQL.');
+        }
+
+        $ortu = User::factory()->create();
+        $anak = $this->anak($ortu);
+
+        $this->expectException(QueryException::class);
+
+        $anak->pantangan()->create(['jenis' => 'ALERGI']);
+    }
+
     public function test_pantangan_tanpa_bahan_atau_alergen_ditolak(): void
     {
         $ortu = User::factory()->create();
@@ -119,7 +180,9 @@ class PantanganAnakTest extends TestCase
         $this->resep('Mengandung Telur', ['alergen' => ['telur']]);
         $this->resep('Mengandung Bahan Pantangan')->bahans()->create([
             'bahan_id' => $bahanPantangan->id,
-            'takaran_gram' => 50,
+            'takaran_jumlah' => 50,
+            'takaran_satuan' => 'g',
+            'takaran_gram_ekuivalen' => 50,
         ]);
         $this->resep('Alergen Tidak Diketahui', ['alergen' => null]);
         $this->resep('Aman');
