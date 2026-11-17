@@ -29,7 +29,7 @@
     <!-- HEADER RESEP CARD -->
     <div class="resep-header-card">
       <div class="resep-image-wrapper">
-        <img src="/img/omelet.jpg" alt="Resep" class="resep-hero-image" id="resep-image" onerror="this.src='https://placehold.co/600x400/006a38/ffffff?text=Resep'">
+        <img src="/img/placeholder-menu.svg" alt="Resep" class="resep-hero-image" id="resep-image">
       </div>
       <div class="resep-info-wrapper">
         <h1 class="resep-title" id="resep-title">Omelet Bayam & Roti Gandum</h1>

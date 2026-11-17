@@ -33,8 +33,8 @@
         </a>
       </nav>
 
-      <div class="profile-ortu">
-        <div class="avatar-initial avatar-sm" id="avatar-ortu">?</div>
+      <div class="profile-ortu profile-account">
+        <button type="button" class="avatar-initial avatar-sm profile-avatar-btn" id="avatar-ortu" data-profile-trigger aria-label="Buka informasi profil akun">?</button>
         <button type="button" class="btn-logout" data-logout title="Keluar" aria-label="Keluar dari akun"><x-icon name="logout" /></button>
       </div>
     </div>
@@ -185,33 +185,8 @@
             </h2>
             <p class="section-subtitle">Ringkasan bulan terpenuhi dan belum terpenuhi.</p>
             
-            <div class="nutrition-status-list">
-              <div class="nutrition-status-item">
-                <div class="status-dot green"></div>
-                <div class="status-info">
-                  <div class="month-name">September</div>
-                  <div class="month-desc">92% - pemenuhan gizi sangat baik.</div>
-                </div>
-                <div class="status-badge fulfilled">TERPENUHI</div>
-              </div>
-              
-              <div class="nutrition-status-item">
-                <div class="status-dot yellow"></div>
-                <div class="status-info">
-                  <div class="month-name">Agustus</div>
-                  <div class="month-desc">68% - perlu peningkatan konsumsi protein dan sayur.</div>
-                </div>
-                <div class="status-badge partial">KURANG TERPENUHI</div>
-              </div>
-              
-              <div class="nutrition-status-item">
-                <div class="status-dot red"></div>
-                <div class="status-info">
-                  <div class="month-name">Juli</div>
-                  <div class="month-desc">46% - perlu perhatian dan pemenuhan gizi dengan baik.</div>
-                </div>
-                <div class="status-badge unfulfilled">TIDAK TERPENUHI</div>
-              </div>
+            <div class="nutrition-status-list" aria-live="polite">
+              <p class="month-desc">Memuat status pemenuhan gizi...</p>
             </div>
           </div>
 
@@ -246,6 +221,7 @@
 
   <!-- JavaScript -->
     @vite(['resources/js/api.js'])
+    @vite(['resources/js/profile-menu.js'])
     @vite(['resources/js/history-ortu.js'])
 </body>
 </html>

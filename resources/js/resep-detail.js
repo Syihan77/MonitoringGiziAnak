@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setText('resep-kalori', energi === null ? 'Energi tidak tersedia' : `±${energi} kkal`);
 
   const img = document.getElementById('resep-image');
-  if (img) img.src = 'https://placehold.co/600x400/006a38/ffffff?text=Resep';
+  if (img) img.src = '/img/placeholder-menu.svg';
 
   // ============================================
   // RENDER BAHAN

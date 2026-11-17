@@ -32,8 +32,8 @@
         </a>
       </nav>
 
-      <div class="profile">
-        <div class="avatar-initial avatar-sm"><x-icon name="user" /></div>
+      <div class="profile profile-account">
+        <button type="button" class="avatar-initial avatar-sm profile-avatar-btn" id="avatar-kader" data-profile-trigger aria-label="Buka informasi profil akun"><x-icon name="user" /></button>
         <button type="button" class="btn-logout" data-logout title="Keluar" aria-label="Keluar dari akun"><x-icon name="logout" /></button>
       </div>
     </div>
@@ -190,6 +190,7 @@
 
   <!-- JavaScript -->
     @vite(['resources/js/api.js'])
+    @vite(['resources/js/profile-menu.js'])
     @vite(['resources/js/db-kader.js'])
 </body>
 </html>

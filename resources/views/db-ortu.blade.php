@@ -32,8 +32,8 @@
                 </a>
             </nav>
 
-            <div class="profile-ortu">
-                <div class="avatar-initial avatar-sm" id="avatar-ortu">?</div>
+            <div class="profile-ortu profile-account">
+                <button type="button" class="avatar-initial avatar-sm profile-avatar-btn" id="avatar-ortu" data-profile-trigger aria-label="Buka informasi profil akun">?</button>
                 <button type="button" class="btn-logout" data-logout title="Keluar" aria-label="Keluar dari akun"><x-icon name="logout" /></button>
             </div>
         </div>
@@ -298,6 +298,7 @@
     </div>
 
     @vite(['resources/js/api.js'])
+    @vite(['resources/js/profile-menu.js'])
     @vite(['resources/js/db-ortu.js'])
 </body>
 </html>
