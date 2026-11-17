@@ -85,83 +85,102 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // 1. Ambil data dari sessionStorage
-      const storedData = sessionStorage.getItem('kaderData');
-      
-      if (!storedData) {
-        alert('Data tidak ditemukan. Silakan isi formulir terlebih dahulu.');
-        window.location.href = '/data-kader';
-        return;
-      }
+  document.addEventListener('DOMContentLoaded', () => {
+    const dataKader = JSON.parse(sessionStorage.getItem('kaderData') || sessionStorage.getItem('kaderDataStep1') || 'null');
 
-      const data = JSON.parse(storedData);
+    if (!dataKader) {
+      alert('Data tidak ditemukan. Silakan isi formulir terlebih dahulu.');
+      window.location.href = '/data-kader';
+      return;
+    }
 
-      // 2. Tampilkan data ke HTML Review
-      document.getElementById('review-nama').textContent = data.nama;
-      document.getElementById('review-nip').textContent = data.nip;
-      
-      // Format Tanggal Lahir dan Hitung Umur Otomatis
-      const dateObj = new Date(data.tglLahir);
+    // 1. Tampilkan Nama Lengkap
+    const elNama = document.getElementById('review-nama') || document.getElementById('review-nama-kader');
+    if (elNama) {
+      elNama.textContent = dataKader.nama || dataKader.namaLengkap || '-';
+    }
+
+    // 2. Tampilkan NIP
+    const elNip = document.getElementById('review-nip') || document.getElementById('review-nip-kader');
+    if (elNip) {
+      elNip.textContent = dataKader.nip || dataKader.nomorIndukPegawai || '-';
+    }
+
+    // 3. Tampilkan Tanggal Lahir & Usia
+    const elTgl = document.getElementById('review-tgl') || document.getElementById('review-tgl-kader');
+    const rawDate = dataKader.tglLahir || dataKader.tanggalLahir;
+    if (elTgl && rawDate) {
+      const dateKader = new Date(rawDate);
       const options = { day: 'numeric', month: 'long', year: 'numeric' };
-      const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+      const formattedDate = dateKader.toLocaleDateString('id-ID', options);
       
       const today = new Date();
-      let age = today.getFullYear() - dateObj.getFullYear();
-      const monthDiff = today.getMonth() - dateObj.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateObj.getDate())) {
+      let age = today.getFullYear() - dateKader.getFullYear();
+      const m = today.getMonth() - dateKader.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dateKader.getDate())) {
         age--;
       }
-      
-      document.getElementById('review-tgl').textContent = `${formattedDate} (${age} Tahun)`;
-      document.getElementById('review-alamat').innerHTML = data.alamat.replace(/\n/g, '<br>');
+      elTgl.textContent = `${formattedDate} (${age} Tahun)`;
+    }
 
-      // 3. Handle Tombol "Simpan & Lanjutkan" -> register + login via API.
-      const btnSubmit = document.getElementById('btn-final-submit');
+    // 4. Tampilkan Alamat
+    const elAlamat = document.getElementById('review-alamat') || document.getElementById('review-alamat-kader');
+    if (elAlamat) {
+      elAlamat.textContent = dataKader.alamat || '-';
+    }
 
+    // 5. Tombol Simpan & Lanjutkan
+    const btnSubmit = document.getElementById('btn-final-submit');
+    if (btnSubmit) {
       btnSubmit.addEventListener('click', async () => {
         const regAkun = JSON.parse(sessionStorage.getItem('regAkun') || 'null');
-        if (!regAkun || !regAkun.email || !regAkun.password) {
-          alert('Data akun tidak ditemukan. Silakan ulangi dari halaman daftar.');
+        const email = regAkun?.email;
+        const password = regAkun?.password;
+
+        if (!email || !password) {
+          alert('Data akun pendaftaran tidak ditemukan. Silakan daftar dari awal.');
           window.location.href = '/daftar';
           return;
         }
 
         const originalText = btnSubmit.innerHTML;
-        btnSubmit.innerHTML = 'Menyimpan data...';
+        btnSubmit.innerHTML = 'Menyimpan...';
         btnSubmit.disabled = true;
-        btnSubmit.style.opacity = '0.7';
 
         try {
-          try {
-            await window.NutriApi.register({
-              nama: data.nama,
-              email: regAkun.email,
-              password: regAkun.password,
-              role: 'kader',
-              wilayah_posyandu: data.wilayahPosyandu,
-              no_telp: data.noTelp || undefined,
-              consent_approved: true,
-            });
-          } catch (err) {
-            if (!(err && err.error_code === 'VALIDATION_ERROR' && err.errors && err.errors.email)) throw err;
+          if (window.NutriApi) {
+            try {
+              await window.NutriApi.register({
+                nama: dataKader.nama || dataKader.namaLengkap,
+                email: email,
+                password: password,
+                role: 'kader',
+                wilayah_posyandu: dataKader.wilayahPosyandu || 'Posyandu Melati',
+                no_telp: dataKader.noTelp || undefined,
+                consent_approved: true
+              });
+            } catch (err) {
+              if (!(err && err.error_code === 'VALIDATION_ERROR' && err.errors && err.errors.email)) {
+                throw err;
+              }
+            }
+
+            await window.NutriApi.login(email, password);
           }
 
-          await window.NutriApi.login(regAkun.email, regAkun.password);
-
-          sessionStorage.removeItem('regAkun');
           sessionStorage.removeItem('kaderData');
-          sessionStorage.setItem('currentUser', JSON.stringify({ nama: data.nama, role: 'kader' }));
+          sessionStorage.removeItem('kaderDataStep1');
+          sessionStorage.removeItem('regAkun');
 
           window.location.href = '/db-kader';
         } catch (err) {
           btnSubmit.innerHTML = originalText;
           btnSubmit.disabled = false;
-          btnSubmit.style.opacity = '1';
-          alert((err && err.message) || 'Penyimpanan gagal. Coba lagi.');
+          alert((err && err.message) || 'Gagal menyimpan data.');
         }
       });
-    });
-  </script>
+    }
+  });
+</script>
 </body>
 </html>

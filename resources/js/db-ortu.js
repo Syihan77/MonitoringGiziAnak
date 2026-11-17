@@ -1,5 +1,3 @@
-import { formatPersentaseAkg } from './gizi-format.js';
-
 /**
  * Dashboard Orang Tua - Dynamic Controller (SKPL v2.0 - 2-Tab & Modal Kondisi Anak)
  * File: db-ortu.js
@@ -189,7 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const bahanArr = (detail && (detail.bahans || detail.bahan || detail.RESEP_BAHAN)) || [];
-            resepBahanContainer.dataset.porsiHasil = (detail && detail.jumlah_porsi_hasil) || 1;
+            resepBahanContainer.dataset.porsiHasil = (detail && (detail.jumlah_porsi_hasil || detail.porsi_saji)) || 1;
             bahanResepList.innerHTML = '';
 
             if (bahanArr.length === 0) {
@@ -198,7 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bahanArr.forEach((b) => {
                     const bahanId = b.bahan_id || b.id;
                     const namaBahan = b.nama_bahan || (b.bahan_makanan && b.bahan_makanan.nama_bahan) || 'Bahan Makanan';
-                    const gramEkuivalen = b.takaran_gram_ekuivalen ?? null;
+                    const gramEkuivalen = b.takaran_gram_ekuivalen ?? b.takaran_gram ?? null;
                     const bisaDihitung = gramEkuivalen !== null && Number(gramEkuivalen) > 0;
                     const takaranStr = b.takaran_jumlah
                         ? `${b.takaran_jumlah} ${b.takaran_satuan || 'g'}`
@@ -406,143 +404,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ==========================================
-    // 5c. MODAL CATAT PENGUKURAN BB/TB
-    // ==========================================
-    const modalUkur = document.getElementById('modal-ukur-ortu');
-    const formUkur = document.getElementById('form-ukur-ortu');
-    const btnCatatUkur = document.getElementById('btn-catat-ukur');
-    const btnUkurBatal = document.getElementById('btn-ukur-ortu-batal');
-    const btnUkurSimpan = document.getElementById('btn-ukur-ortu-simpan');
-    const inputUkurTinggi = document.getElementById('ukur-ortu-tinggi');
-    const inputUkurBerat = document.getElementById('ukur-ortu-berat');
-    const inputUkurPosisi = document.getElementById('ukur-ortu-posisi');
-    const inputUkurTanggal = document.getElementById('ukur-ortu-tanggal');
-    const ukurError = document.getElementById('ukur-ortu-error');
-    const ukurHasil = document.getElementById('ukur-ortu-hasil');
-
-    function tanggalLokalHariIni() {
-        const d = new Date();
-        const bulan = String(d.getMonth() + 1).padStart(2, '0');
-        const tanggal = String(d.getDate()).padStart(2, '0');
-        return `${d.getFullYear()}-${bulan}-${tanggal}`;
-    }
-
-    function labelKategoriUkur(kategori) {
-        return labelKategori[kategori] || 'Belum diukur';
-    }
-
-    function perbaruiRingkasanUkur(hasil, beratBadan, tinggiBadan) {
-        const kategori = hasil.kategori_pemantauan || null;
-        const pesan = hasil.pesan || null;
-
-        tinggi = tinggiBadan;
-        berat = beratBadan;
-        kategoriTerakhir = kategori;
-        pesanKategori = pesan;
-
-        const tbValue = document.getElementById('tb-value');
-        const bbValue = document.getElementById('bb-value');
-        if (tbValue) tbValue.textContent = tinggiBadan;
-        if (bbValue) bbValue.textContent = beratBadan;
-
-        const badgeText = document.getElementById('status-badge-text');
-        const badge = document.getElementById('status-badge-header');
-        if (badgeText) badgeText.textContent = labelKategoriUkur(kategori);
-        if (badge) {
-            if (pesan) badge.title = pesan;
-            const dot = badge.querySelector('.status-dot');
-            if (dot) {
-                dot.style.background = kategori === 'HIGH_RISK_REFERRAL'
-                    ? '#dc2626'
-                    : (kategori === 'AT_RISK_MONITORING' ? '#d97706' : '#16a34a');
-            }
-        }
-
-        const analysis = document.getElementById('analysis-text');
-        if (analysis && pesan) {
-            analysis.textContent = pesan;
-        }
-
-        if (ukurHasil) {
-            ukurHasil.textContent = `Pengukuran tersimpan: ${tinggiBadan} cm, ${beratBadan} kg. Status: ${labelKategoriUkur(kategori)}.`;
-            ukurHasil.style.display = 'block';
-        }
-    }
-
-    function bukaModalUkur() {
-        if (!profilAnakId) {
-            alert('Data anak belum tersedia. Muat ulang dashboard lalu coba lagi.');
-            return;
-        }
-
-        if (formUkur) formUkur.reset();
-        if (ukurError) ukurError.style.display = 'none';
-
-        const hariIni = tanggalLokalHariIni();
-        if (inputUkurTanggal) {
-            inputUkurTanggal.value = hariIni;
-            inputUkurTanggal.max = hariIni;
-            if (profilAnak && profilAnak.tanggal_lahir) {
-                inputUkurTanggal.min = profilAnak.tanggal_lahir;
-            }
-        }
-
-        if (modalUkur) modalUkur.style.display = 'flex';
-        if (inputUkurTinggi) inputUkurTinggi.focus();
-    }
-
-    function tutupModalUkur() {
-        if (modalUkur) modalUkur.style.display = 'none';
-    }
-
-    if (btnCatatUkur) btnCatatUkur.addEventListener('click', bukaModalUkur);
-    if (btnUkurBatal) btnUkurBatal.addEventListener('click', tutupModalUkur);
-
-    if (formUkur) {
-        formUkur.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            if (!profilAnakId) return;
-
-            const beratBadan = Number(inputUkurBerat ? inputUkurBerat.value : 0);
-            const tinggiBadan = Number(inputUkurTinggi ? inputUkurTinggi.value : 0);
-
-            if (!(beratBadan > 0) || !(tinggiBadan > 0)) {
-                if (ukurError) {
-                    ukurError.textContent = 'Berat dan tinggi badan wajib diisi dengan angka lebih dari nol.';
-                    ukurError.style.display = 'block';
-                }
-                return;
-            }
-
-            const teksAsli = btnUkurSimpan.textContent;
-            if (ukurError) ukurError.style.display = 'none';
-            btnUkurSimpan.textContent = 'Menyimpan...';
-            btnUkurSimpan.disabled = true;
-
-            try {
-                const hasil = await window.NutriApi.ukurCreate(profilAnakId, {
-                    berat_badan_kg: beratBadan,
-                    tinggi_badan_cm: tinggiBadan,
-                    tanggal_ukur: inputUkurTanggal.value,
-                    posisi_ukur: inputUkurPosisi.value,
-                });
-
-                perbaruiRingkasanUkur(hasil, beratBadan, tinggiBadan);
-                tutupModalUkur();
-            } catch (err) {
-                if (ukurError) {
-                    ukurError.textContent = (err && err.message) || 'Gagal menyimpan pengukuran.';
-                    ukurError.style.display = 'block';
-                }
-            } finally {
-                btnUkurSimpan.textContent = teksAsli;
-                btnUkurSimpan.disabled = false;
-            }
-        });
-    }
-
-    // ==========================================
     // 6. SUBMIT KONSUMSI & AKG PROCESS
     // ==========================================
     const btnCalculate = document.getElementById('btn-calculate');
@@ -674,11 +535,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 4. Jika Sakit -> Tampilkan Banner Khusus INVALID (SKPL-F-16)
             if (statusKondisi === 'SAKIT') {
                 catatHasil.innerHTML = `
-                    <div class="banner-sakit">
-                        <span>⚠️</span>
-                        <div>Anak tercatat sedang sakit pada tanggal ini — data konsumsi tidak digunakan dalam analisis.</div>
+                    <div class="banner-sakit" style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:16px;border-radius:12px;margin-top:16px;display:flex;gap:12px;align-items:center;">
+                        <span style="font-size:24px;">⚠️</span>
+                        <div style="font-size:14px;line-height:1.4;">Anak tercatat sedang sakit pada tanggal ini — data konsumsi tidak digunakan dalam analisis.</div>
                     </div>
-                    <a href="/history-ortu" class="hasil-link" style="display:inline-block;margin-top:12px;">Lihat History →</a>
+                    <a href="/history-ortu" class="hasil-link" style="display:inline-block;margin-top:12px;font-weight:600;color:#006a38;text-decoration:none;">Lihat History →</a>
                 `;
                 catatHasil.style.display = 'block';
             } else {
@@ -699,29 +560,102 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // ==========================================
+    // 7. FORMAT TAMPILAN ANALISIS GIZI (UI CARD BARU)
+    // ==========================================
+    function formatNamaZatGizi(nama) {
+        const kamus = {
+            energi: 'Energi',
+            protein: 'Protein',
+            lemak: 'Lemak',
+            karbohidrat: 'Karbohidrat',
+            zat_besi: 'Zat Besi',
+            zinc: 'Zinc / Seng',
+            vitamin_a: 'Vitamin A',
+            vitamin_c: 'Vitamin C',
+            kalsium: 'Kalsium',
+            serat: 'Serat'
+        };
+        return kamus[nama.toLowerCase()] || nama.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    function formatLabelStatus(status) {
+        const peta = {
+            sangat_kurang: { teks: 'Sangat Kurang', bg: '#fee2e2', text: '#991b1b', border: '#f87171' },
+            kurang: { teks: 'Kurang', bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
+            cukup: { teks: 'Cukup', bg: '#dcfce7', text: '#166534', border: '#4ade80' },
+            lebih: { teks: 'Lebih', bg: '#e0e7ff', text: '#3730a3', border: '#818cf8' }
+        };
+        return peta[status.toLowerCase()] || { teks: status, bg: '#f3f4f6', text: '#374151', border: '#d1d5db' };
+    }
+
     function tampilkanAnalisis(data) {
         if (!catatHasil) return;
-        const rows = (data.ringkasan || []).map((r) => {
-            const nilai = formatPersentaseAkg(r.persentase_akg, r.status);
-            return `<div class="hasil-row"><span>${r.zat_gizi}</span>`
-                + `<strong>${nilai}</strong></div>`;
-        }).join('');
 
-        let isi = '';
-        if (data.analisis_status !== 'dianalisis' && rows === '') {
+        if (data.analisis_status !== 'dianalisis' && (!data.ringkasan || data.ringkasan.length === 0)) {
             const pesan = data.penanda
                 || (data.status_analisis === 'TIDAK_DAPAT_DIANALISIS_TIDAK_ADA_DATA_VALID'
                     ? 'Data konsumsi hari ini tidak valid sehingga belum dapat dianalisis.'
                     : 'Belum ada data konsumsi yang dapat dianalisis pada tanggal ini.');
-            isi = `<p class="hasil-kosong">${pesan}</p>`;
-        } else {
-            isi = rows;
+            catatHasil.innerHTML = `
+                <div style="background:#ffffff;border-radius:12px;padding:20px;color:#374151;border:1px solid #e5e7eb;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);margin-top:16px;">
+                    <p style="margin:0;font-size:14px;color:#6b7280;text-align:center;">${pesan}</p>
+                </div>
+            `;
+            catatHasil.style.display = 'block';
+            return;
         }
 
-        catatHasil.innerHTML = `<h4>Hasil analisis hari ini (${data.kelompok_umur || ''})</h4>`
-            + isi
-            + (data.catatan ? `<p class="hasil-catatan">${data.catatan}</p>` : '')
-            + `<a href="/history-ortu" class="hasil-link" style="display:inline-block;margin-top:8px;">Lihat History →</a>`;
+        const cards = (data.ringkasan || []).map((r) => {
+            const namaFormat = formatNamaZatGizi(r.zat_gizi);
+            const statusConfig = formatLabelStatus(r.status);
+            const persen = parseFloat(r.persentase_akg) || 0;
+            const barWidth = Math.min(persen, 100);
+
+            return `
+                <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-weight:600;font-size:15px;color:#111827;">${namaFormat}</span>
+                        <span style="background:${statusConfig.bg};color:${statusConfig.text};border:1px solid ${statusConfig.border};font-size:12px;font-weight:700;padding:2px 8px;border-radius:9999px;">
+                            ${statusConfig.teks}
+                        </span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-size:12px;color:#6b7280;">Pemenuhan AKG:</span>
+                        <strong style="font-size:16px;color:#111827;">${r.persentase_akg}%</strong>
+                    </div>
+                    <div style="width:100%;height:8px;background:#e5e7eb;border-radius:9999px;overflow:hidden;">
+                        <div style="width:${barWidth}%;height:100%;background:${statusConfig.text};border-radius:9999px;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        catatHasil.innerHTML = `
+            <div style="background:#ffffff;border-radius:16px;padding:20px;color:#1f2937;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);margin-top:16px;border:1px solid #e5e7eb;">
+                <div style="border-bottom:1px solid #f3f4f6;padding-bottom:12px;margin-bottom:14px;">
+                    <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Hasil Analisis Asupan Hari Ini</h3>
+                    <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Standar Kebutuhan Usia: <strong>${data.kelompok_umur || '1–3 Tahun'}</strong></p>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;">
+                    ${cards}
+                </div>
+
+                ${data.catatan ? `
+                    <div style="margin-top:14px;padding:10px 14px;background:#f8fafc;border-left:4px solid #3b82f6;border-radius:4px;font-size:12px;color:#475569;line-height:1.5;">
+                        ℹ️ ${data.catatan}
+                    </div>
+                ` : ''}
+
+                <div style="margin-top:16px;text-align:right;">
+                    <a href="/history-ortu" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#006a38;text-decoration:none;padding:6px 12px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;">
+                        Lihat Riwayat & History Lengkap →
+                    </a>
+                </div>
+            </div>
+        `;
+        
         catatHasil.style.display = 'block';
         catatHasil.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -104,7 +104,6 @@
   </div>
 
   <script>
-    // Validasi: Cek apakah data step sebelumnya sudah ada
     document.addEventListener('DOMContentLoaded', function() {
       const ortuData = sessionStorage.getItem('ortuDataStep1');
       const anakData = sessionStorage.getItem('anakDataStep2');
@@ -112,18 +111,23 @@
       if (!ortuData || !anakData) {
         alert('Silakan lengkapi data sebelumnya terlebih dahulu');
         window.location.href = '/data-ortu';
+        return;
+      }
+
+      // RESTORE DATA PERTUMBUHAN JIKA SUDAH PERNAH DIISI
+      const savedPertumbuhan = JSON.parse(sessionStorage.getItem('pertumbuhanDataStep3') || 'null');
+      if (savedPertumbuhan) {
+        if (savedPertumbuhan.tinggiBadan) document.getElementById('tinggiBadan').value = savedPertumbuhan.tinggiBadan;
+        if (savedPertumbuhan.beratBadan) document.getElementById('beratBadan').value = savedPertumbuhan.beratBadan;
       }
     });
 
-    // Handle form submission
     document.getElementById('form-data-pertumbuhan').addEventListener('submit', function(e) {
       e.preventDefault();
       
-      // 1. Ambil data dari input
       const tinggiBadan = parseFloat(document.getElementById('tinggiBadan').value);
       const beratBadan = parseFloat(document.getElementById('beratBadan').value);
       
-      // Validasi tambahan
       if (tinggiBadan <= 0 || beratBadan <= 0) {
         alert('Mohon masukkan nilai tinggi dan berat badan yang valid');
         return;
@@ -134,14 +138,10 @@
         beratBadan: beratBadan
       };
 
-      // 2. Simpan ke sessionStorage
       sessionStorage.setItem('pertumbuhanDataStep3', JSON.stringify(formData));
-
-      // 3. Redirect ke halaman Tinjauan (Step 4)
       window.location.href = '/review-ortu';
     });
 
-    // Handle tombol Kembali
     document.getElementById('btn-kembali').addEventListener('click', function() {
       window.location.href = '/data-dirianak';
     });

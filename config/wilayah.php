@@ -17,5 +17,6 @@ return [
         // CONTOH AWAL — hapus/ganti dengan daftar resmi desa.
         'Posyandu Melati',
         'Posyandu Mawar',
+        'Posyandu Kecubung',
     ],
 ];

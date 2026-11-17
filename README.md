@@ -77,8 +77,8 @@ CREATE DATABASE gizi_db_test OWNER gizi;
 ### 2.4. Migrasi + seed
 
 ```sh
-php artisan migrate --force
-php artisan db:seed --force
+php artisan migrate
+php artisan db:seed
 ```
 
 Urutan seeder (`database/seeders/DatabaseSeeder.php`):
@@ -222,7 +222,7 @@ tests/                       Feature/ + Unit/ (ZScoreServiceTest)
 
 ```sh
 php artisan test [--filter=NamaTest]   # unit/integration (DB gizi_db_test)
-php artisan migrate --force            # tambah tabel baru
+php artisan migrate                    # tambah tabel baru
 php artisan db:seed --class=NamaSeeder --force
 php artisan resep:muat-gizi-tkpi --dry-run   # cek muat ulang gizi DB terisi
 php artisan resep:muat-gizi-tkpi             # terapkan (idempoten)
