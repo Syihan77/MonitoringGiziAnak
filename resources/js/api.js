@@ -134,7 +134,7 @@
     },
     konsumsiList: (anakId, tanggal) => get(`/anak/${anakId}/konsumsi?tanggal=${tanggal}`),
     konsumsiRentang: (anakId, dari, sampai) => get(`/anak/${anakId}/konsumsi?dari_tanggal=${dari}&sampai_tanggal=${sampai}`),
-    bahanSearch: (q, limit) => get(`/bahan-makanan?q=${encodeURIComponent(q)}&limit=${limit || 10}`),
+    bahanSearch: (q, limit) => get(`/bahan-makanan?q=${encodeURIComponent(q)}&limit=${limit || 10}&untuk_konsumsi=1`),
     rekomendasi: (anakId, payload) => post(`/anak/${anakId}/rekomendasi-menu`, payload),
     resepDetail: (id) => get(`/resep/${id}`),
     bindLogoutButtons,

@@ -7,8 +7,10 @@ use App\Models\BahanMakanan;
 use App\Models\Konsumsi;
 use App\Models\Resep;
 use App\Models\ResepBahan;
+use App\Support\AliasBahan;
 use App\Support\ApiResponse;
 use App\Support\AuditLogger;
+use App\Support\BahanResolver;
 use App\Support\TakaranConverter;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -34,13 +36,37 @@ class AdminReferensiController extends Controller
             'q' => ['sometimes', 'string', 'max:100'],
             'page' => ['sometimes', 'integer', 'min:1'],
             'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'untuk_konsumsi' => ['sometimes', 'boolean'],
         ]);
 
+        $untukKonsumsi = (bool) ($filter['untuk_konsumsi'] ?? false);
+        $target = isset($filter['q']) ? AliasBahan::target($filter['q']) : null;
+
         $page = BahanMakanan::query()
-            ->when(isset($filter['q']), fn ($q) => $q->whereRaw(
-                'LOWER(nama_bahan) LIKE ?',
-                ['%'.mb_strtolower($filter['q']).'%']
-            ))
+            ->when($untukKonsumsi, fn ($q) => $q
+                ->where(fn ($sub) => $sub
+                    ->whereNull('sumber_rujukan')
+                    ->orWhere('sumber_rujukan', 'not like', BahanResolver::LABEL_PLACEHOLDER.'%'))
+                ->where(fn ($sub) => $sub
+                    ->whereNotNull('energi_per100g')
+                    ->orWhereNotNull('protein_per100g')
+                    ->orWhereNotNull('lemak_per100g')
+                    ->orWhereNotNull('karbohidrat_per100g')
+                    ->orWhereNotNull('zat_besi_per100g')
+                    ->orWhereNotNull('zinc_per100g')))
+            ->when(isset($filter['q']), fn ($q) => $q->where(function ($sub) use ($filter, $target) {
+                $sub->whereRaw(
+                    'LOWER(nama_bahan) LIKE ?',
+                    ['%'.mb_strtolower($filter['q']).'%']
+                );
+
+                if ($target !== null && $target !== mb_strtolower($filter['q'])) {
+                    $sub->orWhereRaw('LOWER(nama_bahan) LIKE ?', ['%'.$target.'%']);
+                }
+            }))
+            ->when($target !== null, fn ($q) => $q
+                ->orderByRaw('CASE WHEN LOWER(nama_bahan) = ? THEN 0 ELSE 1 END', [$target])
+                ->orderByRaw('CASE WHEN LOWER(nama_bahan) LIKE ? THEN 0 ELSE 1 END', [$target.'%']))
             ->orderBy('nama_bahan')
             ->paginate($filter['limit'] ?? 20);
 

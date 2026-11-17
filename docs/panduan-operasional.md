@@ -148,7 +148,48 @@ rekomendasi memakai fallback aturan.
 Smoke test ML2 dengan FastAPI boleh dijalankan karena gate basis sudah exit 0,
 tetapi bukan alasan untuk mengaktifkan `ML_ENABLED` pada aplikasi Laravel.
 
-## 9. Migrasi `konsumsis.kondisi_id`
+## 9. Perbaikan pemetaan bahan dan backfill gizi (database existing)
+
+Perbaikan ini hanya mengubah `resep_bahans` dan baris placeholder lama; CSV dataset
+dan paket ML tidak diubah. Laporan audit ada di
+`docs/audit-pemetaan-bahan.md` dan pasangan rincinya di
+`docs/audit-pemetaan-bahan-93-resep.csv`.
+
+Alur wajib untuk database yang sudah berisi data:
+
+```sh
+php artisan resep:perbaiki-bahan --dry-run
+# Tinjau semua resep/baris yang ditampilkan, terutama air, pisang, dan bumbu.
+# Backup sebelum mengubah data:
+pg_dump -U <user> -h 127.0.0.1 gizi_db | gzip > backup-gizi-sebelum-perbaikan-$(date +%F).sql.gz
+php artisan resep:perbaiki-bahan
+php artisan resep:perbaiki-bahan --dry-run   # harus 0 resep/0 baris
+
+php artisan bahan:backfill-gizi
+# Tinjau pasangan placeholder -> TKPI beserta kode dan enam nilai gizinya.
+# Hanya setelah pasangan disetujui:
+pg_dump -U <user> -h 127.0.0.1 gizi_db | gzip > backup-gizi-sebelum-backfill-$(date +%F).sql.gz
+php artisan bahan:backfill-gizi --apply
+php artisan bahan:backfill-gizi             # harus 0 pasangan
+```
+
+Kedua command bersifat idempoten. `bahan:backfill-gizi` tanpa `--apply` adalah
+dry-run dan hanya menyalin nilai untuk placeholder dengan alias eksplisit
+berkepercayaan tinggi. Placeholder tanpa alias tetap NULL dan dilaporkan.
+
+Setelah perbaikan, analisis konsumsi lama otomatis memakai nilai baru karena baris
+konsumsi menunjuk `bahan_id` yang sama; tidak ada penulisan ulang riwayat. Pencarian
+bahan untuk input konsumsi memakai `untuk_konsumsi=1`, sehingga placeholder dan
+bahan dengan enam zat NULL tidak muncul. Pencarian admin tanpa parameter tetap dapat
+melihat seluruh katalog.
+
+Hasil akhir 17 November 2026: 640 dari 870 baris enam zat lengkap, 12 resep lengkap,
+0 resep yang masih perlu diperbaiki, 154 placeholder (56 sudah di-backfill dan 98
+tetap NULL), serta 0 pasangan backfill tersisa. Penyebab NULL terbanyak adalah
+garam, serai, daun jeruk, dan daun pandan. Aturan khusus bumbu/air belum diterapkan
+dan harus diputuskan ahli gizi sebelum diubah.
+
+## 10. Migrasi `konsumsis.kondisi_id`
 
 Migration baru mengubah `kondisi_id` menjadi NOT NULL dan memakai
 `ON DELETE RESTRICT`. Sebelum deploy, cek:
@@ -160,14 +201,14 @@ SELECT COUNT(*) FROM konsumsis WHERE kondisi_id IS NULL;
 Jika hasilnya > 0, migration akan berhenti dengan pesan diagnostik. Backfill
 data lama terlebih dahulu; jangan memaksa NOT NULL pada data yang belum siap.
 
-## 10. Verifikasi serah terima
+## 11. Verifikasi serah terima
 
 ```sh
 php artisan test     # seluruh test harus hijau
 curl https://<host>/api/v1/ping
 ```
 
-## 11. Serah terima: layanan ML
+## 12. Serah terima: layanan ML
 
 Lokasi paket ML dipertahankan di `ml-monitoring-gizi/ml-monitoring-gizi/`
 (Windows: `ml-monitoring-gizi\ml-monitoring-gizi\`). Layanan ML adalah proses

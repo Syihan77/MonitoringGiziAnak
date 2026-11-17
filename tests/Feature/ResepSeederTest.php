@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Resep;
 use App\Models\ResepBahan;
+use App\Support\BahanResolver;
 use Database\Seeders\BahanSeeder;
 use Database\Seeders\ResepSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -100,7 +101,7 @@ class ResepSeederTest extends TestCase
 
         $r032 = Resep::where('id_resep', 'R032')->firstOrFail();
         $tahu = $r032->bahans()
-            ->whereHas('bahan', fn ($q) => $q->where('nama_bahan', 'like', 'Tahu putih%'))
+            ->whereHas('bahan', fn ($q) => $q->where('nama_bahan', 'Tahu, mentah'))
             ->firstOrFail();
         $this->assertEqualsWithDelta(120.0, (float) $tahu->takaran_gram_ekuivalen, 0.01);
 
@@ -129,7 +130,7 @@ class ResepSeederTest extends TestCase
         $this->assertNull($soun->catatan_bahan);
 
         $r048 = Resep::where('id_resep', 'R048')->firstOrFail();
-        foreach ([['Bawang putih haluskan', 12.0], ['Bawang merah haluskan', 15.0]] as [$nama, $gram]) {
+        foreach ([['Bawang putih, segar', 12.0], ['Bawang merah, segar', 15.0]] as [$nama, $gram]) {
             $bawang = $r048->bahans()->whereHas('bahan', fn ($q) => $q->where('nama_bahan', $nama))->firstOrFail();
             $this->assertSame('siung', $bawang->takaran_satuan);
             $this->assertEqualsWithDelta($gram, (float) $bawang->takaran_gram_ekuivalen, 0.01);
@@ -163,6 +164,121 @@ class ResepSeederTest extends TestCase
             1,
             substr_count((string) $r001->fresh()->catatan_resep, Resep::CATATAN_MAKRO_TIDAK_LENGKAP),
         );
+    }
+
+    public function test_bahan_resep_r086_memakai_tkpi_bergizi(): void
+    {
+        $this->seed(BahanSeeder::class);
+        $this->seed(ResepSeeder::class);
+
+        $r086 = Resep::where('id_resep', 'R086')->with('bahans.bahan')->firstOrFail();
+
+        $this->assertEqualsCanonicalizing([
+            'Beras giling, mentah',
+            'Ayam, daging, segar',
+            'Telur burung puyuh, segar',
+            'Bayam, segar',
+            'Margarin',
+            'Bawang merah, segar',
+            'Bawang putih, segar',
+            'Daun salam, bubuk',
+        ], $r086->bahans->map(fn ($resepBahan) => $resepBahan->bahan->nama_bahan)->all());
+
+        foreach ($r086->bahans as $resepBahan) {
+            foreach (['energi_per100g', 'protein_per100g', 'lemak_per100g', 'karbohidrat_per100g', 'zat_besi_per100g', 'zinc_per100g'] as $kolom) {
+                $this->assertNotNull(
+                    $resepBahan->bahan->{$kolom},
+                    "{$resepBahan->bahan->nama_bahan} {$kolom}",
+                );
+            }
+        }
+    }
+
+    public function test_bahan_resep_r010_memakai_alias_eksplisit_dan_bukan_pisang(): void
+    {
+        $this->seed(BahanSeeder::class);
+        $this->seed(ResepSeeder::class);
+
+        $r010 = Resep::where('id_resep', 'R010')->with('bahans.bahan')->firstOrFail();
+        $nama = $r010->bahans->map(fn ($resepBahan) => $resepBahan->bahan->nama_bahan)->all();
+
+        $this->assertContains('Ayam, daging, segar', $nama);
+        $this->assertContains('Serai', $nama);
+        $this->assertNotContains('Pisang raja sereh, segar', $nama);
+
+        $daunJeruk = $r010->bahans
+            ->first(fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Daun jeruk');
+        $this->assertNotNull($daunJeruk);
+        $this->assertTrue(BahanResolver::placeholder($daunJeruk->bahan));
+        $this->assertTrue(BahanResolver::kosongSemua($daunJeruk->bahan));
+    }
+
+    public function test_nama_generik_tidak_mengambil_bahan_yang_mirip(): void
+    {
+        $this->seed(BahanSeeder::class);
+        $this->seed(ResepSeeder::class);
+
+        $r068 = Resep::where('id_resep', 'R068')->with('bahans.bahan')->firstOrFail();
+        $this->assertFalse($r068->bahans->contains(
+            fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Jeruk ragi, segar',
+        ));
+        $ragi = $r068->bahans->first(fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Ragi');
+        $this->assertNotNull($ragi);
+        $this->assertTrue(BahanResolver::placeholder($ragi->bahan));
+
+        $r076 = Resep::where('id_resep', 'R076')->with('bahans.bahan')->firstOrFail();
+        $this->assertFalse($r076->bahans->contains(
+            fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Jagung titi',
+        ));
+        $jagung = $r076->bahans->first(fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Jagung');
+        $this->assertNotNull($jagung);
+        $this->assertTrue(BahanResolver::placeholder($jagung->bahan));
+
+        $r064 = Resep::where('id_resep', 'R064')->with('bahans.bahan')->firstOrFail();
+        $this->assertFalse($r064->bahans->contains(
+            fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Telur penyu, segar',
+        ));
+        $this->assertTrue($r064->bahans->contains(
+            fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Telur ayam ras, segar',
+        ));
+
+        $r070 = Resep::where('id_resep', 'R070')->with('bahans.bahan')->firstOrFail();
+        $this->assertFalse($r070->bahans->contains(
+            fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Susu bubuk',
+        ));
+        $this->assertTrue($r070->bahans->contains(
+            fn ($resepBahan) => $resepBahan->bahan->nama_bahan === 'Susu sapi, segar',
+        ));
+
+        $this->assertSame(0, ResepBahan::whereHas(
+            'bahan',
+            fn ($query) => $query->where('nama_bahan', 'Buah kelor'),
+        )->count());
+        $this->assertTrue(ResepBahan::whereHas(
+            'bahan',
+            fn ($query) => $query->where('nama_bahan', 'Daun kelor, segar'),
+        )->exists());
+
+        $this->assertSame(0, ResepBahan::whereHas(
+            'bahan',
+            fn ($query) => $query->where('nama_bahan', 'Cakalang asar (asap)'),
+        )->count());
+        $this->assertTrue(ResepBahan::whereHas(
+            'bahan',
+            fn ($query) => $query->where('nama_bahan', 'Ikan cakalang, segar'),
+        )->exists());
+    }
+
+    public function test_command_perbaikan_bahan_idempoten_dan_dry_run(): void
+    {
+        $this->seed(BahanSeeder::class);
+        $this->seed(ResepSeeder::class);
+
+        $this->artisan('resep:perbaiki-bahan', ['--dry-run' => true])->assertSuccessful();
+        $this->artisan('resep:perbaiki-bahan')->assertSuccessful();
+        $this->artisan('resep:perbaiki-bahan', ['--dry-run' => true])
+            ->expectsOutputToContain('0 resep perlu diperbaiki')
+            ->assertSuccessful();
     }
 
     public function test_basis_ml2_cocok_dengan_data_tkpi(): void

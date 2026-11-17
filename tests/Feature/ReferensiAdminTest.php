@@ -116,6 +116,46 @@ class ReferensiAdminTest extends TestCase
         $this->assertDatabaseMissing('bahan_makanans', ['id' => $id]);
     }
 
+    public function test_pencarian_konsumsi_menyembunyikan_placeholder_dan_bahan_tanpa_gizi(): void
+    {
+        $h = $this->asAdmin();
+
+        BahanMakanan::create([
+            'nama_bahan' => 'Ayam, daging, segar',
+            'kelompok_gizi' => 'Protein Hewani',
+            'sumber_rujukan' => 'TKPI 2020 FR005',
+            'energi_per100g' => 298,
+            'protein_per100g' => 18.2,
+            'lemak_per100g' => 25,
+            'karbohidrat_per100g' => 0,
+            'zat_besi_per100g' => 1.5,
+            'zinc_per100g' => 1.3,
+        ]);
+        BahanMakanan::create([
+            'nama_bahan' => 'Ayam fillet',
+            'kelompok_gizi' => 'Dataset',
+            'sumber_rujukan' => 'Dataset resep berlabel',
+        ]);
+        BahanMakanan::create([
+            'nama_bahan' => 'Ayam tanpa gizi',
+            'kelompok_gizi' => 'Uji',
+        ]);
+
+        $this->getJson('/api/v1/bahan-makanan?q=ayam&limit=20', $h)
+            ->assertOk()
+            ->assertJsonPath('data.total', 3);
+
+        $this->getJson('/api/v1/bahan-makanan?q=ayam&limit=20&untuk_konsumsi=1', $h)
+            ->assertOk()
+            ->assertJsonPath('data.total', 1)
+            ->assertJsonPath('data.data.0.nama_bahan', 'Ayam, daging, segar');
+
+        $this->getJson('/api/v1/bahan-makanan?q=ayam%20fillet&limit=20&untuk_konsumsi=1', $h)
+            ->assertOk()
+            ->assertJsonPath('data.total', 1)
+            ->assertJsonPath('data.data.0.nama_bahan', 'Ayam, daging, segar');
+    }
+
     public function test_bahan_terpakai_tak_bisa_dihapus(): void
     {
         $h = $this->asAdmin();

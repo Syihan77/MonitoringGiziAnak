@@ -77,6 +77,7 @@ class NutritionService
             'kelompok_umur' => $akg['label'],
             'status_kondisi' => $statusKondisi,
             'catatan' => self::CATATAN,
+            'jumlah_konsumsi' => $konsumsi->count(),
         ];
 
         if ($konsumsi->isEmpty()) {
@@ -87,6 +88,7 @@ class NutritionService
                 'analisis_status' => 'tidak_dapat_dianalisis',
                 'penanda' => null,
                 'dikecualikan' => [],
+                'jumlah_konsumsi_dianalisis' => 0,
             ]);
         }
 
@@ -108,6 +110,7 @@ class NutritionService
                 'analisis_status' => 'tidak_dapat_dianalisis',
                 'penanda' => $sakit ? self::PENANDA_ANAK_SAKIT : null,
                 'dikecualikan' => $dikecualikan,
+                'jumlah_konsumsi_dianalisis' => 0,
             ]);
         }
 
@@ -121,6 +124,7 @@ class NutritionService
             'analisis_status' => 'dianalisis',
             'penanda' => null,
             'dikecualikan' => $dikecualikan,
+            'jumlah_konsumsi_dianalisis' => $valid->count(),
         ]);
     }
 

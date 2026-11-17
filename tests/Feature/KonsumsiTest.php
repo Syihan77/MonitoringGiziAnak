@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Anak;
 use App\Models\BahanMakanan;
 use App\Models\User;
+use App\Services\NutritionService;
+use App\Support\BahanResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -146,6 +148,8 @@ class KonsumsiTest extends TestCase
         $this->assertSame('sangat_kurang', $protein['status']);
         $this->assertTrue($res->json('data.rekomendasi_tersedia'));
         $this->assertSame('1–3 tahun', $res->json('data.kelompok_umur'));
+        $this->assertSame(1, $res->json('data.jumlah_konsumsi'));
+        $this->assertSame(1, $res->json('data.jumlah_konsumsi_dianalisis'));
     }
 
     public function test_analisis_batas_kurang_75_persen(): void
@@ -177,7 +181,31 @@ class KonsumsiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.analisis_status', 'tidak_dapat_dianalisis')
             ->assertJsonPath('data.rekomendasi_tersedia', false)
+            ->assertJsonPath('data.jumlah_konsumsi', 0)
+            ->assertJsonPath('data.jumlah_konsumsi_dianalisis', 0)
             ->assertJsonCount(0, 'data.ringkasan');
+    }
+
+    public function test_analisis_anak_sakit_tetap_melaporkan_jumlah_konsumsi(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = $this->anak24($ortu);
+        $bahan = $this->bahanProtein();
+        $this->kondisi($ortu, $anak, '2026-01-15', 'SAKIT');
+
+        $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
+            'tanggal_konsumsi' => '2026-01-15',
+            'metode_input' => 'MANUAL',
+            'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
+        ], $this->as($ortu))->assertCreated();
+
+        $this->getJson("/api/v1/anak/{$anak->id}/analisis-gizi?tanggal=2026-01-15", $this->as($ortu))
+            ->assertOk()
+            ->assertJsonPath('data.jumlah_konsumsi', 1)
+            ->assertJsonPath('data.jumlah_konsumsi_dianalisis', 0)
+            ->assertJsonPath('data.status_analisis', NutritionService::STATUS_ANAK_SAKIT)
+            ->assertJsonPath('data.analisis_status', 'tidak_dapat_dianalisis')
+            ->assertJsonPath('data.penanda', NutritionService::PENANDA_ANAK_SAKIT);
     }
 
     public function test_agregat_bulanan_rata_dan_kosong(): void
@@ -375,6 +403,61 @@ class KonsumsiTest extends TestCase
 
         $this->assertEqualsWithDelta(100.0, (float) $res->json('data.rata_persen_akg'), 0.01);
         $this->assertSame('TERPENUHI', $res->json('data.status'));
+    }
+
+    public function test_campuran_bahan_lengkap_dan_placeholder_null_lalu_dipulihkan_backfill(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = $this->anak24($ortu);
+        $lengkap = $this->bahanProtein();
+        $placeholder = BahanMakanan::create([
+            'nama_bahan' => 'Ayam fillet',
+            'kelompok_gizi' => 'Dataset',
+            'sumber_rujukan' => BahanResolver::LABEL_PLACEHOLDER,
+        ]);
+        BahanMakanan::create([
+            'nama_bahan' => 'Ayam, daging, segar',
+            'kelompok_gizi' => 'Protein Hewani',
+            'sumber_rujukan' => 'TKPI 2020 FR005',
+            'energi_per100g' => 298,
+            'protein_per100g' => 18.2,
+            'lemak_per100g' => 25,
+            'karbohidrat_per100g' => 0,
+            'zat_besi_per100g' => 1.5,
+            'zinc_per100g' => 1.3,
+        ]);
+        $h = $this->as($ortu);
+
+        $this->kondisi($ortu, $anak, '2026-05-10');
+        $this->postJson("/api/v1/anak/{$anak->id}/konsumsi", [
+            'tanggal_konsumsi' => '2026-05-10',
+            'metode_input' => 'MANUAL',
+            'items' => [
+                ['bahan_id' => $lengkap->id, 'porsi_gram' => 100],
+                ['bahan_id' => $placeholder->id, 'porsi_gram' => 100],
+            ],
+        ], $h)->assertCreated();
+
+        $sebelum = $this->getJson("/api/v1/anak/{$anak->id}/analisis-gizi?tanggal=2026-05-10", $h)
+            ->assertOk()
+            ->assertJsonPath('data.jumlah_konsumsi', 2)
+            ->assertJsonPath('data.jumlah_konsumsi_dianalisis', 2);
+
+        $proteinSebelum = collect($sebelum->json('data.ringkasan'))->firstWhere('zat_gizi', 'protein');
+        $this->assertSame('tidak_tersedia', $proteinSebelum['status']);
+
+        $this->artisan('bahan:backfill-gizi', ['--apply' => true])->assertSuccessful();
+
+        $this->assertNotNull($placeholder->fresh()->protein_per100g);
+
+        $sesudah = $this->getJson("/api/v1/anak/{$anak->id}/analisis-gizi?tanggal=2026-05-10", $h)
+            ->assertOk()
+            ->assertJsonPath('data.jumlah_konsumsi', 2);
+
+        foreach ($sesudah->json('data.ringkasan') as $zat) {
+            $this->assertNotNull($zat['total'], $zat['zat_gizi']);
+            $this->assertNotNull($zat['persentase_akg'], $zat['zat_gizi']);
+        }
     }
 
     public function test_riwayat_rentang_tanggal(): void

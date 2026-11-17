@@ -6,6 +6,7 @@ use App\Models\BahanMakanan;
 use App\Models\Konsumsi;
 use App\Models\RekomendasiLog;
 use App\Models\Resep;
+use App\Support\BahanResolver;
 use App\Support\DatasetGiziTkpi;
 use App\Support\TakaranCatatan;
 use App\Support\TakaranConverter;
@@ -13,24 +14,6 @@ use Illuminate\Database\Seeder;
 
 class ResepSeeder extends Seeder
 {
-    private const ALIAS_BAHAN = [
-        'nasi putih' => 'nasi',
-        'minyak goreng' => 'minyak kelapa',
-        'minyak sayur' => 'minyak kelapa',
-        'gula pasir' => 'gula pasir',
-        'gula merah' => 'gula merah',
-        'telur ayam' => 'telur ayam',
-        'telur puyuh' => 'telur puyuh',
-        'daun bawang' => 'daun bawang',
-        'bawang bombay' => 'bawang bombay',
-        'bawang merah' => 'bawang merah',
-        'bawang putih' => 'bawang putih',
-        'susu sapi' => 'susu sapi',
-        'santan' => 'santan',
-        'kacang hijau' => 'kacang hijau',
-        'asi' => 'susu ibu - asi',
-    ];
-
     public function run(): void
     {
         foreach (DatasetGiziTkpi::rows() as $recipe) {
@@ -90,12 +73,15 @@ class ResepSeeder extends Seeder
         $resep->update($atribut);
     }
 
-    private function simpanBahan(Resep $resep, string $bahanTeks): bool
+    /**
+     * @return array{baris: list<array{nama_dataset: string, nama_dasar: string, bahan: BahanMakanan|null, jumlah: float|null, satuan: string, gram: float|null, catatan: string|null}>, lengkap: bool}
+     */
+    public function rencanaBahan(string $bahanTeks, bool $buatPlaceholder = false, string $idResep = ''): array
     {
-        $resep->bahans()->delete();
+        $hasil = ['baris' => [], 'lengkap' => false];
 
         if (trim($bahanTeks) === '') {
-            return false;
+            return $hasil;
         }
 
         $lengkap = true;
@@ -124,47 +110,60 @@ class ResepSeeder extends Seeder
                 $lengkap = false;
             }
 
-            $bahan = $this->cariBahan($nama);
+            $bahan = BahanResolver::cari($nama, $buatPlaceholder);
+            if ($bahan === null) {
+                $lengkap = false;
+            }
+
             $satuan = $parsed['satuan'] ?? 'secukupnya';
-            $resep->bahans()->create([
-                'bahan_id' => $bahan->id,
-                'takaran_jumlah' => $parsed['jumlah'],
-                'takaran_satuan' => $satuan,
-                'takaran_gram_ekuivalen' => $parsed['gram'],
-                'catatan_bahan' => TakaranCatatan::untuk(
-                    $resep->id_resep,
+            $hasil['baris'][] = [
+                'nama_dataset' => trim($parsed['nama']),
+                'nama_dasar' => $nama,
+                'bahan' => $bahan,
+                'jumlah' => $parsed['jumlah'],
+                'satuan' => $satuan,
+                'gram' => $parsed['gram'],
+                'catatan' => TakaranCatatan::untuk(
+                    $idResep,
                     $nama,
                     $pelengkap,
                     $satuan,
                     $parsed['gram'],
                 ),
+            ];
+        }
+
+        $hasil['lengkap'] = $lengkap && $hasil['baris'] !== [];
+
+        return $hasil;
+    }
+
+    public function sinkronkanBahan(Resep $resep, string $bahanTeks): bool
+    {
+        $rencana = $this->rencanaBahan($bahanTeks, true, $resep->id_resep);
+
+        $resep->bahans()->delete();
+
+        foreach ($rencana['baris'] as $baris) {
+            if ($baris['bahan'] === null) {
+                continue;
+            }
+
+            $resep->bahans()->create([
+                'bahan_id' => $baris['bahan']->id,
+                'takaran_jumlah' => $baris['jumlah'],
+                'takaran_satuan' => $baris['satuan'],
+                'takaran_gram_ekuivalen' => $baris['gram'],
+                'catatan_bahan' => $baris['catatan'],
             ]);
         }
 
-        return $lengkap && $resep->bahans()->exists();
+        return $rencana['lengkap'] && $resep->bahans()->exists();
     }
 
-    private function cariBahan(string $nama): BahanMakanan
+    private function simpanBahan(Resep $resep, string $bahanTeks): bool
     {
-        $normal = TakaranConverter::normalisasi($nama);
-        $alias = self::ALIAS_BAHAN[$normal] ?? $normal;
-
-        $bahan = BahanMakanan::whereRaw('LOWER(nama_bahan) = ?', [$alias])->first()
-            ?? BahanMakanan::whereRaw('LOWER(nama_bahan) LIKE ?', ['%'.$alias.'%'])
-                ->orderByRaw('LENGTH(nama_bahan)')
-                ->first();
-
-        if ($bahan !== null) {
-            return $bahan;
-        }
-
-        return BahanMakanan::firstOrCreate(
-            ['nama_bahan' => $nama],
-            [
-                'kelompok_gizi' => 'Dataset',
-                'sumber_rujukan' => 'Dataset resep berlabel',
-            ]
-        );
+        return $this->sinkronkanBahan($resep, $bahanTeks);
     }
 
     private function namaDasar(string $nama): string
