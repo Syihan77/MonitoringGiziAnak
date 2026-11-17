@@ -26,7 +26,7 @@ return new class extends Migration
             $table->uuid('label_sebelumnya_id')->nullable()->index();
 
             $table->enum('jenis_label', ['SINTETIS_AWAL', 'SETELAH_VALIDASI_AHLI']);
-            
+
             $table->timestamp('created_at')->useCurrent();
         });
     }

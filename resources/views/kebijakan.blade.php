@@ -30,7 +30,7 @@ Selamat datang di Sistem Monitoring dan Rekomendasi Gizi Anak. Dokumen ini menga
 Dengan mendaftar dan menggunakan sistem ini, Anda menyetujui poin-poin berikut:<br><br>
 Pengumpulan dan Penggunaan Data<br>
 Sistem mengumpulkan informasi seperti identitas, data pertumbuhan (berat dan tinggi badan), serta catatan konsumsi harian anak. Data ini digunakan secara eksklusif untuk:<br>
-Memberikan analisis kecukupan gizi harian dan rekomendasi menu sehat yang sesuai dengan ketersediaan bahan di rumah dan anggaran keluarga bagi Orang Tua.<br>
+Memberikan analisis kecukupan gizi harian dan rekomendasi menu sehat yang sesuai dengan ketersediaan bahan di rumah bagi Orang Tua.<br>
 Menyediakan rekam jejak konsumsi dan pertumbuhan anak yang dapat dipantau oleh Kader Posyandu untuk mendukung evaluasi kesehatan bulanan tanpa mengubah data riwayat konsumsi pribadi.<br><br>
 Batasan Layanan (Penyangkalan Medis)<br>
 Sistem ini merupakan alat bantu edukatif (Sistem Pendukung Keputusan) untuk upaya deteksi dini dan pencegahan stunting di tingkat keluarga. Segala hasil analisis gizi dan rekomendasi menu yang diberikan BUKAN merupakan diagnosis klinis medis. Penentuan status kesehatan dan stunting tetap menjadi wewenang penuh tenaga kesehatan dan kader Posyandu melalui pengukuran antropometri langsung.<br><br>

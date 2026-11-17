@@ -6,6 +6,9 @@
  * LAYOUT 2 (Setelah pilih bulan): Grid 4 Kolom
  */
 
+import { renderPertumbuhan } from './grafik.js';
+import { daftarBulanAnalisis, formatPersentaseAkg, labelStatusGizi } from './gizi-format.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
 
   // ============================================
@@ -22,6 +25,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let namaOrtu = legacyOrtu && legacyOrtu.namaLengkap;
   let kategoriTerakhir = null;
   let pesanKategori = null;
+  let grafikPertumbuhan = null;
+  let indikatorGrafik = 'bb_u';
 
   if (window.NutriApi && window.NutriApi.getToken()) {
     try {
@@ -33,6 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         tglLahirAnak = detail.tanggal_lahir;
 
         const riwayat = await window.NutriApi.ukurRiwayat(items[0].anak_id);
+        grafikPertumbuhan = await window.NutriApi.trenPertumbuhan(items[0].anak_id)
+          .catch(() => null);
         const arr = Array.isArray(riwayat) ? riwayat : [];
         if (arr.length > 0) {
           const terakhir = arr.reduce((a, b) =>
@@ -127,6 +134,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         : (kategoriTerakhir === 'AT_RISK_MONITORING' ? 'kurang' : 'normal'));
     if (pesanKategori) statusBox.title = pesanKategori;
   }
+
+  // ============================================
+  // 3b. GRAFIK PERTUMBUHAN ANAK
+  // ============================================
+  function renderGrafikPertumbuhan() {
+    const canvas = document.getElementById('growthChart');
+    const kosong = document.getElementById('growth-empty');
+    if (!canvas) return;
+
+    const adaTitik = grafikPertumbuhan
+      && Array.isArray(grafikPertumbuhan.titik)
+      && grafikPertumbuhan.titik.length > 0;
+
+    canvas.style.display = adaTitik ? '' : 'none';
+    if (kosong) kosong.hidden = adaTitik;
+
+    if (adaTitik) {
+      renderPertumbuhan(canvas, grafikPertumbuhan, indikatorGrafik);
+    }
+  }
+
+  document.querySelectorAll('.growth-tab').forEach((tombol) => {
+    tombol.addEventListener('click', () => {
+      indikatorGrafik = tombol.dataset.indikator || 'bb_u';
+      document.querySelectorAll('.growth-tab').forEach((el) => {
+        el.classList.toggle('active', el === tombol);
+      });
+      renderGrafikPertumbuhan();
+    });
+  });
+
+  renderGrafikPertumbuhan();
 
   // ============================================
   // 4. TIMELINE KONSUMSI REAL (7 hari terakhir, via API)
@@ -449,11 +488,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!wadah || !anakId) return;
     wadah.classList.add('carousel-x');
 
-    const now = new Date();
-    const daftar = [];
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      daftar.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    const daftar = daftarBulanAnalisis(tglLahirAnak);
+
+    if (daftar.length === 0) {
+      wadah.innerHTML = '<p class="month-desc">Belum ada periode analisis yang dapat ditampilkan.</p>';
+      return;
     }
 
     const hasil = await Promise.all(daftar.map((b) =>
@@ -464,6 +503,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       'TERPENUHI': { dot: 'green', badge: 'fulfilled' },
       'KURANG TERPENUHI': { dot: 'yellow', badge: 'partial' },
       'TIDAK TERPENUHI': { dot: 'red', badge: 'unfulfilled' },
+      'DATA_TIDAK_LENGKAP': { dot: 'yellow', badge: 'partial' },
+      'tidak_tersedia': { dot: 'gray', badge: 'belum' },
     };
 
     wadah.innerHTML = hasil.map((h, idx) => {
@@ -472,14 +513,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `<div class="nutrition-status-item"><div class="status-dot gray"></div>`
           + `<div class="status-info"><div class="month-name">${labelBulan(daftar[idx])}</div>`
           + `<div class="month-desc">Belum ada catatan konsumsi.</div></div>`
-          + `<div class="status-badge belum">BELUM TERCATAT</div></div>`;
+          + `<div class="status-badge belum">${labelStatusGizi(h.status)}</div></div>`;
       }
       const m = meta[h.status] || { dot: 'gray', badge: 'belum' };
       const saran = h.zat_terendah ? ` Perlu peningkatan konsumsi ${h.zat_terendah}.` : '';
+      const rata = formatPersentaseAkg(h.rata_persen_akg);
+      const keterangan = h.rata_persen_akg === null || h.rata_persen_akg === undefined
+        ? `${rata} (${h.hari_tercatat} hari tercatat).${saran}`
+        : `${rata} rata-rata pemenuhan (${h.hari_tercatat} hari tercatat).${saran}`;
       return `<div class="nutrition-status-item"><div class="status-dot ${m.dot}"></div>`
         + `<div class="status-info"><div class="month-name">${labelBulan(daftar[idx])}</div>`
-        + `<div class="month-desc">${h.rata_persen_akg}% rata-rata pemenuhan (${h.hari_tercatat} hari tercatat).${saran}</div></div>`
-        + `<div class="status-badge ${m.badge}">${h.status}</div></div>`;
+        + `<div class="month-desc">${keterangan}</div></div>`
+        + `<div class="status-badge ${m.badge}">${labelStatusGizi(h.status)}</div></div>`;
     }).join('');
 
     pasangNavigasiKarosel(wadah);

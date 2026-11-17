@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Anak;
+use App\Models\BahanMakanan;
+use App\Models\Pertumbuhan;
 use App\Models\User;
 use Database\Seeders\WhoStandardsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class KaderDashboardTest extends TestCase
@@ -71,10 +74,64 @@ class KaderDashboardTest extends TestCase
 
         $res->assertJsonPath('data.total_anak_binaan', 4)
             ->assertJsonPath('data.anak_terukur', 3)
-            ->assertJsonPath('data.distribusi_status_gizi.baik', 2)
-            ->assertJsonPath('data.distribusi_status_gizi.sangat_kurang', 1)
-            ->assertJsonPath('data.distribusi_stunting_indikatif.normal', 2)
-            ->assertJsonPath('data.distribusi_stunting_indikatif.sangat_pendek', 1);
+            ->assertJsonPath('data.distribusi_kategori_pemantauan.NORMAL_LOW_RISK', 1)
+            ->assertJsonPath('data.distribusi_kategori_pemantauan.AT_RISK_MONITORING', 0)
+            ->assertJsonPath('data.distribusi_kategori_pemantauan.HIGH_RISK_REFERRAL', 2);
+    }
+
+    public function test_tren_prevalensi_memakai_kategori_dan_bucket_bulan_jakarta(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-01 00:30:00', 'Asia/Jakarta'));
+
+        try {
+            ['kader' => $kader, 'anakA' => $anakA, 'ortu1' => $ortu] = $this->fixtures();
+
+            Pertumbuhan::create([
+                'anak_id' => $anakA->id,
+                'tanggal_ukur' => '2026-01-20',
+                'umur_bulan' => 24,
+                'berat_kg' => 12.5,
+                'tinggi_cm' => 85.2,
+                'tinggi_koreksi_cm' => 85.2,
+                'status_bb_u' => 'berat_badan_normal',
+                'status_tb_u' => 'normal',
+                'status_bb_tb' => 'gizi_baik',
+                'kategori_pemantauan' => Pertumbuhan::KATEGORI_AT_RISK_MONITORING,
+                'dicatat_oleh' => $ortu->id,
+            ]);
+
+            $res = $this->getJson(
+                '/api/v1/kader/dashboard?wilayah=Posyandu%20Melati&bulan=3',
+                $this->as($kader),
+            )->assertOk();
+
+            $this->assertCount(3, $res->json('data.tren_prevalensi'));
+            $this->assertSame('Des 2025', $res->json('data.tren_prevalensi.0.label'));
+            $this->assertSame('Jan 2026', $res->json('data.tren_prevalensi.1.label'));
+            $this->assertSame(3, $res->json('data.tren_prevalensi.1.total_diukur'));
+            $this->assertSame(0, $res->json('data.tren_prevalensi.1.normal'));
+            $this->assertSame(1, $res->json('data.tren_prevalensi.1.at_risk'));
+            $this->assertSame(2, $res->json('data.tren_prevalensi.1.high_risk'));
+            $this->assertSame(100.0, (float) $res->json('data.tren_prevalensi.1.persen_perlu_perhatian'));
+            $this->assertTrue($res->json('data.tren_prevalensi.1.denominator_kecil'));
+
+            $this->assertSame(0, $res->json('data.tren_prevalensi.2.total_diukur'));
+            $this->assertNull($res->json('data.tren_prevalensi.2.persen_perlu_perhatian'));
+            $this->assertFalse($res->json('data.tren_prevalensi.2.denominator_kecil'));
+
+            $default = $this->getJson(
+                '/api/v1/kader/dashboard?wilayah=Posyandu%20Melati',
+                $this->as($kader),
+            )->assertOk();
+            $this->assertCount(6, $default->json('data.tren_prevalensi'));
+
+            $this->getJson(
+                '/api/v1/kader/dashboard?wilayah=Posyandu%20Melati&bulan=13',
+                $this->as($kader),
+            )->assertBadRequest()->assertJsonPath('error_code', 'VALIDATION_ERROR');
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_dashboard_anonim_tanpa_nama(): void
@@ -138,13 +195,18 @@ class KaderDashboardTest extends TestCase
     {
         ['kader' => $kader, 'anakA' => $anakA, 'ortu1' => $ortu] = $this->fixtures();
 
-        $bahan = \App\Models\BahanMakanan::create([
+        $bahan = BahanMakanan::create([
             'nama_bahan' => 'Telur', 'kelompok_gizi' => 'Protein Hewani', 'protein_per100g' => 12,
         ]);
 
         $this->actingAs($ortu, 'sanctum');
+        $this->postJson("/api/v1/anak/{$anakA->id}/kondisi-harian", [
+            'tanggal' => today()->toDateString(),
+            'status_kondisi' => 'TIDAK_SAKIT',
+        ])->assertCreated();
         $this->postJson("/api/v1/anak/{$anakA->id}/konsumsi", [
             'tanggal_konsumsi' => today()->toDateString(),
+            'metode_input' => 'MANUAL',
             'items' => [['bahan_id' => $bahan->id, 'porsi_gram' => 100]],
         ])->assertCreated();
 

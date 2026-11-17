@@ -1,3 +1,10 @@
+import {
+    formatPersentaseAkg,
+    labelStatusGizi,
+    PESAN_TANPA_CATATAN,
+    tidakAdaCatatanMakan,
+} from './gizi-format.js';
+
 /**
  * Dashboard Orang Tua - Dynamic Controller (SKPL v2.0 - 2-Tab & Modal Kondisi Anak)
  * File: db-ortu.js
@@ -187,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const bahanArr = (detail && (detail.bahans || detail.bahan || detail.RESEP_BAHAN)) || [];
-            resepBahanContainer.dataset.porsiHasil = (detail && (detail.jumlah_porsi_hasil || detail.porsi_saji)) || 1;
+            resepBahanContainer.dataset.porsiHasil = (detail && detail.jumlah_porsi_hasil) || 1;
             bahanResepList.innerHTML = '';
 
             if (bahanArr.length === 0) {
@@ -196,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bahanArr.forEach((b) => {
                     const bahanId = b.bahan_id || b.id;
                     const namaBahan = b.nama_bahan || (b.bahan_makanan && b.bahan_makanan.nama_bahan) || 'Bahan Makanan';
-                    const gramEkuivalen = b.takaran_gram_ekuivalen ?? b.takaran_gram ?? null;
+                    const gramEkuivalen = b.takaran_gram_ekuivalen ?? null;
                     const bisaDihitung = gramEkuivalen !== null && Number(gramEkuivalen) > 0;
                     const takaranStr = b.takaran_jumlah
                         ? `${b.takaran_jumlah} ${b.takaran_satuan || 'g'}`
@@ -404,6 +411,143 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ==========================================
+    // 5c. MODAL CATAT PENGUKURAN BB/TB
+    // ==========================================
+    const modalUkur = document.getElementById('modal-ukur-ortu');
+    const formUkur = document.getElementById('form-ukur-ortu');
+    const btnCatatUkur = document.getElementById('btn-catat-ukur');
+    const btnUkurBatal = document.getElementById('btn-ukur-ortu-batal');
+    const btnUkurSimpan = document.getElementById('btn-ukur-ortu-simpan');
+    const inputUkurTinggi = document.getElementById('ukur-ortu-tinggi');
+    const inputUkurBerat = document.getElementById('ukur-ortu-berat');
+    const inputUkurPosisi = document.getElementById('ukur-ortu-posisi');
+    const inputUkurTanggal = document.getElementById('ukur-ortu-tanggal');
+    const ukurError = document.getElementById('ukur-ortu-error');
+    const ukurHasil = document.getElementById('ukur-ortu-hasil');
+
+    function tanggalLokalHariIni() {
+        const d = new Date();
+        const bulan = String(d.getMonth() + 1).padStart(2, '0');
+        const tanggal = String(d.getDate()).padStart(2, '0');
+        return `${d.getFullYear()}-${bulan}-${tanggal}`;
+    }
+
+    function labelKategoriUkur(kategori) {
+        return labelKategori[kategori] || 'Belum diukur';
+    }
+
+    function perbaruiRingkasanUkur(hasil, beratBadan, tinggiBadan) {
+        const kategori = hasil.kategori_pemantauan || null;
+        const pesan = hasil.pesan || null;
+
+        tinggi = tinggiBadan;
+        berat = beratBadan;
+        kategoriTerakhir = kategori;
+        pesanKategori = pesan;
+
+        const tbValue = document.getElementById('tb-value');
+        const bbValue = document.getElementById('bb-value');
+        if (tbValue) tbValue.textContent = tinggiBadan;
+        if (bbValue) bbValue.textContent = beratBadan;
+
+        const badgeText = document.getElementById('status-badge-text');
+        const badge = document.getElementById('status-badge-header');
+        if (badgeText) badgeText.textContent = labelKategoriUkur(kategori);
+        if (badge) {
+            if (pesan) badge.title = pesan;
+            const dot = badge.querySelector('.status-dot');
+            if (dot) {
+                dot.style.background = kategori === 'HIGH_RISK_REFERRAL'
+                    ? '#dc2626'
+                    : (kategori === 'AT_RISK_MONITORING' ? '#d97706' : '#16a34a');
+            }
+        }
+
+        const analysis = document.getElementById('analysis-text');
+        if (analysis && pesan) {
+            analysis.textContent = pesan;
+        }
+
+        if (ukurHasil) {
+            ukurHasil.textContent = `Pengukuran tersimpan: ${tinggiBadan} cm, ${beratBadan} kg. Status: ${labelKategoriUkur(kategori)}.`;
+            ukurHasil.style.display = 'block';
+        }
+    }
+
+    function bukaModalUkur() {
+        if (!profilAnakId) {
+            alert('Data anak belum tersedia. Muat ulang dashboard lalu coba lagi.');
+            return;
+        }
+
+        if (formUkur) formUkur.reset();
+        if (ukurError) ukurError.style.display = 'none';
+
+        const hariIni = tanggalLokalHariIni();
+        if (inputUkurTanggal) {
+            inputUkurTanggal.value = hariIni;
+            inputUkurTanggal.max = hariIni;
+            if (profilAnak && profilAnak.tanggal_lahir) {
+                inputUkurTanggal.min = profilAnak.tanggal_lahir;
+            }
+        }
+
+        if (modalUkur) modalUkur.style.display = 'flex';
+        if (inputUkurTinggi) inputUkurTinggi.focus();
+    }
+
+    function tutupModalUkur() {
+        if (modalUkur) modalUkur.style.display = 'none';
+    }
+
+    if (btnCatatUkur) btnCatatUkur.addEventListener('click', bukaModalUkur);
+    if (btnUkurBatal) btnUkurBatal.addEventListener('click', tutupModalUkur);
+
+    if (formUkur) {
+        formUkur.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if (!profilAnakId) return;
+
+            const beratBadan = Number(inputUkurBerat ? inputUkurBerat.value : 0);
+            const tinggiBadan = Number(inputUkurTinggi ? inputUkurTinggi.value : 0);
+
+            if (!(beratBadan > 0) || !(tinggiBadan > 0)) {
+                if (ukurError) {
+                    ukurError.textContent = 'Berat dan tinggi badan wajib diisi dengan angka lebih dari nol.';
+                    ukurError.style.display = 'block';
+                }
+                return;
+            }
+
+            const teksAsli = btnUkurSimpan.textContent;
+            if (ukurError) ukurError.style.display = 'none';
+            btnUkurSimpan.textContent = 'Menyimpan...';
+            btnUkurSimpan.disabled = true;
+
+            try {
+                const hasil = await window.NutriApi.ukurCreate(profilAnakId, {
+                    berat_badan_kg: beratBadan,
+                    tinggi_badan_cm: tinggiBadan,
+                    tanggal_ukur: inputUkurTanggal.value,
+                    posisi_ukur: inputUkurPosisi.value,
+                });
+
+                perbaruiRingkasanUkur(hasil, beratBadan, tinggiBadan);
+                tutupModalUkur();
+            } catch (err) {
+                if (ukurError) {
+                    ukurError.textContent = (err && err.message) || 'Gagal menyimpan pengukuran.';
+                    ukurError.style.display = 'block';
+                }
+            } finally {
+                btnUkurSimpan.textContent = teksAsli;
+                btnUkurSimpan.disabled = false;
+            }
+        });
+    }
+
+    // ==========================================
     // 6. SUBMIT KONSUMSI & AKG PROCESS
     // ==========================================
     const btnCalculate = document.getElementById('btn-calculate');
@@ -580,23 +724,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function formatLabelStatus(status) {
+        const kunci = String(status || '').toLowerCase().replace(/\s+/g, '_');
         const peta = {
-            sangat_kurang: { teks: 'Sangat Kurang', bg: '#fee2e2', text: '#991b1b', border: '#f87171' },
-            kurang: { teks: 'Kurang', bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
-            cukup: { teks: 'Cukup', bg: '#dcfce7', text: '#166534', border: '#4ade80' },
-            lebih: { teks: 'Lebih', bg: '#e0e7ff', text: '#3730a3', border: '#818cf8' }
+            sangat_kurang: { bg: '#fee2e2', text: '#991b1b', border: '#f87171' },
+            kurang: { bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
+            cukup: { bg: '#dcfce7', text: '#166534', border: '#4ade80' },
+            baik: { bg: '#dcfce7', text: '#166534', border: '#4ade80' },
+            lebih: { bg: '#e0e7ff', text: '#3730a3', border: '#818cf8' },
+            tidak_tersedia: { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' },
+            belum_ada_data: { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' },
+            data_tidak_lengkap: { bg: '#fef3c7', text: '#92400e', border: '#fbbf24' }
         };
-        return peta[status.toLowerCase()] || { teks: status, bg: '#f3f4f6', text: '#374151', border: '#d1d5db' };
+        const gaya = peta[kunci] || { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' };
+        return { ...gaya, teks: labelStatusGizi(status) };
     }
 
     function tampilkanAnalisis(data) {
         if (!catatHasil) return;
 
+        const tanpaCatatan = tidakAdaCatatanMakan(data);
+
         if (data.analisis_status !== 'dianalisis' && (!data.ringkasan || data.ringkasan.length === 0)) {
             const pesan = data.penanda
-                || (data.status_analisis === 'TIDAK_DAPAT_DIANALISIS_TIDAK_ADA_DATA_VALID'
-                    ? 'Data konsumsi hari ini tidak valid sehingga belum dapat dianalisis.'
-                    : 'Belum ada data konsumsi yang dapat dianalisis pada tanggal ini.');
+                || (tanpaCatatan
+                    ? PESAN_TANPA_CATATAN
+                    : (data.status_analisis === 'TIDAK_DAPAT_DIANALISIS_TIDAK_ADA_DATA_VALID'
+                        ? 'Data konsumsi hari ini tidak valid sehingga belum dapat dianalisis.'
+                        : 'Belum ada data konsumsi yang dapat dianalisis pada tanggal ini.'));
             catatHasil.innerHTML = `
                 <div style="background:#ffffff;border-radius:12px;padding:20px;color:#374151;border:1px solid #e5e7eb;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);margin-top:16px;">
                     <p style="margin:0;font-size:14px;color:#6b7280;text-align:center;">${pesan}</p>
@@ -606,11 +760,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        const zatTidakTersedia = (data.ringkasan || [])
+            .filter((r) => String((r && r.status) || '').toLowerCase() === 'tidak_tersedia')
+            .map((r) => formatNamaZatGizi(r.zat_gizi));
+        const pesanDataSebagian = zatTidakTersedia.length > 0
+            ? `<div style="margin:0 0 12px;padding:10px 14px;background:#fffbeb;border-left:4px solid #f59e0b;border-radius:4px;font-size:13px;color:#92400e;line-height:1.5;">
+                    Sebagian data gizi bahan tidak tersedia. Zat yang tidak dapat dihitung: <strong>${zatTidakTersedia.join(', ')}</strong>.
+                </div>`
+            : '';
+
         const cards = (data.ringkasan || []).map((r) => {
             const namaFormat = formatNamaZatGizi(r.zat_gizi);
             const statusConfig = formatLabelStatus(r.status);
-            const persen = parseFloat(r.persentase_akg) || 0;
-            const barWidth = Math.min(persen, 100);
+            const nilaiAkg = formatPersentaseAkg(r.persentase_akg);
+            const persen = Number(r.persentase_akg);
+            const barWidth = Number.isFinite(persen) ? Math.min(persen, 100) : 0;
 
             return `
                 <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
@@ -622,7 +786,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
                         <span style="font-size:12px;color:#6b7280;">Pemenuhan AKG:</span>
-                        <strong style="font-size:16px;color:#111827;">${r.persentase_akg}%</strong>
+                        <strong style="font-size:16px;color:#111827;">${nilaiAkg}</strong>
                     </div>
                     <div style="width:100%;height:8px;background:#e5e7eb;border-radius:9999px;overflow:hidden;">
                         <div style="width:${barWidth}%;height:100%;background:${statusConfig.text};border-radius:9999px;"></div>
@@ -637,7 +801,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h3 style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">Hasil Analisis Asupan Hari Ini</h3>
                     <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Standar Kebutuhan Usia: <strong>${data.kelompok_umur || '1–3 Tahun'}</strong></p>
                 </div>
-                
+
+                ${pesanDataSebagian}
+
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;">
                     ${cards}
                 </div>
@@ -655,7 +821,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             </div>
         `;
-        
+
         catatHasil.style.display = 'block';
         catatHasil.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }

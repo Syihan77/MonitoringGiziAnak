@@ -5,11 +5,11 @@ mencatat konsumsi harian, menganalisis kecukupan gizi (AKG), memberi
 rekomendasi menu, dan menyajikan dashboard agregat kader — dengan kalkulasi
 Z-score antropometri mengacu standar WHO/Kemenkes (Permenkes No. 2/2020).
 
-Acuan kontrak: SKPL v1.0. Detail kontrak API: [`docs/kontrak-api.md`](docs/kontrak-api.md).
+Acuan kontrak: SKPL v2.0. Detail kontrak API: [`docs/kontrak-api.md`](docs/kontrak-api.md).
 Panduan deploy & operasional server: [`docs/panduan-operasional.md`](docs/panduan-operasional.md).
 
-**Status:** backend + frontend terintegrasi penuh, **80 automated test hijau**
-(`php artisan test`), build frontend sukses (`npm run build`).
+**Status:** backend + frontend terintegrasi penuh, **153 automated test hijau**
+(1097 assertions, `composer test`), build frontend sukses (`npm run build`).
 
 ---
 
@@ -32,9 +32,8 @@ Git** (opsional).
 
 ## 2. Setup dari nol (langkah berurutan, siap salin)
 
-> Semua perintah dijalankan dari root proyek
-> (`D:\Laragon\laragon\www\MonitoringGiziAnak` pada mesin dev saat ini).
-(Sesuaikan dengan direktori laragon di perangkat antum)
+> Semua perintah dijalankan dari root proyek (sesuaikan dengan direktori
+> instalasi Laragon di perangkat Anda).
 ### 2.1. Install dependensi
 
 ```sh
@@ -78,8 +77,8 @@ CREATE DATABASE gizi_db_test OWNER gizi;
 ### 2.4. Migrasi + seed
 
 ```sh
-php artisan migrate 
-php artisan db:seed 
+php artisan migrate
+php artisan db:seed
 ```
 
 Urutan seeder (`database/seeders/DatabaseSeeder.php`):
@@ -94,12 +93,34 @@ Urutan seeder (`database/seeders/DatabaseSeeder.php`):
 4. `BahanSeeder` — 1146 bahan TKPI 2020 dari
    `database/seeders/data/TKPI_2020_komposisi_pangan.csv` (upsert per nama,
    aman di-seed ulang).
-5. `ResepSeeder` — 3 resep awal (takaran gram estimasi, terdokumentasi).
+5. `ResepSeeder` — 93 resep (62 `DATA_LENGKAP`, 31 `PERLU_VERIFIKASI`,
+   0 `TERVERIFIKASI`; takaran/satuan terdokumentasi). Sumber gizi:
+   `dataset_resep_gizi_terstandarisasi_berlabelusia_tkpi.csv` (33 lengkap,
+   46 sebagian, 14 kosong semua; sel kosong menjadi NULL). `DATA_LENGKAP`
+   mensyaratkan energi, karbohidrat, protein, dan lemak per porsi tidak NULL;
+   14 resep tanpa gizi diturunkan ke `PERLU_VERIFIKASI` dengan catatan alasan.
+   Verifikasi ahli gizi dilakukan lewat endpoint admin, bukan di seeder.
 
-> File di `database/seeders/data/` adalah **sumber seed mandiri** (terverifikasi
-> SHA256 identik dengan arsip). Arsip asli (`1_MonitoringGizi/`) sudah
-> dipindah keluar proyek; **dilarang membaca file `*.pdf`** — sumber angka
-> hanya CSV/MD di atas.
+Database yang sudah terisi dapat dimuat ulang tanpa mengubah bahan; status
+hanya diturunkan ke `PERLU_VERIFIKASI` bila empat makro belum lengkap:
+
+```sh
+php artisan resep:muat-gizi-tkpi --dry-run
+php artisan resep:muat-gizi-tkpi
+```
+
+Audit nilai: `docs/audit_gizi_tkpi_semua_resep.csv` (930 baris). CSV lama
+`dataset_resep_gizi_terstandarisasi_berlabelusia.csv` hanya arsip. Basis ML2
+sudah dibangun ulang dari CSV TKPI (versi `1.1.0-tkpi`, 93 resep). Pada
+15 November 2026, `php artisan ml:verify-basis` memberi 93 cocok / 0 selisih
+(exit 0). Label dan metrik K-Means tetap berasal dari basis lama dan ditandai
+`USANG_DATA_LAMA`; refit menunggu kebijakan nilai kosong. Jangan menampilkan
+label cluster sebagai analisis gizi. `ML_ENABLED` tetap `false` sampai
+integrasi disetujui.
+
+> File di `database/seeders/data/` adalah **sumber seed mandiri**. Arsip asli
+> (`1_MonitoringGizi/`) sudah dipindah keluar proyek; **dilarang membaca file
+> `*.pdf`** — sumber angka hanya CSV/MD di atas.
 
 ### 2.5. Build frontend + jalan
 
@@ -124,7 +145,7 @@ npm run dev                # Vite dev server :5173 + HMR
 ### 2.6. Verifikasi instalasi
 
 ```sh
-php artisan test           # wajib 80/80 hijau
+php artisan test           # seluruh test harus hijau
 curl http://localhost:8000/api/v1/ping
 ```
 
@@ -157,9 +178,11 @@ database/
                              wilayahs, bahan_makanans, konsumsis,
                              reseps(+bahan, rekomendasi_logs)
   seeders/ (+ data/)         lihat §2.4
-config/                      nutrition.php (AKG + cutoff), wilayah.php
-docs/                        kontrak-api.md, panduan-operasional.md
-tests/                       Feature/ (12 file) + Unit/ (ZScoreServiceTest)
+config/                      nutrition.php (AKG, cutoff, Z-score, kader,
+                             rekomendasi), wilayah.php
+docs/                        kontrak-api.md, panduan-operasional.md,
+                             deviasi-skpl.md
+tests/                       Feature/ + Unit/ (ZScoreServiceTest)
 ```
 
 ---
@@ -180,13 +203,18 @@ tests/                       Feature/ (12 file) + Unit/ (ZScoreServiceTest)
   4–6th E1400/P25/L50/KH220/Fe10/Zn5 (+0–5/6–11 bln). Status %AKG:
   ≥80 cukup, 70–80 kurang, <70 sangat_kurang (`config/nutrition.php`); rata
   bulanan di-cap 100%/zat.
-- **Harga bahan NULLABLE** (belum ada sumber); resep tanpa info harga dilewati
-  jujur pada mode anggaran; estimasi biaya auto-hitung.
+- **Rekomendasi hanya resep `TERVERIFIKASI`**; field biaya/anggaran sudah
+  dihapus. Mode demo non-production boleh memakai `DATA_LENGKAP` lewat
+  `NUTRITION_DEMO_ALLOW_DATA_LENGKAP=true`, tetapi ditolak di production.
+  `filterWajib()` selalu membuang resep tanpa energi/karbohidrat/protein/lemak
+  (termasuk saat demo), sehingga resep itu tidak masuk kandidat, tidak mengisi
+  kekurangan hasil ML2, dan tidak pernah direkomendasikan.
 - **RBAC**: ortu CRUD milik sendiri (IDOR→403); kader baca sewilayah + catat
   ukur binaan + dashboard/logbook; tulis referensi & impor = admin.
-- **Deviasi SKPL yang disengaja** (tercatat di `docs/kontrak-api.md`):
+- **Deviasi SKPL yang disengaja** (tercatat di `docs/deviasi-skpl.md`):
   token Sanctum opaque (bukan JWT), `DELETE/PATCH` anak, kolom
-  `energi_per100g`, kolom gizi/harga nullable, umur 0–60, kunci respons tambahan.
+  `energi_per100g`, kolom gizi nullable, umur 0–60, kunci respons tambahan,
+  label usia resep dan ambang kategori pemantauan masih baseline sementara.
 
 ---
 
@@ -194,8 +222,11 @@ tests/                       Feature/ (12 file) + Unit/ (ZScoreServiceTest)
 
 ```sh
 php artisan test [--filter=NamaTest]   # unit/integration (DB gizi_db_test)
-php artisan migrate             # tambah tabel baru
+php artisan migrate                    # tambah tabel baru
 php artisan db:seed --class=NamaSeeder --force
+php artisan resep:muat-gizi-tkpi --dry-run   # cek muat ulang gizi DB terisi
+php artisan resep:muat-gizi-tkpi             # terapkan (idempoten)
+php artisan ml:health                        # cek layanan + kesiapan ML1/ML2
 npm run dev                            # develop FE (lihat peringatan §2.5)
 npm run build                          # sebelum serah terima/uji final
 php artisan view:cache && php artisan view:clear   # validasi sintaks Blade

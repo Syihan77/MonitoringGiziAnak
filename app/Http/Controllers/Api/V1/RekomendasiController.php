@@ -66,9 +66,6 @@ class RekomendasiController extends Controller
             'cara_memasak' => $resep->cara_memasak,
             'kategori_gizi' => $resep->kategori_gizi,
             'jumlah_porsi_hasil' => $resep->jumlah_porsi_hasil,
-            'porsi_saji' => $resep->porsi_saji,
-            'estimasi_biaya' => $resep->estimasi_biaya,
-            'biaya_lengkap' => $resep->biayaLengkap(),
             'gizi_per_porsi' => $resep->giziPerPorsi(),
             'usia_min_bulan' => $resep->usia_min_bulan,
             'usia_maks_bulan' => $resep->usia_maks_bulan,
@@ -85,7 +82,6 @@ class RekomendasiController extends Controller
             'bahans' => $resep->bahans->map(fn ($rb) => [
                 'bahan_id' => $rb->bahan_id,
                 'nama_bahan' => $rb->bahan->nama_bahan,
-                'takaran_gram' => $rb->takaran_gram === null ? null : (float) $rb->takaran_gram,
                 'takaran_jumlah' => $rb->takaran_jumlah,
                 'takaran_satuan' => $rb->takaran_satuan,
                 'takaran_gram_ekuivalen' => $rb->takaran_gram_ekuivalen,

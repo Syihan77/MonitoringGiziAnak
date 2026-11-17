@@ -43,7 +43,6 @@ class Pertumbuhan extends Model
         'status_bb_u',
         'status_tb_u',
         'status_bb_tb',
-        'status_gizi_antropometri',
         'kategori_pemantauan',
         'metode_klasifikasi',
         'versi_aturan',
@@ -99,7 +98,7 @@ class Pertumbuhan extends Model
 
     public function versiAturanEfektif(): string
     {
-        return $this->versi_aturan ?? ZScoreService::VERSI_ATURAN;
+        return $this->versi_aturan ?? ZScoreService::versiAturan();
     }
 
     public function statusValiditasEfektif(): string

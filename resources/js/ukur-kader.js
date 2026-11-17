@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         posisi_ukur: inputPosisi.value,
       });
 
-      const kategori = hasil.kategori_pemantauan || hasil.status_gizi_antropometri;
+      const kategori = hasil.kategori_pemantauan;
       boxHasil.innerHTML = `Tersimpan. Umur ${hasil.usia_bulan_saat_ukur ?? hasil.umur_bulan} bln — `
         + `Z BB/U ${hasil.zscore_bb_u}, TB/U ${hasil.zscore_tb_u}, BB/TB ${hasil.zscore_bb_tb}. `
         + `Kategori: <strong>${kategori}</strong> `

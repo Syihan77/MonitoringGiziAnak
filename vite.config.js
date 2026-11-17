@@ -34,6 +34,7 @@ export default defineConfig({
                 'resources/js/history-ortu.js',
                 'resources/js/input-ortu.js',
                 'resources/js/perhatian-kader.js',
+                'resources/js/profile-menu.js',
                 'resources/js/resep-detail.js',
                 'resources/js/riwayat-kader.js',
                 'resources/js/ukur-kader.js',

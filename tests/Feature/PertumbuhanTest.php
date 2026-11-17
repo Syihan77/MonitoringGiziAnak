@@ -54,10 +54,10 @@ class PertumbuhanTest extends TestCase
         $res->assertCreated()
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.umur_bulan', 24)
-            ->assertJsonPath('data.status_gizi_antropometri', 'normal')
+            ->assertJsonPath('data.kategori_pemantauan', 'NORMAL_LOW_RISK')
             ->assertJsonStructure(['data' => [
                 'pertumbuhan_id', 'umur_bulan', 'zscore_bb_u', 'zscore_tb_u', 'zscore_bb_tb',
-                'status_gizi_antropometri', 'status_rincian',
+                'kategori_pemantauan', 'status_rincian',
             ]]);
 
         $this->assertEqualsWithDelta(0.21, (float) $res->json('data.zscore_bb_u'), 0.01);
@@ -176,6 +176,82 @@ class PertumbuhanTest extends TestCase
             'tanggal_ukur' => '2026-01-15',
         ], $this->as($ortuB))
             ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+    }
+
+    public function test_admin_tidak_boleh_mencatat_tetapi_boleh_melihat_riwayat(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $ortu = User::factory()->create();
+        $anak = $this->anakL24($ortu);
+        $h = $this->as($admin);
+        $url = "/api/v1/anak/{$anak->id}/pertumbuhan";
+
+        $this->postJson($url, [
+            'berat_badan_kg' => 12.5,
+            'tinggi_badan_cm' => 85.2,
+            'tanggal_ukur' => '2026-01-15',
+        ], $h)->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+
+        $this->getJson($url, $h)->assertOk();
+    }
+
+    public function test_grafik_pertumbuhan_dengan_acuan_dan_filter(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = $this->anakL24($ortu);
+        $h = $this->as($ortu);
+        $url = "/api/v1/anak/{$anak->id}/tren-pertumbuhan";
+
+        foreach (['2025-11-15', '2025-12-15', '2026-01-15'] as $tgl) {
+            $this->postJson("/api/v1/anak/{$anak->id}/pertumbuhan", [
+                'berat_badan_kg' => 12.0,
+                'tinggi_badan_cm' => 84.0,
+                'tanggal_ukur' => $tgl,
+            ], $h)->assertCreated();
+        }
+
+        $res = $this->getJson($url, $h)->assertOk();
+
+        $this->assertCount(3, $res->json('data.titik'));
+        $this->assertSame('2025-11-15', $res->json('data.titik.0.tanggal_ukur'));
+        $this->assertArrayHasKey('kategori_pemantauan', $res->json('data.titik.0'));
+        $this->assertArrayNotHasKey('status_bb_u', $res->json('data.titik.0'));
+        $this->assertArrayNotHasKey('status_tb_u', $res->json('data.titik.0'));
+        $this->assertArrayNotHasKey('status_bb_tb', $res->json('data.titik.0'));
+        $this->assertCount(61, $res->json('data.acuan.bb_u'));
+        $this->assertCount(61, $res->json('data.acuan.tb_u'));
+
+        $filtered = $this->getJson(
+            $url.'?dari_tanggal=2025-12-01&sampai_tanggal=2026-01-01',
+            $h,
+        )->assertOk();
+        $this->assertCount(1, $filtered->json('data.titik'));
+        $this->assertSame('2025-12-15', $filtered->json('data.titik.0.tanggal_ukur'));
+
+        $this->getJson($url.'?dari_tanggal=bukan-tanggal', $h)
+            ->assertBadRequest()->assertJsonPath('error_code', 'VALIDATION_ERROR');
+    }
+
+    public function test_grafik_pertumbuhan_akses_dan_anak_tanpa_ukur(): void
+    {
+        $ortu = User::factory()->create(['wilayah_posyandu' => 'Posyandu Melati']);
+        $anak = $this->anakL24($ortu);
+        $kaderSama = User::factory()->kader()->create(['wilayah_posyandu' => 'Posyandu Melati']);
+        $kaderBeda = User::factory()->kader()->create(['wilayah_posyandu' => 'Posyandu Mawar']);
+        $ortuLain = User::factory()->create();
+        $admin = User::factory()->admin()->create();
+        $url = "/api/v1/anak/{$anak->id}/tren-pertumbuhan";
+
+        $this->getJson($url, $this->as($kaderSama))->assertOk();
+        $this->getJson($url, $this->as($admin))->assertOk();
+        $this->getJson($url, $this->as($kaderBeda))
+            ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+        $this->getJson($url, $this->as($ortuLain))
+            ->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN_RESOURCE');
+
+        $res = $this->getJson($url, $this->as($ortu))->assertOk();
+        $this->assertCount(0, $res->json('data.titik'));
+        $this->assertCount(61, $res->json('data.acuan.bb_u'));
     }
 
     public function test_riwayat_dengan_filter_tanggal(): void

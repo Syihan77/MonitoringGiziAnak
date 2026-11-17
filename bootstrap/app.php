@@ -8,6 +8,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands()
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })
@@ -78,11 +80,11 @@ return Application::configure(basePath: dirname(__DIR__))
             $expired = false;
             if ($request->bearerToken()) {
                 try {
-                    $record = \Laravel\Sanctum\PersonalAccessToken::findToken($request->bearerToken());
+                    $record = PersonalAccessToken::findToken($request->bearerToken());
                     $expired = $record !== null
                         && $record->expires_at !== null
                         && $record->expires_at->isPast();
-                } catch (\Throwable) {
+                } catch (Throwable) {
                     $expired = false;
                 }
             }
@@ -105,7 +107,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // SKPL §5.4.11: fallback 500 INTERNAL_ERROR (envelope standar).
         // Didaftarkan terakhir agar renderer spesifik menang lebih dulu;
         // HttpResponseException (mis. NOT_FOUND dari controller) diteruskan.
-        $exceptions->render(function (\Exception $e, Request $request) {
+        $exceptions->render(function (Exception $e, Request $request) {
             if (! $request->is('api/*')) {
                 return null;
             }
@@ -121,4 +123,3 @@ return Application::configure(basePath: dirname(__DIR__))
             );
         });
     })->create();
-

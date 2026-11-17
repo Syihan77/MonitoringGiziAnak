@@ -4,17 +4,11 @@
  * Sumber data: API backend (tanpa mock).
  */
 
-// ==========================================
-// STATUS GIZI -> LABEL & WARNA
-// ==========================================
-const STATUS_META = {
-  normal: { label: 'Gizi Baik', cls: 'green' },
-  kurang: { label: 'Gizi Kurang', cls: 'yellow' },
-  stunting_terindikasi: { label: 'Stunting Terindikasi', cls: 'red' },
-  gizi_buruk: { label: 'Gizi Buruk', cls: 'red' },
-  lebih: { label: 'Gizi Lebih', cls: 'blue' },
-};
+import { renderPrevalensi } from './grafik.js';
 
+// ==========================================
+// KATEGORI PEMANTAUAN -> LABEL & WARNA
+// ==========================================
 const KATEGORI_META = {
   NORMAL_LOW_RISK: { label: 'Normal / Risiko Rendah', cls: 'green' },
   AT_RISK_MONITORING: { label: 'Perlu Pemantauan', cls: 'yellow' },
@@ -23,9 +17,7 @@ const KATEGORI_META = {
 
 function metaKategori(ukur) {
   if (!ukur) return { label: 'Belum Diukur', cls: 'gray' };
-  return KATEGORI_META[ukur.kategori_pemantauan]
-    || STATUS_META[ukur.status_gizi_antropometri]
-    || { label: 'Belum Diukur', cls: 'gray' };
+  return KATEGORI_META[ukur.kategori_pemantauan] || { label: 'Belum Diukur', cls: 'gray' };
 }
 
 function inisial(nama) {
@@ -131,7 +123,7 @@ class DashboardController {
       this.childrenList = childrenList;
 
       this.updateSummaryCards(summary);
-      this.tampilkanCatatanTren();
+      this.renderPrevalensiChart(summary.tren_prevalensi || []);
       this.updateDonutChart(summary);
       this.updateTable(childrenList);
 
@@ -143,10 +135,9 @@ class DashboardController {
 
   updateSummaryCards(data) {
     const kategori = data.distribusi_kategori_pemantauan || {};
-    const dist = data.distribusi_status_gizi || {};
-    const baik = kategori.NORMAL_LOW_RISK ?? dist.baik ?? 0;
-    const kurang = kategori.AT_RISK_MONITORING ?? dist.kurang ?? 0;
-    const buruk = kategori.HIGH_RISK_REFERRAL ?? dist.sangat_kurang ?? 0;
+    const baik = kategori.NORMAL_LOW_RISK ?? 0;
+    const kurang = kategori.AT_RISK_MONITORING ?? 0;
+    const buruk = kategori.HIGH_RISK_REFERRAL ?? 0;
 
     this.animateValue('total-anak', 0, data.total_anak_binaan || 0, 1000);
     this.animateValue('gizi-baik', 0, baik, 1000);
@@ -164,31 +155,77 @@ class DashboardController {
       if (konten) konten.prepend(info);
     }
 
-    const trendBadge = document.getElementById('trend-badge');
-    const trendText = document.getElementById('trend-text');
-
-    if (trendBadge && trendText) {
-      trendBadge.className = 'badge-green';
-      trendText.textContent = `Terukur ${data.anak_terukur || 0} dari ${data.total_anak_binaan || 0} anak`;
-    }
   }
 
-  // Grafik tren bulanan belum tersedia di backend: tampilkan catatan jujur.
-  tampilkanCatatanTren() {
+  renderPrevalensiChart(data) {
+    const canvas = document.getElementById('trendChart');
     const wadah = document.querySelector('.trend-graph-placeholder');
-    if (wadah) {
-      wadah.innerHTML = '<p style="text-align:center;color:#6b7280;padding:48px 16px;">'
-        + 'Grafik tren bulanan segera hadir.<br>Distribusi terkini tersedia pada kartu di atas.</p>';
+    if (!canvas || !wadah) return;
+
+    wadah.querySelectorAll('.trend-empty').forEach((el) => el.remove());
+
+    if (!Array.isArray(data) || data.length === 0) {
+      canvas.style.display = 'none';
+      const info = document.createElement('p');
+      info.className = 'trend-empty';
+      info.style.cssText = 'text-align:center;color:#6b7280;padding:48px 16px;margin:0;';
+      info.textContent = 'Belum ada data pengukuran pada periode ini.';
+      wadah.appendChild(info);
+      this.updatePrevalensiBadge(null);
+      return;
     }
+
+    canvas.style.display = '';
+    renderPrevalensi(canvas, data);
+    this.updatePrevalensiBadge(data);
+  }
+
+  updatePrevalensiBadge(data) {
+    const badge = document.getElementById('trend-badge');
+    const text = document.getElementById('trend-text');
+    if (!badge || !text) return;
+
+    badge.className = 'badge-neutral';
+
+    if (!Array.isArray(data) || data.length === 0) {
+      text.textContent = 'Belum ada data';
+      return;
+    }
+
+    const terakhir = data[data.length - 1];
+    if (terakhir.persen_perlu_perhatian === null) {
+      text.textContent = 'Belum ada data bulan ini';
+      return;
+    }
+
+    const bagian = [
+      `${Number(terakhir.persen_perlu_perhatian).toLocaleString('id-ID', {
+        maximumFractionDigits: 1,
+      })}% perlu perhatian · n=${terakhir.total_diukur}`,
+    ];
+
+    if (terakhir.denominator_kecil) {
+      bagian.push('denominator kecil');
+    }
+
+    const sebelumnya = data[data.length - 2];
+    if (sebelumnya && sebelumnya.persen_perlu_perhatian !== null) {
+      const selisih = terakhir.persen_perlu_perhatian - sebelumnya.persen_perlu_perhatian;
+      const tanda = selisih > 0 ? '+' : '';
+      bagian.push(`${tanda}${selisih.toLocaleString('id-ID', {
+        maximumFractionDigits: 1,
+      })} poin dari bulan lalu`);
+    }
+
+    text.textContent = bagian.join(' · ');
   }
 
   updateDonutChart(data) {
     const kategori = data.distribusi_kategori_pemantauan || {};
-    const dist = data.distribusi_status_gizi || {};
     const total = data.anak_terukur || 0;
-    const baik = kategori.NORMAL_LOW_RISK ?? dist.baik ?? 0;
-    const kurang = kategori.AT_RISK_MONITORING ?? dist.kurang ?? 0;
-    const buruk = kategori.HIGH_RISK_REFERRAL ?? dist.sangat_kurang ?? 0;
+    const baik = kategori.NORMAL_LOW_RISK ?? 0;
+    const kurang = kategori.AT_RISK_MONITORING ?? 0;
+    const buruk = kategori.HIGH_RISK_REFERRAL ?? 0;
 
     const baikPersen = total > 0 ? ((baik / total) * 100).toFixed(0) : 0;
     const kurangPersen = total > 0 ? ((kurang / total) * 100).toFixed(0) : 0;

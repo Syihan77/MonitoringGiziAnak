@@ -1,0 +1,931 @@
+﻿id_resep,nama_menu,zat,nilai_dataset_lama,nilai_tkpi_baru,selisih_persen,status,bahan_bermasalah,nilai_imputasi_dipakai,proksi_dipakai,takaran_perkiraan_persen
+R001,Bubur Kededeai Telur Tempe,energi,83.0,,,tidak_terhitung,daun kededeai,,,25
+R001,Bubur Kededeai Telur Tempe,karbohidrat,8.9333,,,tidak_terhitung,daun kededeai,,,25
+R001,Bubur Kededeai Telur Tempe,protein,3.5333,,,tidak_terhitung,daun kededeai,,,25
+R001,Bubur Kededeai Telur Tempe,lemak,3.7667,,,tidak_terhitung,daun kededeai,,,25
+R001,Bubur Kededeai Telur Tempe,zat_besi,0.8333,,,tidak_terhitung,daun kededeai,,,25
+R001,Bubur Kededeai Telur Tempe,vitamin_c,2.2,,,tidak_terhitung,daun kededeai; tempe(TKPI kosong),,,25
+R001,Bubur Kededeai Telur Tempe,kalsium,28.1667,,,tidak_terhitung,daun kededeai,,,25
+R001,Bubur Kededeai Telur Tempe,zinc,0.4,,,tidak_terhitung,daun kededeai,bawang putih; minyak goreng; nasi putih; telur puyuh; tempe,,25
+R001,Bubur Kededeai Telur Tempe,serat,0.1999999999999999,,,tidak_terhitung,daun kededeai,bawang putih; minyak goreng,,25
+R001,Bubur Kededeai Telur Tempe,vitamin_a,177.4,,,tidak_terhitung,daun kededeai,,,25
+R002,Bubur Gabus Ubi Rambat,energi,81.6667,84.55,3.5,terhitung,,,,1
+R002,Bubur Gabus Ubi Rambat,karbohidrat,10.5333,10.96,4.1,terhitung,,,,1
+R002,Bubur Gabus Ubi Rambat,protein,5.8,4.58,-21.0,terhitung,,,,1
+R002,Bubur Gabus Ubi Rambat,lemak,1.9,1.93,1.6,terhitung,,,,1
+R002,Bubur Gabus Ubi Rambat,zat_besi,0.4667,0.2,-57.1,terhitung,,,,1
+R002,Bubur Gabus Ubi Rambat,vitamin_c,5.8667,,,tidak_terhitung,ikan gabus(TKPI kosong),,,1
+R002,Bubur Gabus Ubi Rambat,kalsium,6.6333,57.75,770.6,terhitung,,,,1
+R002,Bubur Gabus Ubi Rambat,zinc,0.3667,0.19,-48.2,terhitung,,bawang putih; minyak goreng/minyak kelapa,,1
+R002,Bubur Gabus Ubi Rambat,serat,0.5666666666666667,1.69,198.2,terhitung,,bawang putih; ikan gabus; minyak goreng/minyak kelapa,,1
+R002,Bubur Gabus Ubi Rambat,vitamin_a,86.26666666666667,142.27,64.9,terhitung,,,,1
+R003,Pisang Lumat,energi,9.4,36.3,286.2,terhitung,,,,0
+R003,Pisang Lumat,karbohidrat,2.2,7.12,223.6,terhitung,,,,0
+R003,Pisang Lumat,protein,0.2666666666666666,0.48,80.0,terhitung,,,,0
+R003,Pisang Lumat,lemak,0.0666666666666666,0.68,920.0,terhitung,,,,0
+R003,Pisang Lumat,zat_besi,0.0333333333333333,0.08,140.0,terhitung,,,,0
+R003,Pisang Lumat,vitamin_c,0.7999999999999999,,,tidak_terhitung,asi perah(TKPI kosong),,,0
+R003,Pisang Lumat,kalsium,6.666666666666667,10.1,51.5,terhitung,,,,0
+R003,Pisang Lumat,zinc,0.0333333333333333,0.11,230.0,terhitung,,asi perah,,0
+R003,Pisang Lumat,serat,0.1999999999999999,0.48,140.0,terhitung,,,,0
+R003,Pisang Lumat,vitamin_a,0.7333333333333334,1.72,134.5,terhitung,,,,0
+R004,Tim Ubi Rambat Tongkol,energi,134.3333,140.69,4.7,terhitung,,,,18
+R004,Tim Ubi Rambat Tongkol,karbohidrat,17.8667,18.66,4.4,terhitung,,,,18
+R004,Tim Ubi Rambat Tongkol,protein,8.5333,5.17,-39.4,terhitung,,,,18
+R004,Tim Ubi Rambat Tongkol,lemak,3.2333,4.05,25.3,terhitung,,,,18
+R004,Tim Ubi Rambat Tongkol,zat_besi,1.0,1.13,13.0,terhitung,,,,18
+R004,Tim Ubi Rambat Tongkol,vitamin_c,9.5667,,,tidak_terhitung,ikan tongkol(TKPI kosong),,,18
+R004,Tim Ubi Rambat Tongkol,kalsium,19.1,53.93,182.4,terhitung,,,,18
+R004,Tim Ubi Rambat Tongkol,zinc,0.7333,0.63,-14.1,terhitung,,margarin; telur ayam; wortel parut,,18
+R004,Tim Ubi Rambat Tongkol,serat,1.0666666666666669,2.83,165.3,terhitung,,ikan tongkol; margarin,,18
+R004,Tim Ubi Rambat Tongkol,vitamin_a,91.5,202.52,121.3,terhitung,,,,18
+R005,Bubur Opor Ayam Khas Kalimantan,energi,134.3333,142.68,6.2,terhitung,,,,7
+R005,Bubur Opor Ayam Khas Kalimantan,karbohidrat,13.8333,14.26,3.1,terhitung,,,,7
+R005,Bubur Opor Ayam Khas Kalimantan,protein,6.3667,5.6,-12.0,terhitung,,,,7
+R005,Bubur Opor Ayam Khas Kalimantan,lemak,5.7667,7.23,25.4,terhitung,,,,7
+R005,Bubur Opor Ayam Khas Kalimantan,zat_besi,0.9333,0.94,0.7,terhitung,,,,7
+R005,Bubur Opor Ayam Khas Kalimantan,vitamin_c,0.4333,,,tidak_terhitung,tahu(TKPI kosong),,,7
+R005,Bubur Opor Ayam Khas Kalimantan,kalsium,14.6,50.49,245.8,terhitung,,,,7
+R005,Bubur Opor Ayam Khas Kalimantan,zinc,0.6,0.31,-48.3,terhitung,,bawang merah; bawang putih; daging ayam; jahe; minyak; santan; tahu; wortel,,7
+R005,Bubur Opor Ayam Khas Kalimantan,serat,0.5333333333333333,0.42,-21.3,terhitung,,bawang merah; bawang putih; daging ayam; jahe; minyak; santan,,7
+R005,Bubur Opor Ayam Khas Kalimantan,vitamin_a,168.53333333333333,124.51,-26.1,terhitung,,,,7
+R006,Puding Labu Kuning,energi,37.3,38.11,2.2,terhitung,,,,0
+R006,Puding Labu Kuning,karbohidrat,8.4,7.4,-11.9,terhitung,,,,0
+R006,Puding Labu Kuning,protein,0.95,0.78,-17.9,terhitung,,,,0
+R006,Puding Labu Kuning,lemak,0.35,0.53,51.4,terhitung,,,,0
+R006,Puding Labu Kuning,zat_besi,0.15,0.73,386.7,terhitung,,,,0
+R006,Puding Labu Kuning,vitamin_c,5.15,,,tidak_terhitung,asi(TKPI kosong),,,0
+R006,Puding Labu Kuning,kalsium,25.5,27.76,8.9,terhitung,,,,0
+R006,Puding Labu Kuning,zinc,0.2,0.21,5.0,terhitung,,asi; gula pasir; labu kuning,,0
+R006,Puding Labu Kuning,serat,1.4,0.25,-82.1,terhitung,,gula pasir; labu kuning,,0
+R006,Puding Labu Kuning,vitamin_a,200.65,59.51,-70.3,terhitung,,,,0
+R007,Nasi Sup Ikan Toman,energi,301.0,,,tidak_terhitung,ikan toman fillet,,,3
+R007,Nasi Sup Ikan Toman,karbohidrat,30.1,,,tidak_terhitung,ikan toman fillet,,,3
+R007,Nasi Sup Ikan Toman,protein,23.7,,,tidak_terhitung,ikan toman fillet,,,3
+R007,Nasi Sup Ikan Toman,lemak,9.0333,,,tidak_terhitung,ikan toman fillet,,,3
+R007,Nasi Sup Ikan Toman,zat_besi,2.7,,,tidak_terhitung,ikan toman fillet,,,3
+R007,Nasi Sup Ikan Toman,vitamin_c,3.8,,,tidak_terhitung,ikan toman fillet; tahu(TKPI kosong),,,3
+R007,Nasi Sup Ikan Toman,kalsium,234.6,,,tidak_terhitung,ikan toman fillet,,,3
+R007,Nasi Sup Ikan Toman,zinc,1.4333,,,tidak_terhitung,ikan teri kering(TKPI kosong); ikan toman fillet,bawang merah; bawang putih; kunyit; minyak; nasi; tahu; tomat,,3
+R007,Nasi Sup Ikan Toman,serat,0.8666666666666667,,,tidak_terhitung,ikan toman fillet,bawang merah; bawang putih; kunyit; minyak,,3
+R007,Nasi Sup Ikan Toman,vitamin_a,293.2,,,tidak_terhitung,ikan toman fillet,,,3
+R008,Nasi Sayur Pelangi,energi,315.6667,375.38,18.9,terhitung,,,,8
+R008,Nasi Sayur Pelangi,karbohidrat,32.4667,45.39,39.8,terhitung,,,,8
+R008,Nasi Sayur Pelangi,protein,17.6,14.03,-20.3,terhitung,,,,8
+R008,Nasi Sayur Pelangi,lemak,12.2,14.99,22.9,terhitung,,,,8
+R008,Nasi Sayur Pelangi,zat_besi,2.0667,2.09,1.1,terhitung,,,,8
+R008,Nasi Sayur Pelangi,vitamin_c,8.5,,,tidak_terhitung,mentega(TKPI kosong),,,8
+R008,Nasi Sayur Pelangi,kalsium,33.5333,72.26,115.5,terhitung,,,,8
+R008,Nasi Sayur Pelangi,zinc,1.6667,1.2,-28.0,terhitung,,ayam fillet; bawang merah; bawang putih; buncis; jahe; mentega; nasi; seledri; telur puyuh; tomat; wortel,,8
+R008,Nasi Sayur Pelangi,serat,2.033333333333333,1.47,-27.7,terhitung,,ayam fillet; bawang merah; bawang putih; jahe; mentega; seledri,,8
+R008,Nasi Sayur Pelangi,vitamin_a,499.4333333333333,353.06,-29.3,terhitung,,,,8
+R009,Ubi Rambat Rebus,energi,151.0,160.65,6.4,terhitung,,,,0
+R009,Ubi Rambat Rebus,karbohidrat,35.5,33.88,-4.6,terhitung,,,,0
+R009,Ubi Rambat Rebus,protein,3.2,0.68,-78.8,terhitung,,,,0
+R009,Ubi Rambat Rebus,lemak,0.1,0.54,440.0,terhitung,,,,0
+R009,Ubi Rambat Rebus,zat_besi,1.2,0.54,-55.0,terhitung,,,,0
+R009,Ubi Rambat Rebus,vitamin_c,18.9,28.35,50.0,terhitung,,,,0
+R009,Ubi Rambat Rebus,kalsium,12.1,40.5,234.7,terhitung,,,,0
+R009,Ubi Rambat Rebus,zinc,0.8,0.27,-66.2,terhitung,,,,0
+R009,Ubi Rambat Rebus,serat,1.9,5.67,198.4,terhitung,,,,0
+R009,Ubi Rambat Rebus,vitamin_a,0.0,178.65,,terhitung,,,,0
+R010,Bubur Soto Lamongan,energi,75.2,81.05,7.8,terhitung,,,,36
+R010,Bubur Soto Lamongan,karbohidrat,6.3,8.84,40.3,terhitung,,,,36
+R010,Bubur Soto Lamongan,protein,4.5,3.61,-19.8,terhitung,,,,36
+R010,Bubur Soto Lamongan,lemak,3.3,3.31,0.3,terhitung,,,,36
+R010,Bubur Soto Lamongan,zat_besi,0.6,0.66,10.0,terhitung,,,,36
+R010,Bubur Soto Lamongan,vitamin_c,0.4,0.7,75.0,terhitung,,,,36
+R010,Bubur Soto Lamongan,kalsium,10.3,15.42,49.7,terhitung,,,,36
+R010,Bubur Soto Lamongan,zinc,0.4,0.32,-20.0,terhitung,,ayam cincang; bawang merah; bawang putih; jahe; kunyit; nasi; telur puyuh; wortel,,36
+R010,Bubur Soto Lamongan,serat,0.2,0.19,-5.0,terhitung,,ayam cincang; bawang merah; bawang putih; jahe; kunyit,,36
+R010,Bubur Soto Lamongan,vitamin_a,109.8,52.17,-52.5,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,energi,72.3,89.93,24.4,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,karbohidrat,6.3,9.36,48.6,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,protein,3.3,2.67,-19.1,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,lemak,3.7,4.62,24.9,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,zat_besi,0.4,0.34,-15.0,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,vitamin_c,0.7,1.72,145.7,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,kalsium,6.1,12.27,101.1,terhitung,,,,36
+R011,Bubur Opor Ayam Khas Jawa,zinc,0.3,0.23,-23.3,terhitung,,bawang merah; bawang putih; daging ayam cincang; minyak sayur untuk menumis; nasi; santan cair; wortel parut,,36
+R011,Bubur Opor Ayam Khas Jawa,serat,0.5,0.22,-56.0,terhitung,,bawang merah; bawang putih; daging ayam cincang; minyak sayur untuk menumis; santan cair,,36
+R011,Bubur Opor Ayam Khas Jawa,vitamin_a,161.3,120.41,-25.4,terhitung,,,,36
+R012,Puree Naga,energi,40.0,58.53,46.3,terhitung,,,,0
+R012,Puree Naga,karbohidrat,6.2,7.19,16.0,terhitung,,,,0
+R012,Puree Naga,protein,0.7,1.41,101.4,terhitung,,,,0
+R012,Puree Naga,lemak,1.6,2.72,70.0,terhitung,,,,0
+R012,Puree Naga,zat_besi,0.1,0.28,180.0,terhitung,,,,0
+R012,Puree Naga,vitamin_c,7.5,,,tidak_terhitung,asi(TKPI kosong),,,0
+R012,Puree Naga,kalsium,13.9,18.27,31.4,terhitung,,,,0
+R012,Puree Naga,zinc,0.1,0.35,250.0,terhitung,,asi,,0
+R012,Puree Naga,serat,0.3,1.71,470.0,terhitung,,,,0
+R012,Puree Naga,vitamin_a,42.7,0.39,-99.1,terhitung,,,,0
+R013,Tim Sup Daging Kacang,energi,156.9,224.67,43.2,terhitung,,,,18
+R013,Tim Sup Daging Kacang,karbohidrat,18.9,22.3,18.0,terhitung,,,,18
+R013,Tim Sup Daging Kacang,protein,7.8,7.49,-4.0,terhitung,,,,18
+R013,Tim Sup Daging Kacang,lemak,5.5,11.83,115.1,terhitung,,,,18
+R013,Tim Sup Daging Kacang,zat_besi,1.4,1.8,28.6,terhitung,,,,18
+R013,Tim Sup Daging Kacang,vitamin_c,2.0,,,tidak_terhitung,kacang merah(TKPI kosong),,,18
+R013,Tim Sup Daging Kacang,kalsium,20.2,82.3,307.4,terhitung,,,,18
+R013,Tim Sup Daging Kacang,zinc,0.8,0.69,-13.8,terhitung,,bawang goreng; bawang merah; bawang putih; buncis mentah; daging ayam cincang; kacang merah; minyak untuk menumis; nasi; seledri; wortel,,18
+R013,Tim Sup Daging Kacang,serat,2.5,0.98,-60.8,terhitung,,bawang goreng; bawang merah; bawang putih; daging ayam cincang; minyak untuk menumis; seledri,,18
+R013,Tim Sup Daging Kacang,vitamin_a,253.3,325.62,28.6,terhitung,,,,18
+R014,Nasi Tim Tahu Tongkol,energi,130.2,155.78,19.6,terhitung,,,,0
+R014,Nasi Tim Tahu Tongkol,karbohidrat,15.9,22.8,43.4,terhitung,,,,0
+R014,Nasi Tim Tahu Tongkol,protein,6.0,4.94,-17.7,terhitung,,,,0
+R014,Nasi Tim Tahu Tongkol,lemak,4.6,4.91,6.7,terhitung,,,,0
+R014,Nasi Tim Tahu Tongkol,zat_besi,1.0,0.92,-8.0,terhitung,,,,0
+R014,Nasi Tim Tahu Tongkol,vitamin_c,0.9,,,tidak_terhitung,daging ikan tongkol kukus(TKPI kosong); tahu(TKPI kosong),,,0
+R014,Nasi Tim Tahu Tongkol,kalsium,20.7,55.55,168.4,terhitung,,,,0
+R014,Nasi Tim Tahu Tongkol,zinc,0.5,0.68,36.0,terhitung,,bawang merah; bawang putih; minyak; nasi; santan; tahu; wortel,,0
+R014,Nasi Tim Tahu Tongkol,serat,0.8,0.33,-58.8,terhitung,,bawang merah; bawang putih; daging ikan tongkol kukus; minyak; santan,,0
+R014,Nasi Tim Tahu Tongkol,vitamin_a,324.8,193.19,-40.5,terhitung,,,,0
+R015,Bola-Bola Nasi,energi,77.4,81.6,5.4,terhitung,,,,38
+R015,Bola-Bola Nasi,karbohidrat,6.9,7.65,10.9,terhitung,,,,38
+R015,Bola-Bola Nasi,protein,4.0,3.38,-15.5,terhitung,,,,38
+R015,Bola-Bola Nasi,lemak,3.6,4.06,12.8,terhitung,,,,38
+R015,Bola-Bola Nasi,zat_besi,0.6,0.73,21.7,terhitung,,,,38
+R015,Bola-Bola Nasi,vitamin_c,0.2,,,tidak_terhitung,tahu(TKPI kosong),,,38
+R015,Bola-Bola Nasi,kalsium,11.3,22.24,96.8,terhitung,,,,38
+R015,Bola-Bola Nasi,zinc,0.6,0.78,30.0,terhitung,,bawang merah goreng; bawang putih goreng; daging sapi giling; minyak; nasi; tahu; telur ayam; tepung maizena; wortel parut,,38
+R015,Bola-Bola Nasi,serat,0.2,0.25,25.0,terhitung,,bawang merah goreng; bawang putih goreng; daging sapi giling; minyak; tepung maizena,,38
+R015,Bola-Bola Nasi,vitamin_a,98.3,52.65,-46.4,terhitung,,,,38
+R016,Nasi Sup Kimlo,energi,280.8,304.61,8.5,terhitung,,,soun,1
+R016,Nasi Sup Kimlo,karbohidrat,41.3,52.31,26.7,terhitung,,,soun,1
+R016,Nasi Sup Kimlo,protein,11.2,8.9,-20.5,terhitung,,,soun,1
+R016,Nasi Sup Kimlo,lemak,7.1,6.08,-14.4,terhitung,,,soun,1
+R016,Nasi Sup Kimlo,zat_besi,2.1,1.77,-15.7,terhitung,,,soun,1
+R016,Nasi Sup Kimlo,vitamin_c,2.0,5.39,169.5,terhitung,,,soun,1
+R016,Nasi Sup Kimlo,kalsium,29.0,48.68,67.9,terhitung,,,soun,1
+R016,Nasi Sup Kimlo,zinc,1.3,1.0,-23.1,terhitung,,bawang goreng; bawang merah; bawang putih; daging dada ayam; daun seledri; gula; jahe; jamur kuping; nasi putih; soun; telur puyuh rebus; wortel,soun,1
+R016,Nasi Sup Kimlo,serat,1.4,1.7,21.4,terhitung,,bawang goreng; bawang merah; bawang putih; daging dada ayam; daun seledri; gula; jahe; jamur kuping; soun,soun,1
+R016,Nasi Sup Kimlo,vitamin_a,441.4,184.68,-58.2,terhitung,,,soun,1
+R017,Nasi Sup Kacang Hijau,energi,354.6,454.78,28.3,terhitung,,,,9
+R017,Nasi Sup Kacang Hijau,karbohidrat,42.7,59.84,40.1,terhitung,,,,9
+R017,Nasi Sup Kacang Hijau,protein,15.8,16.69,5.6,terhitung,,,,9
+R017,Nasi Sup Kacang Hijau,lemak,13.0,16.08,23.7,terhitung,,,,9
+R017,Nasi Sup Kacang Hijau,zat_besi,1.8,3.72,106.7,terhitung,,,,9
+R017,Nasi Sup Kacang Hijau,vitamin_c,4.6,10.65,131.5,terhitung,,,,9
+R017,Nasi Sup Kacang Hijau,kalsium,16.6,111.96,574.5,terhitung,,,,9
+R017,Nasi Sup Kacang Hijau,zinc,2.5,4.03,61.2,terhitung,,bawang goreng; bawang merah; bawang putih; daging sapi rebus; jahe; kacang hijau; kentang; minyak; nasi; seledri diiris,,9
+R017,Nasi Sup Kacang Hijau,serat,2.5,2.54,1.6,terhitung,,bawang goreng; bawang merah; bawang putih; daging sapi rebus; jahe; minyak; seledri diiris,,9
+R017,Nasi Sup Kacang Hijau,vitamin_a,250.5,209.84,-16.2,terhitung,,,,9
+R018,Sempol Ayam,energi,190.9,240.27,25.9,terhitung,,,,25
+R018,Sempol Ayam,karbohidrat,13.4,18.41,37.4,terhitung,,,,25
+R018,Sempol Ayam,protein,10.2,9.22,-9.6,terhitung,,,,25
+R018,Sempol Ayam,lemak,10.5,14.58,38.9,terhitung,,,,25
+R018,Sempol Ayam,zat_besi,0.9,1.27,41.1,terhitung,,,,25
+R018,Sempol Ayam,vitamin_c,1.3,0.89,-31.5,terhitung,,,,25
+R018,Sempol Ayam,kalsium,33.7,72.32,114.6,terhitung,,,,25
+R018,Sempol Ayam,zinc,0.8,0.77,-3.8,terhitung,,ayam paha tanpa tulang giling; bawang merah goreng; bawang putih goreng; keju parut; kuning telur; minyak goreng; putih telur; santan kental; susu bubuk; tepung panir; tepung tapioka; tepung terigu; wortel,,25
+R018,Sempol Ayam,serat,0.4,1.06,165.0,terhitung,,ayam paha tanpa tulang giling; bawang merah goreng; bawang putih goreng; keju parut; kuning telur; minyak goreng; putih telur; santan kental; susu bubuk; tepung panir; tepung tapioka,,25
+R018,Sempol Ayam,vitamin_a,221.8,228.99,3.2,terhitung,,,,25
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,energi,136.2,,,tidak_terhitung,brokoli,,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,karbohidrat,16.1,,,tidak_terhitung,brokoli,,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,protein,6.6,,,tidak_terhitung,brokoli,,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,lemak,4.7,,,tidak_terhitung,brokoli,,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,zat_besi,0.5,,,tidak_terhitung,brokoli,,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,vitamin_c,9.2,,,tidak_terhitung,brokoli,,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,kalsium,21.6,,,tidak_terhitung,brokoli,,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,zinc,0.5,,,tidak_terhitung,brokoli,ayam giling; bawang merah; bawang putih; minyak; nasi; putih telur; tapioka,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,serat,0.6,,,tidak_terhitung,brokoli,ayam giling; bawang merah; bawang putih; minyak; putih telur; tapioka,,30
+R019,Tim Sate Lilit Ayam Sayur Khas Banten,vitamin_a,106.4,,,tidak_terhitung,brokoli,,,30
+R020,Tim Sayur Lodeh Ayam,energi,124.7,162.93,30.7,terhitung,,,,8
+R020,Tim Sayur Lodeh Ayam,karbohidrat,11.6,16.59,43.0,terhitung,,,,8
+R020,Tim Sayur Lodeh Ayam,protein,6.8,6.38,-6.2,terhitung,,,,8
+R020,Tim Sayur Lodeh Ayam,lemak,5.7,8.06,41.4,terhitung,,,,8
+R020,Tim Sayur Lodeh Ayam,zat_besi,1.2,1.22,1.7,terhitung,,,,8
+R020,Tim Sayur Lodeh Ayam,vitamin_c,1.4,,,tidak_terhitung,tahu(TKPI kosong); tempe(TKPI kosong),,,8
+R020,Tim Sayur Lodeh Ayam,kalsium,25.1,49.79,98.4,terhitung,,,,8
+R020,Tim Sayur Lodeh Ayam,zinc,0.7,0.65,-7.1,terhitung,,ayam cincang; bawang merah; bawang putih; labu siam; lengkuas geprek; minyak; nasi; santan kental; tahu; tempe; wortel,,8
+R020,Tim Sayur Lodeh Ayam,serat,0.9,0.95,5.6,terhitung,,ayam cincang; bawang merah; bawang putih; labu siam; lengkuas geprek; minyak; santan kental,,8
+R020,Tim Sayur Lodeh Ayam,vitamin_a,241.2,148.06,-38.6,terhitung,,,,8
+R021,Talam Pisang,energi,81.1,94.88,17.0,terhitung,,,,0
+R021,Talam Pisang,karbohidrat,15.5,16.67,7.5,terhitung,,,,0
+R021,Talam Pisang,protein,1.1,1.4,27.3,terhitung,,,,0
+R021,Talam Pisang,lemak,1.9,2.7,42.1,terhitung,,,,0
+R021,Talam Pisang,zat_besi,0.3,0.16,-46.7,terhitung,,,,0
+R021,Talam Pisang,vitamin_c,1.7,2.0,17.6,terhitung,,,,0
+R021,Talam Pisang,kalsium,2.7,11.68,332.6,terhitung,,,,0
+R021,Talam Pisang,zinc,0.2,0.26,30.0,terhitung,,gula pasir; santan; santan kelapa; tepung beras; tepung tapioka; tepung terigu,,0
+R021,Talam Pisang,serat,1.0,0.86,-14.0,terhitung,,gula pasir; santan; santan kelapa; tepung beras; tepung tapioka,,0
+R021,Talam Pisang,vitamin_a,1.3,1.03,-20.8,terhitung,,,,0
+R022,Sup Ikan Tahu Sutra,energi,369.2,,,tidak_terhitung,ikan tenggiri,,mie soun,7
+R022,Sup Ikan Tahu Sutra,karbohidrat,53.1,,,tidak_terhitung,ikan tenggiri,,mie soun,7
+R022,Sup Ikan Tahu Sutra,protein,19.3,,,tidak_terhitung,ikan tenggiri,,mie soun,7
+R022,Sup Ikan Tahu Sutra,lemak,8.2,,,tidak_terhitung,ikan tenggiri,,mie soun,7
+R022,Sup Ikan Tahu Sutra,zat_besi,3.2,,,tidak_terhitung,ikan tenggiri,,mie soun,7
+R022,Sup Ikan Tahu Sutra,vitamin_c,1.3,,,tidak_terhitung,ikan tenggiri; tahu sutera(TKPI kosong),,mie soun,7
+R022,Sup Ikan Tahu Sutra,kalsium,60.5,,,tidak_terhitung,ikan tenggiri,,mie soun,7
+R022,Sup Ikan Tahu Sutra,zinc,1.4,,,tidak_terhitung,ikan tenggiri,bawang putih; jamur kuping; mie soun; minyak; nasi; tahu sutera; tepung tapioca; udang,mie soun,7
+R022,Sup Ikan Tahu Sutra,serat,1.2,,,tidak_terhitung,ikan tenggiri,bawang putih; jamur kuping; mie soun; minyak; tepung tapioca,mie soun,7
+R022,Sup Ikan Tahu Sutra,vitamin_a,279.3,,,tidak_terhitung,ikan tenggiri,,mie soun,7
+R023,Nasi Ayam Manis,energi,357.8,435.5,21.7,terhitung,,,,40
+R023,Nasi Ayam Manis,karbohidrat,36.6,48.29,31.9,terhitung,,,,40
+R023,Nasi Ayam Manis,protein,13.2,10.65,-19.3,terhitung,,,,40
+R023,Nasi Ayam Manis,lemak,17.5,21.75,24.3,terhitung,,,,40
+R023,Nasi Ayam Manis,zat_besi,1.8,2.2,22.2,terhitung,,,,40
+R023,Nasi Ayam Manis,vitamin_c,7.0,5.36,-23.4,terhitung,,,,40
+R023,Nasi Ayam Manis,kalsium,41.2,68.83,67.1,terhitung,,,,40
+R023,Nasi Ayam Manis,zinc,1.3,,,tidak_terhitung,kecap(TKPI kosong),bawang merah; bawang putih; daging ayam; gula; minyak; nasi; sawi putih; telur puyuh; wortel,,40
+R023,Nasi Ayam Manis,serat,1.6,0.92,-42.5,terhitung,,bawang merah; bawang putih; daging ayam; gula; kecap; minyak,,40
+R023,Nasi Ayam Manis,vitamin_a,946.5,601.28,-36.5,terhitung,,,,40
+R024,Talam Jagung,energi,211.0,253.19,20.0,terhitung,,,,6
+R024,Talam Jagung,karbohidrat,37.3,41.75,11.9,terhitung,,,,6
+R024,Talam Jagung,protein,3.7,4.99,34.9,terhitung,,,,6
+R024,Talam Jagung,lemak,5.9,7.75,31.4,terhitung,,,,6
+R024,Talam Jagung,zat_besi,0.8,0.84,5.0,terhitung,,,,6
+R024,Talam Jagung,vitamin_c,2.4,4.01,67.1,terhitung,,,,6
+R024,Talam Jagung,kalsium,8.9,32.15,261.2,terhitung,,,,6
+R024,Talam Jagung,zinc,37.3,0.74,-98.0,terhitung,,gula pasir; jagung serut; santan; telur; tepung beras; tepung tapioka,,6
+R024,Talam Jagung,serat,2.2,1.72,-21.8,terhitung,,gula pasir; santan; tepung beras; tepung tapioka,,6
+R024,Talam Jagung,vitamin_a,22.9,11.04,-51.8,terhitung,,,,6
+R025,Bubur Liwet Ayam Wortel,energi,72.9,82.39,13.0,terhitung,,,,21
+R025,Bubur Liwet Ayam Wortel,karbohidrat,7.9,8.66,9.6,terhitung,,,,21
+R025,Bubur Liwet Ayam Wortel,protein,4.8,2.53,-47.3,terhitung,,,,21
+R025,Bubur Liwet Ayam Wortel,lemak,5.4,4.09,-24.3,terhitung,,,,21
+R025,Bubur Liwet Ayam Wortel,zat_besi,0.8,0.29,-63.7,terhitung,,,,21
+R025,Bubur Liwet Ayam Wortel,vitamin_c,1.0,0.9,-10.0,terhitung,,,,21
+R025,Bubur Liwet Ayam Wortel,kalsium,12.0,9.22,-23.2,terhitung,,,,21
+R025,Bubur Liwet Ayam Wortel,zinc,0.3,0.2,-33.3,terhitung,,ayam cincang; bawang merah; bawang putih; minyak goreng; nasi; wortel parut,,21
+R025,Bubur Liwet Ayam Wortel,serat,0.3,0.11,-63.3,terhitung,,ayam cincang; bawang merah; bawang putih; minyak goreng,,21
+R025,Bubur Liwet Ayam Wortel,vitamin_a,195.0,95.18,-51.2,terhitung,,,,21
+R026,Bubur Tepung Jagung Ikan Gurame,energi,78.7,,,tidak_terhitung,cincang filet ikan gurame,,,12
+R026,Bubur Tepung Jagung Ikan Gurame,karbohidrat,11.5,,,tidak_terhitung,cincang filet ikan gurame,,,12
+R026,Bubur Tepung Jagung Ikan Gurame,protein,3.5,,,tidak_terhitung,cincang filet ikan gurame,,,12
+R026,Bubur Tepung Jagung Ikan Gurame,lemak,2.5,,,tidak_terhitung,cincang filet ikan gurame,pisang kepok,,12
+R026,Bubur Tepung Jagung Ikan Gurame,zat_besi,0.7,,,tidak_terhitung,cincang filet ikan gurame,,,12
+R026,Bubur Tepung Jagung Ikan Gurame,vitamin_c,3.0,,,tidak_terhitung,cincang filet ikan gurame; tempe(TKPI kosong); tepung jagung(TKPI kosong),,,12
+R026,Bubur Tepung Jagung Ikan Gurame,kalsium,14.3,,,tidak_terhitung,cincang filet ikan gurame,,,12
+R026,Bubur Tepung Jagung Ikan Gurame,zinc,0.3,,,tidak_terhitung,cincang filet ikan gurame,bawang merah; bawang putih; daun pakcoy; minyak kelapa; tempe; tepung jagung,,12
+R026,Bubur Tepung Jagung Ikan Gurame,serat,1.2,,,tidak_terhitung,cincang filet ikan gurame,bawang merah; bawang putih; minyak kelapa; tepung jagung,,12
+R026,Bubur Tepung Jagung Ikan Gurame,vitamin_a,108.8,,,tidak_terhitung,cincang filet ikan gurame,,,12
+R027,Puree Pepaya,energi,19.5,23.0,17.9,terhitung,,,,0
+R027,Puree Pepaya,karbohidrat,4.9,6.1,24.5,terhitung,,,,0
+R027,Puree Pepaya,protein,0.3,0.25,-16.7,terhitung,,,,0
+R027,Puree Pepaya,lemak,0.1,0.05,-50.0,terhitung,,,,0
+R027,Puree Pepaya,zat_besi,0.1,0.85,750.0,terhitung,,,,0
+R027,Puree Pepaya,vitamin_c,31.0,39.0,25.8,terhitung,,,,0
+R027,Puree Pepaya,kalsium,12.0,11.5,-4.2,terhitung,,,,0
+R027,Puree Pepaya,zinc,0.1,0.15,50.0,terhitung,,buah pepaya,,0
+R027,Puree Pepaya,serat,0.9,0.8,-11.1,terhitung,,buah pepaya,,0
+R027,Puree Pepaya,vitamin_a,67.5,86.5,28.1,terhitung,,,,0
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,energi,136.2,,,tidak_terhitung,brokoli,,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,karbohidrat,16.1,,,tidak_terhitung,brokoli,,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,protein,6.6,,,tidak_terhitung,brokoli,,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,lemak,4.7,,,tidak_terhitung,brokoli,,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,zat_besi,0.5,,,tidak_terhitung,brokoli,,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,vitamin_c,9.2,,,tidak_terhitung,brokoli,,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,kalsium,21.6,,,tidak_terhitung,brokoli,,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,zinc,0.5,,,tidak_terhitung,brokoli,ayam giling; minyak; nasi; putih telur; tapioka,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,serat,0.6,,,tidak_terhitung,brokoli,ayam giling; minyak; putih telur; tapioka,,27
+R028,Tim Sate Lilit Ayam Sayur Khas Jawa,vitamin_a,106.4,,,tidak_terhitung,brokoli,,,27
+R029,Gadon Kentang Ayam,energi,109.9,105.4,-4.1,terhitung,,,,27
+R029,Gadon Kentang Ayam,karbohidrat,12.7,9.03,-28.9,terhitung,,,,27
+R029,Gadon Kentang Ayam,protein,6.2,5.79,-6.6,terhitung,,,,27
+R029,Gadon Kentang Ayam,lemak,4.1,5.52,34.6,terhitung,,,,27
+R029,Gadon Kentang Ayam,zat_besi,1.2,1.15,-4.2,terhitung,,,,27
+R029,Gadon Kentang Ayam,vitamin_c,8.2,,,tidak_terhitung,tahu kecil(TKPI kosong),,,27
+R029,Gadon Kentang Ayam,kalsium,22.5,76.96,242.0,terhitung,,,,27
+R029,Gadon Kentang Ayam,zinc,0.6,0.43,-28.3,terhitung,,bawang merah; bawang putih; buncis; daging ayam cincang; kentang; santan; tahu kecil,,27
+R029,Gadon Kentang Ayam,serat,1.6,0.64,-60.0,terhitung,,bawang merah; bawang putih; daging ayam cincang; santan,,27
+R029,Gadon Kentang Ayam,vitamin_a,15.9,50.96,220.5,terhitung,,,,27
+R030,Pudding Buah,energi,86.1,107.03,24.3,terhitung,,,,0
+R030,Pudding Buah,karbohidrat,21.5,21.28,-1.0,terhitung,,,,0
+R030,Pudding Buah,protein,1.1,1.84,67.3,terhitung,,,,0
+R030,Pudding Buah,lemak,0.5,2.03,306.0,terhitung,,,,0
+R030,Pudding Buah,zat_besi,0.3,1.96,553.3,terhitung,,,,0
+R030,Pudding Buah,vitamin_c,72.8,57.63,-20.8,terhitung,,,,0
+R030,Pudding Buah,kalsium,33.3,35.47,6.5,terhitung,,,,0
+R030,Pudding Buah,zinc,0.3,0.44,46.7,terhitung,,pepaya potong kecil-kecil,,0
+R030,Pudding Buah,serat,2.6,4.05,55.8,terhitung,,pepaya potong kecil-kecil,,0
+R030,Pudding Buah,vitamin_a,115.3,142.92,24.0,terhitung,,,,0
+R031,Nasi Bakar Ayam Santan,energi,436.0,533.55,22.4,terhitung,,,,33
+R031,Nasi Bakar Ayam Santan,karbohidrat,45.3,44.54,-1.7,terhitung,,,,33
+R031,Nasi Bakar Ayam Santan,protein,19.8,20.5,3.5,terhitung,,,,33
+R031,Nasi Bakar Ayam Santan,lemak,19.2,30.52,59.0,terhitung,,,,33
+R031,Nasi Bakar Ayam Santan,zat_besi,3.6,3.71,3.1,terhitung,,,,33
+R031,Nasi Bakar Ayam Santan,vitamin_c,5.9,,,tidak_terhitung,tahu potong kotak(TKPI kosong),,,33
+R031,Nasi Bakar Ayam Santan,kalsium,436.0,142.85,-67.2,terhitung,,,,33
+R031,Nasi Bakar Ayam Santan,zinc,45.3,1.67,-96.3,terhitung,,bawang merah; bawang merah goreng; bawang putih; bawang putih goreng; daun bayam; filet dada ayam di potong kotak; gula pasir; jahe; margarin; minyak goreng; nasi; santan kental; tahu potong kotak; telur puyuh,,33
+R031,Nasi Bakar Ayam Santan,serat,1.3,0.53,-59.2,terhitung,,bawang merah; bawang merah goreng; bawang putih; bawang putih goreng; daun bayam; filet dada ayam di potong kotak; gula pasir; jahe; margarin; minyak goreng; santan kental,,33
+R031,Nasi Bakar Ayam Santan,vitamin_a,466.0,406.73,-12.7,terhitung,,,,33
+R032,Nasi Cah Tahu Ayam,energi,381.8,447.64,17.2,terhitung,,,,10
+R032,Nasi Cah Tahu Ayam,karbohidrat,36.9,50.15,35.9,terhitung,,,,10
+R032,Nasi Cah Tahu Ayam,protein,20.2,17.72,-12.3,terhitung,,,,10
+R032,Nasi Cah Tahu Ayam,lemak,16.7,19.54,17.0,terhitung,,,,10
+R032,Nasi Cah Tahu Ayam,zat_besi,4.0,3.62,-9.5,terhitung,,,,10
+R032,Nasi Cah Tahu Ayam,vitamin_c,3.9,,,tidak_terhitung,tahu putih potong dadu kecil(TKPI kosong),,,10
+R032,Nasi Cah Tahu Ayam,kalsium,73.3,157.17,114.4,terhitung,,,,10
+R032,Nasi Cah Tahu Ayam,zinc,2.0,,,tidak_terhitung,kecap(TKPI kosong),bawang putih cincang halus; fillet dada ayam diiris tipis; labu siam dipotong dadu; minyak; nasi; tahu putih potong dadu kecil; tapioka; wortel dipotong dadu,,10
+R032,Nasi Cah Tahu Ayam,serat,2.4,2.6,8.3,terhitung,,bawang putih cincang halus; fillet dada ayam diiris tipis; kecap; labu siam dipotong dadu; minyak; tapioka,,10
+R032,Nasi Cah Tahu Ayam,vitamin_a,750.4,460.75,-38.6,terhitung,,,,10
+R033,Talam Labu Kuning,energi,204.3,223.24,9.3,terhitung,,,,0
+R033,Talam Labu Kuning,karbohidrat,42.2,42.56,0.9,terhitung,,,,0
+R033,Talam Labu Kuning,protein,1.9,2.72,43.2,terhitung,,,,0
+R033,Talam Labu Kuning,lemak,3.3,4.67,41.5,terhitung,,,,0
+R033,Talam Labu Kuning,zat_besi,0.5,0.72,44.0,terhitung,,,,0
+R033,Talam Labu Kuning,vitamin_c,3.5,16.5,371.4,terhitung,,,,0
+R033,Talam Labu Kuning,kalsium,7.5,33.22,342.9,terhitung,,,,0
+R033,Talam Labu Kuning,zinc,0.4,0.44,10.0,terhitung,,gula pasir; labu kuning; santan; tepung beras; tepung tapioka,,0
+R033,Talam Labu Kuning,serat,1.9,1.33,-30.0,terhitung,,gula pasir; labu kuning; santan; tepung beras; tepung tapioka,,0
+R033,Talam Labu Kuning,vitamin_a,120.3,35.6,-70.4,terhitung,,,,0
+R034,Kanji Rumbi,energi,80.0,72.03,-10.0,terhitung,,,,10
+R034,Kanji Rumbi,karbohidrat,7.6,7.73,1.7,terhitung,,,,10
+R034,Kanji Rumbi,protein,3.4667,2.78,-19.8,terhitung,,,,10
+R034,Kanji Rumbi,lemak,3.9,3.42,-12.3,terhitung,,,,10
+R034,Kanji Rumbi,zat_besi,0.4,0.41,2.5,terhitung,,,,10
+R034,Kanji Rumbi,vitamin_c,1.4,2.87,105.0,terhitung,,,,10
+R034,Kanji Rumbi,kalsium,4.7667,18.24,282.7,terhitung,,,,10
+R034,Kanji Rumbi,zinc,0.3333,0.15,-55.0,terhitung,,bawang merah; bawang putih; daging ayam; jahe; minyak; santan; tomat; wortel,,10
+R034,Kanji Rumbi,serat,0.6,0.27,-55.0,terhitung,,bawang merah; bawang putih; daging ayam; jahe; minyak; santan,,10
+R034,Kanji Rumbi,vitamin_a,128.63333333333333,72.19,-43.9,terhitung,,,,10
+R035,Bubur Asyura,energi,81.3333,93.49,14.9,terhitung,,,,7
+R035,Bubur Asyura,karbohidrat,10.3667,10.99,6.0,terhitung,,,,7
+R035,Bubur Asyura,protein,4.3333,4.04,-6.8,terhitung,,,,7
+R035,Bubur Asyura,lemak,2.5,3.84,53.6,terhitung,,,,7
+R035,Bubur Asyura,zat_besi,0.6333,0.8,26.3,terhitung,,,,7
+R035,Bubur Asyura,vitamin_c,1.2667,,,tidak_terhitung,kacang merah(TKPI kosong),,,7
+R035,Bubur Asyura,kalsium,9.6333,35.08,264.2,terhitung,,,,7
+R035,Bubur Asyura,zinc,0.4333,0.29,-33.1,terhitung,,bawang merah; bawang putih; bayam; daging ayam; jagung manis; jahe; kacang merah; kunyit; santan; wortel,,7
+R035,Bubur Asyura,serat,1.0333333333333334,0.43,-58.4,terhitung,,bawang merah; bawang putih; bayam; daging ayam; jahe; kunyit; santan,,7
+R035,Bubur Asyura,vitamin_a,65.03333333333333,51.28,-21.1,terhitung,,,,7
+R036,Puree Wortel Jagung,energi,33.5,91.5,173.1,terhitung,,,,0
+R036,Puree Wortel Jagung,karbohidrat,7.5,19.7,162.7,terhitung,,,,0
+R036,Puree Wortel Jagung,protein,1.1,3.05,177.3,terhitung,,,,0
+R036,Puree Wortel Jagung,lemak,0.4,0.65,62.5,terhitung,,,,0
+R036,Puree Wortel Jagung,zat_besi,0.7,1.05,50.0,terhitung,,,,0
+R036,Puree Wortel Jagung,vitamin_c,3.3,13.5,309.1,terhitung,,,,0
+R036,Puree Wortel Jagung,kalsium,10.8,25.5,136.1,terhitung,,,,0
+R036,Puree Wortel Jagung,zinc,0.3,0.6,100.0,terhitung,,jagung; wortel,,0
+R036,Puree Wortel Jagung,serat,1.6,1.15,-28.1,terhitung,,,,0
+R036,Puree Wortel Jagung,vitamin_a,396.8,324.75,-18.2,terhitung,,,,0
+R037,Tim Tumis Ikan Tongkol,energi,136.0,135.98,-0.0,terhitung,,,,4
+R037,Tim Tumis Ikan Tongkol,karbohidrat,18.0333,19.95,10.6,terhitung,,,,4
+R037,Tim Tumis Ikan Tongkol,protein,7.0333,5.03,-28.5,terhitung,,,,4
+R037,Tim Tumis Ikan Tongkol,lemak,3.7,4.1,10.8,terhitung,,,,4
+R037,Tim Tumis Ikan Tongkol,zat_besi,0.5,0.89,78.0,terhitung,,,,4
+R037,Tim Tumis Ikan Tongkol,vitamin_c,0.7,,,tidak_terhitung,ikan tongkol(TKPI kosong),,,4
+R037,Tim Tumis Ikan Tongkol,kalsium,9.8667,56.36,471.2,terhitung,,,,4
+R037,Tim Tumis Ikan Tongkol,zinc,0.4333,0.51,17.7,terhitung,,bawang merah; bawang putih; gula pasir; kunyit; minyak; wortel,,4
+R037,Tim Tumis Ikan Tongkol,serat,0.5333333333333333,0.17,-68.1,terhitung,,bawang merah; bawang putih; gula pasir; ikan tongkol; kunyit; minyak,,4
+R037,Tim Tumis Ikan Tongkol,vitamin_a,327.8,206.32,-37.1,terhitung,,,,4
+R038,Tim Kari Udang,energi,131.6667,144.48,9.7,terhitung,,,,9
+R038,Tim Kari Udang,karbohidrat,16.8667,17.84,5.8,terhitung,,,,9
+R038,Tim Kari Udang,protein,8.1333,10.52,29.3,terhitung,,,,9
+R038,Tim Kari Udang,lemak,3.3,3.61,9.4,terhitung,,,,9
+R038,Tim Kari Udang,zat_besi,1.9333,3.63,87.8,terhitung,,,,9
+R038,Tim Kari Udang,vitamin_c,1.4333,,,tidak_terhitung,tahu(TKPI kosong),,,9
+R038,Tim Kari Udang,kalsium,30.4,113.72,274.1,terhitung,,,,9
+R038,Tim Kari Udang,zinc,0.8333,0.73,-12.4,terhitung,,bawang bombay; minyak; santan; tahu; udang; wortel,,9
+R038,Tim Kari Udang,serat,0.8333333333333334,0.44,-47.2,terhitung,,bawang bombay; minyak; santan,,9
+R038,Tim Kari Udang,vitamin_a,257.7333333333333,133.36,-48.3,terhitung,,,,9
+R039,Susu Pisang,energi,37.333333333333336,57.5,54.0,terhitung,,,,33
+R039,Susu Pisang,karbohidrat,5.5,8.22,49.5,terhitung,,,,33
+R039,Susu Pisang,protein,1.2333333333333334,1.85,50.0,terhitung,,,,33
+R039,Susu Pisang,lemak,1.4,1.95,39.3,terhitung,,,,33
+R039,Susu Pisang,zat_besi,0.0999999999999999,0.9,800.0,terhitung,,,,33
+R039,Susu Pisang,vitamin_c,1.8333333333333333,2.75,50.0,terhitung,,,,33
+R039,Susu Pisang,kalsium,39.333333333333336,76.5,94.5,terhitung,,,,33
+R039,Susu Pisang,zinc,0.1666666666666666,0.2,20.0,terhitung,,susu,,33
+R039,Susu Pisang,serat,0.3999999999999999,0.48,20.0,terhitung,,susu,,33
+R039,Susu Pisang,vitamin_a,19.666666666666668,22.04,12.1,terhitung,,,,33
+R040,Nasi Gurih Omelet Sayur Kukus,energi,306.0,317.62,3.8,terhitung,,,,2
+R040,Nasi Gurih Omelet Sayur Kukus,karbohidrat,44.3667,45.0,1.4,terhitung,,,,2
+R040,Nasi Gurih Omelet Sayur Kukus,protein,10.3667,11.58,11.7,terhitung,,,,2
+R040,Nasi Gurih Omelet Sayur Kukus,lemak,9.1667,10.28,12.1,terhitung,,,,2
+R040,Nasi Gurih Omelet Sayur Kukus,zat_besi,1.5,2.78,85.3,terhitung,,,,2
+R040,Nasi Gurih Omelet Sayur Kukus,vitamin_c,2.8,5.72,104.3,terhitung,,,,2
+R040,Nasi Gurih Omelet Sayur Kukus,kalsium,41.1333,139.37,238.8,terhitung,,,,2
+R040,Nasi Gurih Omelet Sayur Kukus,zinc,1.3,0.97,-25.4,terhitung,,bawang merah; bawang putih; buncis; jagung pipil; lengkuas; minyak; santan; telur; wortel,,2
+R040,Nasi Gurih Omelet Sayur Kukus,serat,1.8,0.8,-55.6,terhitung,,bawang merah; bawang putih; lengkuas; minyak; santan,,2
+R040,Nasi Gurih Omelet Sayur Kukus,vitamin_a,490.1,227.65,-53.6,terhitung,,,,2
+R041,Nasi Sup Bakso Sayur,energi,313.3333,,,tidak_terhitung,bakso sapi,,,4
+R041,Nasi Sup Bakso Sayur,karbohidrat,44.7333,,,tidak_terhitung,bakso sapi,,,4
+R041,Nasi Sup Bakso Sayur,protein,11.3333,,,tidak_terhitung,bakso sapi,,,4
+R041,Nasi Sup Bakso Sayur,lemak,9.3667,,,tidak_terhitung,bakso sapi,,,4
+R041,Nasi Sup Bakso Sayur,zat_besi,1.7,,,tidak_terhitung,bakso sapi,,,4
+R041,Nasi Sup Bakso Sayur,vitamin_c,8.6,,,tidak_terhitung,bakso sapi,,,4
+R041,Nasi Sup Bakso Sayur,kalsium,28.8,,,tidak_terhitung,bakso sapi,,,4
+R041,Nasi Sup Bakso Sayur,zinc,1.9667,,,tidak_terhitung,bakso sapi,bawang merah; bawang putih; buncis; kentang; nasi; seledri; wortel,,4
+R041,Nasi Sup Bakso Sayur,serat,2.566666666666667,,,tidak_terhitung,bakso sapi,bawang merah; bawang putih; seledri,,4
+R041,Nasi Sup Bakso Sayur,vitamin_a,413.26666666666665,,,tidak_terhitung,bakso sapi,,,4
+R042,Kue Boh Deuk Beudeh,energi,44.3333,135.2,205.0,terhitung,,,,0
+R042,Kue Boh Deuk Beudeh,karbohidrat,8.6333,23.6,173.4,terhitung,,,,0
+R042,Kue Boh Deuk Beudeh,protein,0.4667,2.25,382.1,terhitung,,,,0
+R042,Kue Boh Deuk Beudeh,lemak,0.9667,3.8,293.1,terhitung,,,,0
+R042,Kue Boh Deuk Beudeh,zat_besi,0.1667,1.09,553.9,terhitung,,,,0
+R042,Kue Boh Deuk Beudeh,vitamin_c,0.1,0.67,570.0,terhitung,,,,0
+R042,Kue Boh Deuk Beudeh,kalsium,4.1333,12.37,199.3,terhitung,,,,0
+R042,Kue Boh Deuk Beudeh,zinc,0.1,0.85,750.0,terhitung,,kelapa parut; tepung ketan,,0
+R042,Kue Boh Deuk Beudeh,serat,0.3,0.47,56.7,terhitung,,gula merah; kelapa parut,,0
+R042,Kue Boh Deuk Beudeh,vitamin_a,0.0,0.0,,terhitung,,,,0
+R043,Nasi Tim Pepes Ayam Sayur,energi,127.0,135.23,6.5,terhitung,,,,18
+R043,Nasi Tim Pepes Ayam Sayur,karbohidrat,13.8,14.66,6.2,terhitung,,,,18
+R043,Nasi Tim Pepes Ayam Sayur,protein,7.4,6.16,-16.8,terhitung,,,,18
+R043,Nasi Tim Pepes Ayam Sayur,lemak,4.4,5.79,31.6,terhitung,,,,18
+R043,Nasi Tim Pepes Ayam Sayur,zat_besi,1.2,1.04,-13.3,terhitung,,,,18
+R043,Nasi Tim Pepes Ayam Sayur,vitamin_c,1.0,,,tidak_terhitung,tahu putih(TKPI kosong),,,18
+R043,Nasi Tim Pepes Ayam Sayur,kalsium,20.8,33.57,61.4,terhitung,,,,18
+R043,Nasi Tim Pepes Ayam Sayur,zinc,0.7,0.46,-34.3,terhitung,,bawang merah; bawng putih; daging ayam; jahe; kunyit; nasi tim; tahu putih; wortel parut,,18
+R043,Nasi Tim Pepes Ayam Sayur,serat,0.8,0.62,-22.5,terhitung,,bawang merah; bawng putih; daging ayam; jahe; kunyit; nasi tim,,18
+R043,Nasi Tim Pepes Ayam Sayur,vitamin_a,243.9,126.67,-48.1,terhitung,,,,18
+R044,Tim Nasi Kentang Ayam Sayuran,energi,141.3,152.64,8.0,terhitung,,,,16
+R044,Tim Nasi Kentang Ayam Sayuran,karbohidrat,15.3,17.44,14.0,terhitung,,,,16
+R044,Tim Nasi Kentang Ayam Sayuran,protein,7.0,5.37,-23.3,terhitung,,,,16
+R044,Tim Nasi Kentang Ayam Sayuran,lemak,5.5,6.71,22.0,terhitung,,,,16
+R044,Tim Nasi Kentang Ayam Sayuran,zat_besi,0.7,0.78,11.4,terhitung,,,,16
+R044,Tim Nasi Kentang Ayam Sayuran,vitamin_c,3.6,6.09,69.2,terhitung,,,,16
+R044,Tim Nasi Kentang Ayam Sayuran,kalsium,11.0,30.79,179.9,terhitung,,,,16
+R044,Tim Nasi Kentang Ayam Sayuran,zinc,0.6,,,tidak_terhitung,kecap manis(TKPI kosong),bawang putih; dada fillet ayam dipotong dadu kecil; kentang dipotong dadu kecil; minyak wijen; nasi; wortel dipotong dadu kecil,,16
+R044,Tim Nasi Kentang Ayam Sayuran,serat,0.8,0.26,-67.5,terhitung,,bawang putih; dada fillet ayam dipotong dadu kecil; kecap manis; minyak wijen,,16
+R044,Tim Nasi Kentang Ayam Sayuran,vitamin_a,165.2,99.45,-39.8,terhitung,,,,16
+R045,Pudding Buah Naga,energi,72.2,175.67,143.3,terhitung,,,,0
+R045,Pudding Buah Naga,karbohidrat,16.0,26.83,67.7,terhitung,,,,0
+R045,Pudding Buah Naga,protein,2.0,4.08,104.0,terhitung,,,,0
+R045,Pudding Buah Naga,lemak,0.3,5.5,1733.3,terhitung,,,,0
+R045,Pudding Buah Naga,zat_besi,0.1,1.77,1670.0,terhitung,,,,0
+R045,Pudding Buah Naga,vitamin_c,5.5,1.67,-69.6,terhitung,,,,0
+R045,Pudding Buah Naga,kalsium,65.6,130.83,99.4,terhitung,,,,0
+R045,Pudding Buah Naga,zinc,0.3,0.58,93.3,terhitung,,gula pasir; susu cair,,0
+R045,Pudding Buah Naga,serat,0.3,2.67,790.0,terhitung,,gula pasir; susu cair,,0
+R045,Pudding Buah Naga,vitamin_a,19.0,34.17,79.8,terhitung,,,,0
+R046,Nasi Baso Rambutan,energi,412.8,481.45,16.6,terhitung,,,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,karbohidrat,45.8,49.99,9.1,terhitung,,,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,protein,21.0,23.72,13.0,terhitung,,,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,lemak,15.6,20.72,32.8,terhitung,,,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,zat_besi,4.6,5.64,22.6,terhitung,,,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,vitamin_c,1.4,,,tidak_terhitung,tahu putih(TKPI kosong),,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,kalsium,74.8,185.89,148.5,terhitung,,,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,zinc,1.8,1.69,-6.1,terhitung,,bawang putih goreng yang dihaluskan; cincang paha fillet; jamur kuping; minyak wijen; nasi putih; putih telur; soun yang sudah direndam air dan digunting kecil; tahu putih; tapioka; udang cincang; wortel cincang kecil,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,serat,1.5,0.89,-40.7,terhitung,,bawang putih goreng yang dihaluskan; cincang paha fillet; jamur kuping; minyak wijen; putih telur; soun yang sudah direndam air dan digunting kecil; tapioka,soun yang sudah direndam air dan digunting kecil,14
+R046,Nasi Baso Rambutan,vitamin_a,105.6,139.88,32.5,terhitung,,,soun yang sudah direndam air dan digunting kecil,14
+R047,Nasi Tongseng Ayam,energi,353.0,461.47,30.7,terhitung,,,,16
+R047,Nasi Tongseng Ayam,karbohidrat,36.9,52.61,42.6,terhitung,,,,16
+R047,Nasi Tongseng Ayam,protein,16.6,14.95,-9.9,terhitung,,,,16
+R047,Nasi Tongseng Ayam,lemak,15.1,21.26,40.8,terhitung,,,,16
+R047,Nasi Tongseng Ayam,zat_besi,1.3,2.38,83.1,terhitung,,,,16
+R047,Nasi Tongseng Ayam,vitamin_c,4.8,15.23,217.3,terhitung,,,,16
+R047,Nasi Tongseng Ayam,kalsium,18.1,82.04,353.3,terhitung,,,,16
+R047,Nasi Tongseng Ayam,zinc,1.5,1.45,-3.3,terhitung,,bawang merah; bawang putih; daging ayam; gula pasir; jahe; kunyit; nasi; santan; tomat,,16
+R047,Nasi Tongseng Ayam,serat,2.3,2.85,23.9,terhitung,,bawang merah; bawang putih; daging ayam; gula pasir; jahe; kunyit; santan,,16
+R047,Nasi Tongseng Ayam,vitamin_a,22.1,483.83,2089.3,terhitung,,,,16
+R048,Dimsum Udang Tepung Lele,energi,76.5,,,tidak_terhitung,kulit dimsum; tepung ikan lele,,,10
+R048,Dimsum Udang Tepung Lele,karbohidrat,4.8,,,tidak_terhitung,kulit dimsum; tepung ikan lele,,,10
+R048,Dimsum Udang Tepung Lele,protein,9.5,,,tidak_terhitung,kulit dimsum; tepung ikan lele,,,10
+R048,Dimsum Udang Tepung Lele,lemak,1.9,,,tidak_terhitung,kulit dimsum; tepung ikan lele,,,10
+R048,Dimsum Udang Tepung Lele,zat_besi,1.1,,,tidak_terhitung,kulit dimsum; tepung ikan lele,,,10
+R048,Dimsum Udang Tepung Lele,vitamin_c,0.8,,,tidak_terhitung,ebi kering(TKPI kosong); kulit dimsum; tepung ikan lele,,,10
+R048,Dimsum Udang Tepung Lele,kalsium,89.0,,,tidak_terhitung,kulit dimsum; tepung ikan lele,,,10
+R048,Dimsum Udang Tepung Lele,zinc,0.8,,,tidak_terhitung,kulit dimsum; tepung ikan lele,bawang merah haluskan; bawang putih; bawang putih haluskan; gula; gula pasir; maizena; minyak wijen; tepung tapioka; tomat apel masak; udang kupas,,10
+R048,Dimsum Udang Tepung Lele,serat,0.1,,,tidak_terhitung,ebi kering(TKPI kosong); kulit dimsum; tepung ikan lele,bawang merah haluskan; bawang putih; bawang putih haluskan; gula; gula pasir; maizena; minyak wijen; tepung tapioka,,10
+R048,Dimsum Udang Tepung Lele,vitamin_a,23.1,,,tidak_terhitung,kulit dimsum; tepung ikan lele,,,10
+R049,Bubur Iwak Haruan,energi,80.0,98.74,23.4,terhitung,,,,7
+R049,Bubur Iwak Haruan,karbohidrat,9.1667,12.38,35.1,terhitung,,,,7
+R049,Bubur Iwak Haruan,protein,5.5667,5.78,3.8,terhitung,,,,7
+R049,Bubur Iwak Haruan,lemak,2.3667,3.03,28.0,terhitung,,,,7
+R049,Bubur Iwak Haruan,zat_besi,0.5,0.74,48.0,terhitung,,,,7
+R049,Bubur Iwak Haruan,vitamin_c,0.5,,,tidak_terhitung,daging ikan haruan(TKPI kosong); tempe(TKPI kosong),,,7
+R049,Bubur Iwak Haruan,kalsium,16.6333,52.79,217.4,terhitung,,,,7
+R049,Bubur Iwak Haruan,zinc,0.4333,0.45,3.9,terhitung,,bawang merah; bawang putih; jahe; margarin/minyak goreng; nasi; tempe; wortel parut,,7
+R049,Bubur Iwak Haruan,serat,0.4333333333333333,0.52,20.0,terhitung,,bawang merah; bawang putih; daging ikan haruan; jahe; margarin/minyak goreng,,7
+R049,Bubur Iwak Haruan,vitamin_a,84.46666666666667,126.71,50.0,terhitung,,,,7
+R050,Bubur Labu Waluh Iwak Tenggiri,energi,78.6667,,,tidak_terhitung,daging ikan tenggiri,,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,karbohidrat,8.6,,,tidak_terhitung,daging ikan tenggiri,,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,protein,6.7333,,,tidak_terhitung,daging ikan tenggiri,,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,lemak,2.3667,,,tidak_terhitung,daging ikan tenggiri,,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,zat_besi,0.6667,,,tidak_terhitung,daging ikan tenggiri,,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,vitamin_c,11.2333,,,tidak_terhitung,daging ikan tenggiri,,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,kalsium,29.5667,,,tidak_terhitung,daging ikan tenggiri,,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,zinc,0.4,,,tidak_terhitung,daging ikan tenggiri,bawang merah; bawang putih; buncis; labu waluh; margarin; tomat,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,serat,2.766666666666667,,,tidak_terhitung,daging ikan tenggiri,bawang merah; bawang putih; labu waluh; margarin,,2
+R050,Bubur Labu Waluh Iwak Tenggiri,vitamin_a,365.2,,,tidak_terhitung,daging ikan tenggiri,,,2
+R051,Puree Pisang Mahuli,energi,15.333333333333334,54.0,252.2,terhitung,,,,100
+R051,Puree Pisang Mahuli,karbohidrat,3.9,12.15,211.5,terhitung,,,,100
+R051,Puree Pisang Mahuli,protein,0.1666666666666666,0.5,200.0,terhitung,,,,100
+R051,Puree Pisang Mahuli,lemak,0.0999999999999999,0.4,300.0,terhitung,,,,100
+R051,Puree Pisang Mahuli,zat_besi,0.0666666666666666,0.1,50.0,terhitung,,,,100
+R051,Puree Pisang Mahuli,vitamin_c,1.5,4.5,200.0,terhitung,,,,100
+R051,Puree Pisang Mahuli,kalsium,1.0,10.0,900.0,terhitung,,,,100
+R051,Puree Pisang Mahuli,zinc,0.0333333333333333,0.1,200.0,terhitung,,,,100
+R051,Puree Pisang Mahuli,serat,0.3999999999999999,0.95,137.5,terhitung,,,,100
+R051,Puree Pisang Mahuli,vitamin_a,1.3333333333333333,3.08,131.0,terhitung,,,,100
+R052,Tim Keladi Iwak Haruan,energi,133.0,133.12,0.1,terhitung,,,,15
+R052,Tim Keladi Iwak Haruan,karbohidrat,18.2,18.32,0.7,terhitung,,,,15
+R052,Tim Keladi Iwak Haruan,protein,7.6333,6.39,-16.3,terhitung,,,,15
+R052,Tim Keladi Iwak Haruan,lemak,3.3667,3.9,15.8,terhitung,,,,15
+R052,Tim Keladi Iwak Haruan,zat_besi,1.1,1.1,0.0,terhitung,,,,15
+R052,Tim Keladi Iwak Haruan,vitamin_c,10.2333,,,tidak_terhitung,ikan haruan(TKPI kosong),,,15
+R052,Tim Keladi Iwak Haruan,kalsium,21.4667,84.59,294.1,terhitung,,,,15
+R052,Tim Keladi Iwak Haruan,zinc,0.7667,0.75,-2.2,terhitung,,bawang putih; keladi; margarin; telur ayam; wortel,,15
+R052,Tim Keladi Iwak Haruan,serat,1.3,0.71,-45.4,terhitung,,bawang putih; ikan haruan; margarin,,15
+R052,Tim Keladi Iwak Haruan,vitamin_a,198.6,191.35,-3.7,terhitung,,,,15
+R053,Nasi Tim Tenggiri Santan,energi,131.6667,,,tidak_terhitung,ikan tenggiri,,,3
+R053,Nasi Tim Tenggiri Santan,karbohidrat,18.2,,,tidak_terhitung,ikan tenggiri,,,3
+R053,Nasi Tim Tenggiri Santan,protein,7.6,,,tidak_terhitung,ikan tenggiri,,,3
+R053,Nasi Tim Tenggiri Santan,lemak,2.8333,,,tidak_terhitung,ikan tenggiri,,,3
+R053,Nasi Tim Tenggiri Santan,zat_besi,0.7333,,,tidak_terhitung,ikan tenggiri,,,3
+R053,Nasi Tim Tenggiri Santan,vitamin_c,3.4333,,,tidak_terhitung,ikan tenggiri,,,3
+R053,Nasi Tim Tenggiri Santan,kalsium,36.1,,,tidak_terhitung,ikan tenggiri,,,3
+R053,Nasi Tim Tenggiri Santan,zinc,0.4,,,tidak_terhitung,ikan tenggiri,bawang merah; bawang putih; daun bayam; margarin; nasi; santan,,3
+R053,Nasi Tim Tenggiri Santan,serat,0.4666666666666666,,,tidak_terhitung,ikan tenggiri,bawang merah; bawang putih; daun bayam; margarin; santan,,3
+R053,Nasi Tim Tenggiri Santan,vitamin_a,67.53333333333333,,,tidak_terhitung,ikan tenggiri,,,3
+R054,Pisang Santan,energi,48.5,52.35,7.9,terhitung,,,,29
+R054,Pisang Santan,karbohidrat,6.15,6.54,6.3,terhitung,,,,29
+R054,Pisang Santan,protein,2.05,1.9,-7.3,terhitung,,,,29
+R054,Pisang Santan,lemak,1.95,2.05,5.1,terhitung,,,,29
+R054,Pisang Santan,zat_besi,0.25,0.43,72.0,terhitung,,,,29
+R054,Pisang Santan,vitamin_c,2.3,2.35,2.2,terhitung,,,,29
+R054,Pisang Santan,kalsium,8.65,17.0,96.5,terhitung,,,,29
+R054,Pisang Santan,zinc,0.2,0.2,0.0,terhitung,,santan; telur ayam,,29
+R054,Pisang Santan,serat,0.7,0.54,-22.9,terhitung,,santan,,29
+R054,Pisang Santan,vitamin_a,28.6,9.62,-66.4,terhitung,,,,29
+R055,Nasi Iwak Patin Baubar,energi,309.6667,430.29,39.0,terhitung,,,,1
+R055,Nasi Iwak Patin Baubar,karbohidrat,47.2667,61.42,29.9,terhitung,,,,1
+R055,Nasi Iwak Patin Baubar,protein,17.6333,19.29,9.4,terhitung,,,,1
+R055,Nasi Iwak Patin Baubar,lemak,5.3667,12.04,124.3,terhitung,,,,1
+R055,Nasi Iwak Patin Baubar,zat_besi,2.4333,2.85,17.1,terhitung,,,,1
+R055,Nasi Iwak Patin Baubar,vitamin_c,5.4333,,,tidak_terhitung,ikan patin(TKPI kosong); tahu(TKPI kosong),,,1
+R055,Nasi Iwak Patin Baubar,kalsium,49.5333,129.14,160.7,terhitung,,,,1
+R055,Nasi Iwak Patin Baubar,zinc,1.1667,1.7,45.7,terhitung,,bawang merah; bawang putih; nasi; santan; tahu; tomat,,1
+R055,Nasi Iwak Patin Baubar,serat,1.933333333333333,1.3,-32.8,terhitung,,bawang merah; bawang putih; gula merah; ikan patin; santan,,1
+R055,Nasi Iwak Patin Baubar,vitamin_a,31.133333333333336,24.87,-20.1,terhitung,,,,1
+R056,Nasi Sop Ayam Banjar,energi,308.6667,,,tidak_terhitung,kakas,,,1
+R056,Nasi Sop Ayam Banjar,karbohidrat,33.4,,,tidak_terhitung,kakas,,,1
+R056,Nasi Sop Ayam Banjar,protein,16.4333,,,tidak_terhitung,kakas,,,1
+R056,Nasi Sop Ayam Banjar,lemak,11.3667,,,tidak_terhitung,kakas,,,1
+R056,Nasi Sop Ayam Banjar,zat_besi,1.5,,,tidak_terhitung,kakas,,,1
+R056,Nasi Sop Ayam Banjar,vitamin_c,3.9333,,,tidak_terhitung,kakas,,,1
+R056,Nasi Sop Ayam Banjar,kalsium,20.6667,,,tidak_terhitung,kakas,,,1
+R056,Nasi Sop Ayam Banjar,zinc,1.5,,,tidak_terhitung,kakas,bawang merah; bawang putih; daging ayam; kentang; minyak; nasi; wortel,,1
+R056,Nasi Sop Ayam Banjar,serat,1.4666666666666668,,,tidak_terhitung,kakas,bawang merah; bawang putih; daging ayam; minyak,,1
+R056,Nasi Sop Ayam Banjar,vitamin_a,496.3333333333333,,,tidak_terhitung,kakas,,,1
+R057,Agar-Agar Jeruk Manis,energi,102.0,105.76,3.7,terhitung,,,,100
+R057,Agar-Agar Jeruk Manis,karbohidrat,26.0,26.16,0.6,terhitung,,,,100
+R057,Agar-Agar Jeruk Manis,protein,1.0,1.8,80.0,terhitung,,,,100
+R057,Agar-Agar Jeruk Manis,lemak,0.1,0.4,300.0,terhitung,,,,100
+R057,Agar-Agar Jeruk Manis,zat_besi,0.1,0.8,700.0,terhitung,,,,100
+R057,Agar-Agar Jeruk Manis,vitamin_c,58.3,98.0,68.1,terhitung,,,,100
+R057,Agar-Agar Jeruk Manis,kalsium,44.1,66.2,50.1,terhitung,,,,100
+R057,Agar-Agar Jeruk Manis,zinc,0.1,0.4,300.0,terhitung,,gula pasir; jeruk manis,,100
+R057,Agar-Agar Jeruk Manis,serat,2.6,2.8,7.7,terhitung,,gula pasir; jeruk manis,,100
+R057,Agar-Agar Jeruk Manis,vitamin_a,8.8,0.0,-100.0,terhitung,,,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,energi,112.64,192.22,70.6,terhitung,,,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,karbohidrat,11.4333,15.84,38.5,terhitung,,,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,protein,3.68,9.14,148.4,terhitung,,,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,lemak,5.8733,10.44,77.8,terhitung,,,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,zat_besi,1.1433,2.19,91.6,terhitung,,,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,vitamin_c,2.7,,,tidak_terhitung,tahu(TKPI kosong); tempe(TKPI kosong),,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,kalsium,0.0,79.66,,terhitung,,,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,zinc,0.0,1.06,,terhitung,,bawang merah; bawang putih; bayam; labu siam; lengkuas; minyak goreng; nasi putih; tahu; telur puyuh; tempe; wortel,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,serat,0.9266666666666666,2.04,120.1,terhitung,,bawang merah; bawang putih; bayam; labu siam; lengkuas; minyak goreng,,100
+R058,Nasi Tim + Sayur Bobor Labu Telur Puyuh,vitamin_a,570.0,262.71,-53.9,terhitung,,,,100
+R059,Nasi Kuning Kari Ayam,energi,104.0967,93.25,-10.4,terhitung,,,,62
+R059,Nasi Kuning Kari Ayam,karbohidrat,14.16,7.93,-44.0,terhitung,,,,62
+R059,Nasi Kuning Kari Ayam,protein,3.94,4.18,6.1,terhitung,,,,62
+R059,Nasi Kuning Kari Ayam,lemak,3.4967,5.01,43.3,terhitung,,,,62
+R059,Nasi Kuning Kari Ayam,zat_besi,0.6933,1.03,48.6,terhitung,,,,62
+R059,Nasi Kuning Kari Ayam,vitamin_c,0.0,,,tidak_terhitung,tahu(TKPI kosong),,,62
+R059,Nasi Kuning Kari Ayam,kalsium,0.0,42.8,,terhitung,,,,62
+R059,Nasi Kuning Kari Ayam,zinc,0.0,0.36,,terhitung,,ayam; bawang merah; buncis; jahe; kunyit; lengkuas; minyak; nasi; tahu; telur,,62
+R059,Nasi Kuning Kari Ayam,serat,0.5466666666666666,0.62,13.4,terhitung,,ayam; bawang merah; jahe; kunyit; lengkuas; minyak,,62
+R059,Nasi Kuning Kari Ayam,vitamin_a,3.0866666666666664,85.57,2672.2,terhitung,,,,62
+R060,Jus Mangga,energi,11.2667,17.33,53.8,terhitung,,,,0
+R060,Jus Mangga,karbohidrat,2.6667,4.1,53.7,terhitung,,,,0
+R060,Jus Mangga,protein,0.1533,0.23,50.0,terhitung,,,,0
+R060,Jus Mangga,lemak,0.0,0.0,,terhitung,,,,0
+R060,Jus Mangga,zat_besi,0.2167,0.33,52.3,terhitung,,,,0
+R060,Jus Mangga,vitamin_c,2.6,4.0,53.8,terhitung,,,,0
+R060,Jus Mangga,kalsium,0.0,6.67,,terhitung,,,,0
+R060,Jus Mangga,zinc,0.0,,,tidak_terhitung,semua bahan bernilai 0 di TKPI (dianggap tidak tersedia),,,0
+R060,Jus Mangga,serat,0.3466666666666667,0.53,52.9,terhitung,,,,0
+R060,Jus Mangga,vitamin_a,0.0,17.56,,terhitung,,,,0
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,energi,804.0,616.71,-23.3,terhitung,,,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,karbohidrat,99.23,123.49,24.4,terhitung,,,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,protein,27.84,17.79,-36.1,terhitung,,,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,lemak,32.98,7.43,-77.5,terhitung,,,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,zat_besi,5.73,4.8,-16.2,terhitung,,,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,vitamin_c,7.2,,,tidak_terhitung,kacang merah(TKPI kosong),,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,kalsium,0.0,417.61,,terhitung,,,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,zinc,0.0,1.5,,terhitung,,bawang merah; bawang putih; buncis; kacang merah; minyak; tomat; wortel,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,serat,4.18,4.5,7.7,terhitung,,bawang merah; bawang putih; minyak,,100
+R061,Lontong + Sate Ayam Taliwang + Sup Sayuran,vitamin_a,2850.0,436.14,-84.7,terhitung,,,,100
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,energi,753.0,271.56,-63.9,terhitung,,,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,karbohidrat,104.51,35.96,-65.6,terhitung,,,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,protein,37.73,13.15,-65.1,terhitung,,,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,lemak,21.87,8.68,-60.3,terhitung,,,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,zat_besi,9.14,3.14,-65.6,terhitung,,,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,vitamin_c,32.29,,,tidak_terhitung,ikan tongkol(TKPI kosong); tahu(TKPI kosong),,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,kalsium,0.0,182.23,,terhitung,,,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,zinc,0.0,1.54,,terhitung,,bawang merah; bawang putih; jahe; kunyit; lengkuas; minyak; nasi putih; santan; tahu; wortel kecil,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,serat,2.11,1.22,-42.2,terhitung,,bawang merah; bawang putih; ikan tongkol; jahe; kunyit; lengkuas; minyak; santan,,31
+R062,Nasi Putih + Pepes Ikan + Gulai Tahu Wortel,vitamin_a,5771.55,327.74,-94.3,terhitung,,,,31
+R063,Bubur Sumsum Ubi Ungu,energi,74.0,242.83,228.1,terhitung,,,,100
+R063,Bubur Sumsum Ubi Ungu,karbohidrat,32.25,46.7,44.8,terhitung,,,,100
+R063,Bubur Sumsum Ubi Ungu,protein,6.36,2.68,-57.9,terhitung,,,,100
+R063,Bubur Sumsum Ubi Ungu,lemak,1.14,5.95,421.9,terhitung,,,,100
+R063,Bubur Sumsum Ubi Ungu,zat_besi,0.57,1.14,100.0,terhitung,,,,100
+R063,Bubur Sumsum Ubi Ungu,vitamin_c,0.0,2.5,,terhitung,,,,100
+R063,Bubur Sumsum Ubi Ungu,kalsium,0.0,35.95,,terhitung,,,,100
+R063,Bubur Sumsum Ubi Ungu,zinc,0.0,0.33,,terhitung,,maizena; santan; tepung beras,,100
+R063,Bubur Sumsum Ubi Ungu,serat,109.2,1.46,-98.7,terhitung,,gula merah; maizena; santan; tepung beras,,100
+R063,Bubur Sumsum Ubi Ungu,vitamin_a,3.14,0.18,-94.3,terhitung,,,,100
+R064,Nasi Goreng,energi,299.6667,206.5,-31.1,terhitung,,,,100
+R064,Nasi Goreng,karbohidrat,40.12,19.09,-52.4,terhitung,,,,100
+R064,Nasi Goreng,protein,10.45,9.37,-10.3,terhitung,,,,100
+R064,Nasi Goreng,lemak,10.18,10.23,0.5,terhitung,,,,100
+R064,Nasi Goreng,zat_besi,2.6067,2.84,9.0,terhitung,,,,100
+R064,Nasi Goreng,vitamin_c,0.0,3.4,,terhitung,,,,100
+R064,Nasi Goreng,kalsium,0.0,69.84,,terhitung,,,,100
+R064,Nasi Goreng,zinc,0.0,,,tidak_terhitung,kecap(TKPI kosong),bawang merah; bawang putih; jagung; minyak; nasi; telur,,100
+R064,Nasi Goreng,serat,0.3066666666666667,0.56,82.6,terhitung,,bawang merah; bawang putih; kecap; minyak,,100
+R064,Nasi Goreng,vitamin_a,102.33666666666666,169.93,66.0,terhitung,,,,100
+R065,Nasi Bakar Cakalang,energi,297.0,270.42,-8.9,terhitung,,,,52
+R065,Nasi Bakar Cakalang,karbohidrat,41.4033,40.3,-2.7,terhitung,,,,52
+R065,Nasi Bakar Cakalang,protein,12.45,7.05,-43.4,terhitung,,,,52
+R065,Nasi Bakar Cakalang,lemak,9.28,8.94,-3.7,terhitung,,,,52
+R065,Nasi Bakar Cakalang,zat_besi,2.45,2.19,-10.6,terhitung,,,,52
+R065,Nasi Bakar Cakalang,vitamin_c,3.0667,,,tidak_terhitung,tahu(TKPI kosong),,,52
+R065,Nasi Bakar Cakalang,kalsium,0.0,247.41,,terhitung,,,,52
+R065,Nasi Bakar Cakalang,zinc,0.0,0.93,,terhitung,,bawang merah; bawang putih; lengkuas; minyak; nasi putih; santan; tahu; wortel,,52
+R065,Nasi Bakar Cakalang,serat,1.5,2.22,48.0,terhitung,,bawang merah; bawang putih; cakalang; lengkuas; minyak; santan,,52
+R065,Nasi Bakar Cakalang,vitamin_a,953.6666666666666,313.47,-67.1,terhitung,,,,52
+R066,Singkong Keju,energi,141.0,141.5,0.4,terhitung,,,,0
+R066,Singkong Keju,karbohidrat,21.1,21.3,0.9,terhitung,,,,0
+R066,Singkong Keju,protein,4.9333,4.83,-2.1,terhitung,,,,0
+R066,Singkong Keju,lemak,4.1167,4.12,0.1,terhitung,,,,0
+R066,Singkong Keju,zat_besi,0.7333,1.08,47.3,terhitung,,,,0
+R066,Singkong Keju,vitamin_c,10.3333,15.83,53.2,terhitung,,,,0
+R066,Singkong Keju,kalsium,0.0,191.83,,terhitung,,,,0
+R066,Singkong Keju,zinc,0.0,0.77,,terhitung,,keju; singkong; susu,,0
+R066,Singkong Keju,serat,0.65,0.45,-30.8,terhitung,,keju; susu,,0
+R066,Singkong Keju,vitamin_a,0.0,48.22,,terhitung,,,,0
+R067,Tim Tuna Kelor,energi,81.9667,65.95,-19.5,terhitung,,,tuna fillet,36
+R067,Tim Tuna Kelor,karbohidrat,8.09,9.78,20.9,terhitung,,,tuna fillet,36
+R067,Tim Tuna Kelor,protein,3.2,4.12,28.7,terhitung,,,tuna fillet,36
+R067,Tim Tuna Kelor,lemak,4.1533,1.15,-72.3,terhitung,,,tuna fillet,36
+R067,Tim Tuna Kelor,zat_besi,0.6333,1.0,57.9,terhitung,,,tuna fillet,36
+R067,Tim Tuna Kelor,vitamin_c,0.0,,,tidak_terhitung,asi/susu(TKPI kosong); tahu mentah(TKPI kosong),,tuna fillet,36
+R067,Tim Tuna Kelor,kalsium,0.0,72.55,,terhitung,,,tuna fillet,36
+R067,Tim Tuna Kelor,zinc,0.0,0.34,,terhitung,,asi/susu; bawang merah; bawang putih; jahe; nasi; tahu mentah,tuna fillet,36
+R067,Tim Tuna Kelor,serat,0.1833333333333333,0.49,167.3,terhitung,,bawang merah; bawang putih; jahe; tuna fillet,tuna fillet,36
+R067,Tim Tuna Kelor,vitamin_a,0.7333333333333334,58.9,7931.8,terhitung,,,tuna fillet,36
+R068,Roti Pawa Mini,energi,78.31,59.8,-23.6,terhitung,,,abon tuna,80
+R068,Roti Pawa Mini,karbohidrat,10.4333,8.62,-17.4,terhitung,,,abon tuna,80
+R068,Roti Pawa Mini,protein,2.0033,1.77,-11.6,terhitung,,,abon tuna,80
+R068,Roti Pawa Mini,lemak,3.5067,2.28,-35.0,terhitung,,,abon tuna,80
+R068,Roti Pawa Mini,zat_besi,0.18,,,tidak_terhitung,abon tuna(TKPI kosong),,,80
+R068,Roti Pawa Mini,vitamin_c,0.48,,,tidak_terhitung,abon tuna(TKPI kosong),,,80
+R068,Roti Pawa Mini,kalsium,0.0,,,tidak_terhitung,abon tuna(TKPI kosong),,,80
+R068,Roti Pawa Mini,zinc,0.0,,,tidak_terhitung,abon tuna(TKPI kosong),margarin; terigu serbaguna; wortel parut,,80
+R068,Roti Pawa Mini,serat,0.0633333333333333,,,tidak_terhitung,abon tuna(TKPI kosong),margarin,,80
+R068,Roti Pawa Mini,vitamin_a,190.0,,,tidak_terhitung,abon tuna(TKPI kosong),,,80
+R069,Puree Alpukat,energi,10.37,17.0,63.9,terhitung,,,,0
+R069,Puree Alpukat,karbohidrat,0.94,1.54,63.8,terhitung,,,,0
+R069,Puree Alpukat,protein,0.11,0.18,63.6,terhitung,,,,0
+R069,Puree Alpukat,lemak,0.7933,1.3,63.9,terhitung,,,,0
+R069,Puree Alpukat,zat_besi,0.11,0.18,63.6,terhitung,,,,0
+R069,Puree Alpukat,vitamin_c,1.5867,2.6,63.9,terhitung,,,,0
+R069,Puree Alpukat,kalsium,0.0,2.0,,terhitung,,,,0
+R069,Puree Alpukat,zinc,0.0,0.08,,terhitung,,alpukat,,0
+R069,Puree Alpukat,serat,0.0,,,tidak_terhitung,alpukat(TKPI kosong),,,0
+R069,Puree Alpukat,vitamin_a,21.96,6.3,-71.3,terhitung,,,,0
+R070,Sup Krim Kentang Jagung,energi,404.0,159.62,-60.5,terhitung,,,,45
+R070,Sup Krim Kentang Jagung,karbohidrat,53.94,22.58,-58.1,terhitung,,,,45
+R070,Sup Krim Kentang Jagung,protein,14.32,5.66,-60.5,terhitung,,,,45
+R070,Sup Krim Kentang Jagung,lemak,15.51,5.65,-63.6,terhitung,,,,45
+R070,Sup Krim Kentang Jagung,zat_besi,2.8,1.16,-58.6,terhitung,,,,45
+R070,Sup Krim Kentang Jagung,vitamin_c,50.03,,,tidak_terhitung,susu/asi(TKPI kosong),,,45
+R070,Sup Krim Kentang Jagung,kalsium,0.0,66.53,,terhitung,,,,45
+R070,Sup Krim Kentang Jagung,zinc,0.0,0.66,,terhitung,,bawang bombay; dada ayam; jagung; kentang; minyak; susu/asi; tepung maizena,,45
+R070,Sup Krim Kentang Jagung,serat,2.19,1.2,-45.2,terhitung,,bawang bombay; dada ayam; minyak; tepung maizena,,45
+R070,Sup Krim Kentang Jagung,vitamin_a,156.6,103.95,-33.6,terhitung,,,,45
+R071,Nasi Tim + Bola Ikan Palumara,energi,409.0,260.94,-36.2,terhitung,,,,100
+R071,Nasi Tim + Bola Ikan Palumara,karbohidrat,46.42,35.65,-23.2,terhitung,,,,100
+R071,Nasi Tim + Bola Ikan Palumara,protein,13.11,13.06,-0.4,terhitung,,,,100
+R071,Nasi Tim + Bola Ikan Palumara,lemak,19.11,7.8,-59.2,terhitung,,,,100
+R071,Nasi Tim + Bola Ikan Palumara,zat_besi,2.09,2.53,21.1,terhitung,,,,100
+R071,Nasi Tim + Bola Ikan Palumara,vitamin_c,1.44,,,tidak_terhitung,tempe(TKPI kosong),,,100
+R071,Nasi Tim + Bola Ikan Palumara,kalsium,0.0,91.34,,terhitung,,,,100
+R071,Nasi Tim + Bola Ikan Palumara,zinc,0.0,1.18,,terhitung,,bawang merah; buncis; kunyit; minyak; nasi; tempe; tomat; wortel parut,,100
+R071,Nasi Tim + Bola Ikan Palumara,serat,1.04,1.43,37.5,terhitung,,bawang merah; cakalang; kunyit; minyak,,100
+R071,Nasi Tim + Bola Ikan Palumara,vitamin_a,570.0,355.5,-37.6,terhitung,,,,100
+R072,Setup Apel,energi,25.6667,29.0,13.0,terhitung,,,,0
+R072,Setup Apel,karbohidrat,6.5567,7.45,13.6,terhitung,,,,0
+R072,Setup Apel,protein,0.1333,0.15,12.5,terhitung,,,,0
+R072,Setup Apel,lemak,0.1767,0.2,13.2,terhitung,,,,0
+R072,Setup Apel,zat_besi,0.1333,0.15,12.5,terhitung,,,,0
+R072,Setup Apel,vitamin_c,2.2,2.5,13.6,terhitung,,,,0
+R072,Setup Apel,kalsium,0.0,3.0,,terhitung,,,,0
+R072,Setup Apel,zinc,0.0,0.15,,terhitung,,apel,,0
+R072,Setup Apel,serat,1.143333333333333,1.3,13.7,terhitung,,apel,,0
+R072,Setup Apel,vitamin_a,39.6,2.5,-93.7,terhitung,,,,0
+R073,Nasi Goreng Tuna + Tempe Goreng,energi,864.0,407.02,-52.9,terhitung,,,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,karbohidrat,113.1,35.19,-68.9,terhitung,,,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,protein,27.03,6.35,-76.5,terhitung,,,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,lemak,34.21,27.1,-20.8,terhitung,,,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,zat_besi,4.95,2.02,-59.2,terhitung,,,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,vitamin_c,11.7,,,tidak_terhitung,tempe(TKPI kosong),,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,kalsium,0.0,222.29,,terhitung,,,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,zinc,0.0,0.85,,terhitung,,bawang putih; jagung pipil; margarin; minyak; nasi; tempe; wortel potong dadu,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,serat,4.11,1.91,-53.5,terhitung,,bawang putih; margarin; minyak,,21
+R073,Nasi Goreng Tuna + Tempe Goreng,vitamin_a,2991.5,910.7,-69.6,terhitung,,,,21
+R074,Nasi + Binte Bulihuta,energi,931.0,309.87,-66.7,terhitung,,,,34
+R074,Nasi + Binte Bulihuta,karbohidrat,125.62,42.91,-65.8,terhitung,,,,34
+R074,Nasi + Binte Bulihuta,protein,33.74,10.14,-69.9,terhitung,,,,34
+R074,Nasi + Binte Bulihuta,lemak,32.81,10.89,-66.8,terhitung,,,,34
+R074,Nasi + Binte Bulihuta,zat_besi,6.92,2.3,-66.8,terhitung,,,,34
+R074,Nasi + Binte Bulihuta,vitamin_c,11.7,,,tidak_terhitung,tahu potong dadu(TKPI kosong),,,34
+R074,Nasi + Binte Bulihuta,kalsium,0.0,81.67,,terhitung,,,,34
+R074,Nasi + Binte Bulihuta,zinc,0.0,1.12,,terhitung,,bawang merah; jagung pipil; margarin; nasi; tahu potong dadu; telur puyuh; tomat; wortel,,34
+R074,Nasi + Binte Bulihuta,serat,3.98,1.1,-72.4,terhitung,,bawang merah; cakalang fillet; margarin,,34
+R074,Nasi + Binte Bulihuta,vitamin_a,3026.78,470.69,-84.4,terhitung,,,,34
+R075,Bola Singkong Isi Pisang,energi,400.0,174.53,-56.4,terhitung,,,,0
+R075,Bola Singkong Isi Pisang,karbohidrat,93.85,38.88,-58.6,terhitung,,,,0
+R075,Bola Singkong Isi Pisang,protein,3.94,1.89,-52.0,terhitung,,,,0
+R075,Bola Singkong Isi Pisang,lemak,0.71,1.34,88.7,terhitung,,,,0
+R075,Bola Singkong Isi Pisang,zat_besi,3.2,1.28,-60.0,terhitung,,,,0
+R075,Bola Singkong Isi Pisang,vitamin_c,24.46,16.4,-33.0,terhitung,,,,0
+R075,Bola Singkong Isi Pisang,kalsium,0.0,49.83,,terhitung,,,,0
+R075,Bola Singkong Isi Pisang,zinc,0.0,0.51,,terhitung,,singkong; tepung ketan,,0
+R075,Bola Singkong Isi Pisang,serat,2.91,0.69,-76.3,terhitung,,gula merah,,0
+R075,Bola Singkong Isi Pisang,vitamin_a,0.0,0.62,,terhitung,,,,0
+R076,Bubur Jagung,energi,82.5833,111.65,35.2,terhitung,,,,70
+R076,Bubur Jagung,karbohidrat,10.9,12.47,14.4,terhitung,,,,70
+R076,Bubur Jagung,protein,3.4933,5.1,46.0,terhitung,,,,70
+R076,Bubur Jagung,lemak,2.8133,4.62,64.2,terhitung,,,,70
+R076,Bubur Jagung,zat_besi,0.5833,0.81,38.9,terhitung,,,,70
+R076,Bubur Jagung,vitamin_c,0.9,0.9,0.0,terhitung,,,,70
+R076,Bubur Jagung,kalsium,0.0,28.13,,terhitung,,,,70
+R076,Bubur Jagung,zinc,0.0,0.32,,terhitung,,ayam; jagung; telur kocok,,70
+R076,Bubur Jagung,serat,0.15,0.15,0.0,terhitung,,ayam,,70
+R076,Bubur Jagung,vitamin_a,32.27,40.59,25.8,terhitung,,,,70
+R077,Bubur + Pepes Ikan Tahu,energi,79.22,,,tidak_terhitung,ikan dole,,,100
+R077,Bubur + Pepes Ikan Tahu,karbohidrat,11.3633,,,tidak_terhitung,ikan dole,,,100
+R077,Bubur + Pepes Ikan Tahu,protein,3.55,,,tidak_terhitung,ikan dole,,,100
+R077,Bubur + Pepes Ikan Tahu,lemak,2.3467,,,tidak_terhitung,ikan dole,,,100
+R077,Bubur + Pepes Ikan Tahu,zat_besi,0.88,,,tidak_terhitung,ikan dole,,,100
+R077,Bubur + Pepes Ikan Tahu,vitamin_c,0.96,,,tidak_terhitung,ikan dole; mentega(TKPI kosong); tahu(TKPI kosong),,,100
+R077,Bubur + Pepes Ikan Tahu,kalsium,0.0,,,tidak_terhitung,ikan dole,,,100
+R077,Bubur + Pepes Ikan Tahu,zinc,0.0,,,tidak_terhitung,ikan dole,bawang merah; bawang putih; mentega; tahu; wortel parut,,100
+R077,Bubur + Pepes Ikan Tahu,serat,0.0933333333333333,,,tidak_terhitung,ikan dole,bawang merah; bawang putih; mentega,,100
+R077,Bubur + Pepes Ikan Tahu,vitamin_a,380.0,,,tidak_terhitung,ikan dole,,,100
+R078,Melon Kerok,energi,10.75,18.5,72.1,terhitung,,,,0
+R078,Melon Kerok,karbohidrat,2.2667,3.9,72.1,terhitung,,,,0
+R078,Melon Kerok,protein,0.1733,0.3,73.1,terhitung,,,,0
+R078,Melon Kerok,lemak,0.1167,0.2,71.4,terhitung,,,,0
+R078,Melon Kerok,zat_besi,0.1167,0.2,71.4,terhitung,,,,0
+R078,Melon Kerok,vitamin_c,0.0,0.0,,terhitung,,,,0
+R078,Melon Kerok,kalsium,0.0,6.0,,terhitung,,,,0
+R078,Melon Kerok,zinc,0.0,0.05,,terhitung,,,,0
+R078,Melon Kerok,serat,0.29,0.5,72.4,terhitung,,,,0
+R078,Melon Kerok,vitamin_a,0.0,0.08,,terhitung,,,,0
+R079,Kentang Lapis,energi,407.0,40.98,-89.9,terhitung,,,,100
+R079,Kentang Lapis,karbohidrat,43.85,5.23,-88.1,terhitung,,,,100
+R079,Kentang Lapis,protein,15.03,1.05,-93.0,terhitung,,,,100
+R079,Kentang Lapis,lemak,19.51,1.97,-89.9,terhitung,,,,100
+R079,Kentang Lapis,zat_besi,3.67,0.34,-90.7,terhitung,,,,100
+R079,Kentang Lapis,vitamin_c,53.55,,,tidak_terhitung,asi(TKPI kosong); tahu(TKPI kosong),,,100
+R079,Kentang Lapis,kalsium,0.0,23.25,,terhitung,,,,100
+R079,Kentang Lapis,zinc,0.0,0.17,,terhitung,,asi; bawang bombay; bawang putih; kentang; maizena; margarin; tahu; wortel parut,,100
+R079,Kentang Lapis,serat,1.98,0.5,-74.7,terhitung,,bawang bombay; bawang putih; maizena; margarin,,100
+R079,Kentang Lapis,vitamin_a,27.77,84.9,205.7,terhitung,,,,100
+R080,Nasi Tim + Sup Telur Orak Arik,energi,400.0,57.64,-85.6,terhitung,,,,70
+R080,Nasi Tim + Sup Telur Orak Arik,karbohidrat,54.66,4.25,-92.2,terhitung,,,,70
+R080,Nasi Tim + Sup Telur Orak Arik,protein,14.21,4.41,-69.0,terhitung,,,,70
+R080,Nasi Tim + Sup Telur Orak Arik,lemak,13.86,2.67,-80.7,terhitung,,,,70
+R080,Nasi Tim + Sup Telur Orak Arik,zat_besi,3.26,1.22,-62.6,terhitung,,,,70
+R080,Nasi Tim + Sup Telur Orak Arik,vitamin_c,2.88,,,tidak_terhitung,tahu(TKPI kosong),,,70
+R080,Nasi Tim + Sup Telur Orak Arik,kalsium,0.0,59.5,,terhitung,,,,70
+R080,Nasi Tim + Sup Telur Orak Arik,zinc,0.0,0.38,,terhitung,,bawang putih; buncis; nasi tim; tahu; telur; wortel,,70
+R080,Nasi Tim + Sup Telur Orak Arik,serat,2.14,0.21,-90.2,terhitung,,bawang putih; nasi tim,,70
+R080,Nasi Tim + Sup Telur Orak Arik,vitamin_a,1167.77,52.84,-95.5,terhitung,,,,70
+R081,Jus Pepaya,energi,17.333333333333332,23.0,32.7,terhitung,,,,0
+R081,Jus Pepaya,karbohidrat,4.576666666666667,6.1,33.3,terhitung,,,,0
+R081,Jus Pepaya,protein,0.1866666666666666,0.25,33.9,terhitung,,,,0
+R081,Jus Pepaya,lemak,4.5,0.05,-98.9,terhitung,,,,0
+R081,Jus Pepaya,zat_besi,0.6367,0.85,33.5,terhitung,,,,0
+R081,Jus Pepaya,vitamin_c,29.25,39.0,33.3,terhitung,,,,0
+R081,Jus Pepaya,kalsium,0.0,11.5,,terhitung,,,,0
+R081,Jus Pepaya,zinc,0.0,0.15,,terhitung,,pepaya,,0
+R081,Jus Pepaya,serat,0.6,0.8,33.3,terhitung,,pepaya,,0
+R081,Jus Pepaya,vitamin_a,136.8766666666667,86.5,-36.8,terhitung,,,,0
+R082,Nasi Bakar Tuna + Tempe Kecap,energi,948.0,58.51,-93.8,terhitung,,,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,karbohidrat,115.64,8.54,-92.6,terhitung,,,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,protein,36.24,2.27,-93.7,terhitung,,,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,lemak,38.45,1.75,-95.4,terhitung,,,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,zat_besi,7.18,0.49,-93.2,terhitung,,,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,vitamin_c,0.0,9.8,,terhitung,,,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,kalsium,0.0,10.39,,terhitung,,,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,zinc,0.0,0.2,,terhitung,,bawang merah; bawang putih; lengkuas; minyak; nasi; tomat,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,serat,3.02,0.53,-82.5,terhitung,,bawang merah; bawang putih; lengkuas; minyak; tuna,tuna,100
+R082,Nasi Bakar Tuna + Tempe Kecap,vitamin_a,46.8,96.76,106.8,terhitung,,,tuna,100
+R083,Lontong Sayur,energi,941.0,,,tidak_terhitung,lotong,,,54
+R083,Lontong Sayur,karbohidrat,128.44,,,tidak_terhitung,lotong,,,54
+R083,Lontong Sayur,protein,41.02,,,tidak_terhitung,lotong,,,54
+R083,Lontong Sayur,lemak,31.29,,,tidak_terhitung,lotong,,,54
+R083,Lontong Sayur,zat_besi,10.1,,,tidak_terhitung,lotong,,,54
+R083,Lontong Sayur,vitamin_c,7.98,,,tidak_terhitung,lotong; tahu(TKPI kosong),,,54
+R083,Lontong Sayur,kalsium,0.0,,,tidak_terhitung,lotong,,,54
+R083,Lontong Sayur,zinc,0.0,,,tidak_terhitung,lotong,bawang putih; jahe; kunyit; labu siam; lengkuas; lengkuas muda; minyak; susu; tahu; telur puyuh; wortel,,54
+R083,Lontong Sayur,serat,5.31,,,tidak_terhitung,lotong,bawang putih; jahe; kunyit; labu siam; lengkuas; lengkuas muda; minyak; susu,,54
+R083,Lontong Sayur,vitamin_a,89.94,,,tidak_terhitung,lotong,,,54
+R084,Kapusu,energi,216.0,119.99,-44.4,terhitung,,,,100
+R084,Kapusu,karbohidrat,45.12,22.61,-49.9,terhitung,,,,100
+R084,Kapusu,protein,4.44,4.23,-4.7,terhitung,,,,100
+R084,Kapusu,lemak,1.71,1.37,-19.9,terhitung,,,,100
+R084,Kapusu,zat_besi,1.29,1.92,48.8,terhitung,,,,100
+R084,Kapusu,vitamin_c,0.0,,,tidak_terhitung,kacang merah(TKPI kosong),,,100
+R084,Kapusu,kalsium,0.0,109.11,,terhitung,,,,100
+R084,Kapusu,zinc,0.0,0.5,,terhitung,,gula pasir; jagung pipil; kacang merah; susu,,100
+R084,Kapusu,serat,0.84,0.61,-27.4,terhitung,,gula pasir; susu,,100
+R084,Kapusu,vitamin_a,73.2,18.13,-75.2,terhitung,,,,100
+R085,Bubur Hati Ayam Wortel,energi,78.6667,88.57,12.6,terhitung,,,,0
+R085,Bubur Hati Ayam Wortel,karbohidrat,10.3,10.14,-1.6,terhitung,,,,0
+R085,Bubur Hati Ayam Wortel,protein,3.9333,4.38,11.4,terhitung,,,,0
+R085,Bubur Hati Ayam Wortel,lemak,2.3333,3.48,49.1,terhitung,,,,0
+R085,Bubur Hati Ayam Wortel,zat_besi,1.2667,2.15,69.7,terhitung,,,,0
+R085,Bubur Hati Ayam Wortel,vitamin_c,2.7667,,,tidak_terhitung,kacang merah(TKPI kosong),,,0
+R085,Bubur Hati Ayam Wortel,kalsium,6.7,45.48,578.8,terhitung,,,,0
+R085,Bubur Hati Ayam Wortel,zinc,0.6667,0.15,-77.5,terhitung,,hati ayam; kacang merah; minyak kelapa; wortel,,0
+R085,Bubur Hati Ayam Wortel,serat,0.8333333333333334,0.2,-76.0,terhitung,,hati ayam; minyak kelapa,,0
+R085,Bubur Hati Ayam Wortel,vitamin_a,1211.2,530.77,-56.2,terhitung,,,,0
+R086,Bubur Ayam Telur Puyuh,energi,83.3333,101.54,21.8,terhitung,,,,8
+R086,Bubur Ayam Telur Puyuh,karbohidrat,9.8667,9.5,-3.7,terhitung,,,,8
+R086,Bubur Ayam Telur Puyuh,protein,3.3,3.96,20.0,terhitung,,,,8
+R086,Bubur Ayam Telur Puyuh,lemak,3.2333,5.3,63.9,terhitung,,,,8
+R086,Bubur Ayam Telur Puyuh,zat_besi,0.6333,0.66,4.2,terhitung,,,,8
+R086,Bubur Ayam Telur Puyuh,vitamin_c,2.2,0.18,-91.8,terhitung,,,,8
+R086,Bubur Ayam Telur Puyuh,kalsium,20.3333,24.57,20.8,terhitung,,,,8
+R086,Bubur Ayam Telur Puyuh,zinc,0.3333,0.22,-34.0,terhitung,,bawang merah; bawang putih; bayam; daging ayam; margarin; telur puyuh,,8
+R086,Bubur Ayam Telur Puyuh,serat,0.1333333333333333,0.06,-55.0,terhitung,,bawang merah; bawang putih; bayam; daging ayam; margarin,,8
+R086,Bubur Ayam Telur Puyuh,vitamin_a,80.3,87.04,8.4,terhitung,,,,8
+R087,Puree Pisang Alpukat,energi,100.0,37.62,-62.4,terhitung,,,,0
+R087,Puree Pisang Alpukat,karbohidrat,11.8,7.04,-40.3,terhitung,,,,0
+R087,Puree Pisang Alpukat,protein,1.0,0.36,-64.0,terhitung,,,,0
+R087,Puree Pisang Alpukat,lemak,6.1,1.01,-83.4,terhitung,,,,0
+R087,Puree Pisang Alpukat,zat_besi,0.3,0.16,-46.7,terhitung,,,,0
+R087,Puree Pisang Alpukat,vitamin_c,7.8,3.88,-50.3,terhitung,,,,0
+R087,Puree Pisang Alpukat,kalsium,5.5,6.25,13.6,terhitung,,,,0
+R087,Puree Pisang Alpukat,zinc,0.2,0.1,-50.0,terhitung,,alpukat,,0
+R087,Puree Pisang Alpukat,serat,2.0,,,tidak_terhitung,alpukat(TKPI kosong),,,0
+R087,Puree Pisang Alpukat,vitamin_a,7.0,5.48,-21.7,terhitung,,,,0
+R088,Nasi Tim Udang Ebi,energi,133.3333,188.39,41.3,terhitung,,,,6
+R088,Nasi Tim Udang Ebi,karbohidrat,19.4,27.89,43.8,terhitung,,,,6
+R088,Nasi Tim Udang Ebi,protein,5.3,8.94,68.7,terhitung,,,,6
+R088,Nasi Tim Udang Ebi,lemak,3.4667,4.35,25.5,terhitung,,,,6
+R088,Nasi Tim Udang Ebi,zat_besi,0.6,0.99,65.0,terhitung,,,,6
+R088,Nasi Tim Udang Ebi,vitamin_c,0.6333,,,tidak_terhitung,ebi(TKPI kosong),,,6
+R088,Nasi Tim Udang Ebi,kalsium,8.5,87.19,925.8,terhitung,,,,6
+R088,Nasi Tim Udang Ebi,zinc,0.5667,0.75,32.3,terhitung,,ayam; bawang merah cincang halus; bawang putih; minyak; nasi; wortel,,6
+R088,Nasi Tim Udang Ebi,serat,0.4333333333333333,,,tidak_terhitung,ebi(TKPI kosong),ayam; bawang merah cincang halus; bawang putih; minyak,,6
+R088,Nasi Tim Udang Ebi,vitamin_a,195.76666666666665,117.43,-40.0,terhitung,,,,6
+R089,Nasi Tim Semur Ayam Tahu,energi,136.0,174.77,28.5,terhitung,,,,6
+R089,Nasi Tim Semur Ayam Tahu,karbohidrat,19.3,27.12,40.5,terhitung,,,,6
+R089,Nasi Tim Semur Ayam Tahu,protein,5.9,5.32,-9.8,terhitung,,,,6
+R089,Nasi Tim Semur Ayam Tahu,lemak,3.5667,4.63,29.8,terhitung,,,,6
+R089,Nasi Tim Semur Ayam Tahu,zat_besi,0.7333,0.81,10.5,terhitung,,,,6
+R089,Nasi Tim Semur Ayam Tahu,vitamin_c,0.0,,,tidak_terhitung,tahu(TKPI kosong),,,6
+R089,Nasi Tim Semur Ayam Tahu,kalsium,11.0667,36.47,229.5,terhitung,,,,6
+R089,Nasi Tim Semur Ayam Tahu,zinc,0.5667,,,tidak_terhitung,kecap(TKPI kosong),ayam cincang; bawang merah; bawang putih; margarin; nasi; tahu,,6
+R089,Nasi Tim Semur Ayam Tahu,serat,0.3,0.17,-43.3,terhitung,,ayam cincang; bawang merah; bawang putih; kecap; margarin,,6
+R089,Nasi Tim Semur Ayam Tahu,vitamin_a,7.3,56.71,676.8,terhitung,,,,6
+R090,Kolak Pisang,energi,64.0,226.18,253.4,terhitung,,,,92
+R090,Kolak Pisang,karbohidrat,14.9,29.63,98.9,terhitung,,,,92
+R090,Kolak Pisang,protein,0.6,2.89,381.7,terhitung,,,,92
+R090,Kolak Pisang,lemak,0.9,11.7,1200.0,terhitung,,,,92
+R090,Kolak Pisang,zat_besi,0.3,0.54,80.0,terhitung,,,,92
+R090,Kolak Pisang,vitamin_c,4.6,6.5,41.3,terhitung,,,,92
+R090,Kolak Pisang,kalsium,5.8,44.88,673.8,terhitung,,,,92
+R090,Kolak Pisang,zinc,0.1,0.5,400.0,terhitung,,santan,,92
+R090,Kolak Pisang,serat,1.4,2.35,67.9,terhitung,,gula merah; santan,,92
+R090,Kolak Pisang,vitamin_a,4.0,3.08,-23.0,terhitung,,,,92
+R091,Nasi Arsik Ikan MAs,energi,297.0,326.16,9.8,terhitung,,,,4
+R091,Nasi Arsik Ikan MAs,karbohidrat,35.2333,45.85,30.1,terhitung,,,,4
+R091,Nasi Arsik Ikan MAs,protein,18.7,18.68,-0.1,terhitung,,,,4
+R091,Nasi Arsik Ikan MAs,lemak,9.0333,7.11,-21.3,terhitung,,,,4
+R091,Nasi Arsik Ikan MAs,zat_besi,1.9333,2.88,49.0,terhitung,,,,4
+R091,Nasi Arsik Ikan MAs,vitamin_c,4.2,,,tidak_terhitung,tempe(TKPI kosong),,,4
+R091,Nasi Arsik Ikan MAs,kalsium,65.4667,96.76,47.8,terhitung,,,,4
+R091,Nasi Arsik Ikan MAs,zinc,1.8667,1.86,-0.4,terhitung,,bawang merah; bawang putih; ikan mas; jahe; kunyit; minyak; nasi; tempe,,4
+R091,Nasi Arsik Ikan MAs,serat,1.6,1.56,-2.5,terhitung,,bawang merah; bawang putih; jahe; kunyit; minyak,,4
+R091,Nasi Arsik Ikan MAs,vitamin_a,191.2333333333333,135.09,-29.4,terhitung,,,,4
+R092,Nasi Sayur Sop Oyong,energi,288.6667,,,tidak_terhitung,bakso sapi,,soun,7
+R092,Nasi Sayur Sop Oyong,karbohidrat,37.2667,,,tidak_terhitung,bakso sapi,,soun,7
+R092,Nasi Sayur Sop Oyong,protein,8.9333,,,tidak_terhitung,bakso sapi,,soun,7
+R092,Nasi Sayur Sop Oyong,lemak,10.8667,,,tidak_terhitung,bakso sapi,,soun,7
+R092,Nasi Sayur Sop Oyong,zat_besi,1.2,,,tidak_terhitung,bakso sapi,,soun,7
+R092,Nasi Sayur Sop Oyong,vitamin_c,2.6,,,tidak_terhitung,bakso sapi,,soun,7
+R092,Nasi Sayur Sop Oyong,kalsium,17.7,,,tidak_terhitung,bakso sapi,,soun,7
+R092,Nasi Sayur Sop Oyong,zinc,1.6,,,tidak_terhitung,bakso sapi,bawang merah; bawang putih; minyak; nasi; oyong; seledri; soun; wortel,soun,7
+R092,Nasi Sayur Sop Oyong,serat,1.3666666666666665,,,tidak_terhitung,bakso sapi,bawang merah; bawang putih; minyak; oyong; seledri; soun,soun,7
+R092,Nasi Sayur Sop Oyong,vitamin_a,406.9333333333333,,,tidak_terhitung,bakso sapi,,soun,7
+R093,Bubur Kacang Hijau,energi,59.0,101.7,72.4,terhitung,,,,6
+R093,Bubur Kacang Hijau,karbohidrat,10.7,16.87,57.7,terhitung,,,,6
+R093,Bubur Kacang Hijau,protein,1.3,3.87,197.7,terhitung,,,,6
+R093,Bubur Kacang Hijau,lemak,1.4,2.25,60.7,terhitung,,,,6
+R093,Bubur Kacang Hijau,zat_besi,0.5,1.19,138.0,terhitung,,,,6
+R093,Bubur Kacang Hijau,vitamin_c,0.2,2.0,900.0,terhitung,,,,6
+R093,Bubur Kacang Hijau,kalsium,4.3,39.33,814.7,terhitung,,,,6
+R093,Bubur Kacang Hijau,zinc,0.2,0.53,165.0,terhitung,,gula pasir; jahe; kacang hijau; santan,,6
+R093,Bubur Kacang Hijau,serat,1.3,1.7,30.8,terhitung,,gula pasir; jahe; santan,,6
+R093,Bubur Kacang Hijau,vitamin_a,0.3,3.9,1200.0,terhitung,,,,6

@@ -1,0 +1,58 @@
+{
+  "fitur": {
+    "usia_bulan": {
+      "tipe": "integer",
+      "satuan": "bulan",
+      "wajib": true,
+      "min": 12,
+      "maks": 59,
+      "keterangan": "Usia anak saat pengukuran (cakupan SKPL 12–59 bulan)."
+    },
+    "jk": {
+      "tipe": "kategori",
+      "wajib": true,
+      "nilai_valid": [
+        "L",
+        "P"
+      ],
+      "keterangan": "L = laki-laki (dikodekan 1), P = perempuan (0)."
+    },
+    "bb_kg": {
+      "tipe": "angka",
+      "satuan": "kg",
+      "wajib": true,
+      "min": 2.0,
+      "maks": 40.0,
+      "keterangan": "Batas teknis kasar, bukan batas klinis. Kewajaran biologis dicek via Z-score."
+    },
+    "tb_cm": {
+      "tipe": "angka",
+      "satuan": "cm",
+      "wajib": true,
+      "min": 45.0,
+      "maks": 130.0,
+      "keterangan": "Batas teknis kasar, bukan batas klinis. Kewajaran biologis dicek via Z-score."
+    }
+  },
+  "urutan_fitur_model": [
+    "usia_bulan",
+    "jk_num",
+    "bb_kg",
+    "tb_cm"
+  ],
+  "kebijakan_nilai_kosong": "Ditolak (HTTP 422 / InputError); tidak diimputasi, sesuai notebook yang membuang baris kosong.",
+  "rentang_data_latih": {
+    "bb_kg": {
+      "min": 5.9,
+      "maks": 27.2
+    },
+    "tb_cm": {
+      "min": 65.3,
+      "maks": 118.3
+    },
+    "usia_bulan": {
+      "min": 12,
+      "maks": 59
+    }
+  }
+}

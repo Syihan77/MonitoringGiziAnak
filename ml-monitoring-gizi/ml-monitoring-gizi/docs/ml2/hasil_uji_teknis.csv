@@ -1,0 +1,26 @@
+uji,lulus,detail
+"Skor tidak NaN/inf dan berada di [0,1] (300 prioritas acak)",LULUS,3000 hasil diperiksa; JSON allow_nan=False
+Bobot negatif ditolak,LULUS,
+Bobot NaN/inf ditolak,LULUS,
+Total bobot nol ditolak,LULUS,
+Zat gizi tak dikenal ditolak,LULUS,
+Kunci payload salah-ketik ditolak,LULUS,
+Filter bahan aktif tanpa daftar bahan ditolak,LULUS,
+Bobot dinormalisasi (jumlah = 1),LULUS,"{'protein': 0.75, 'energi': 0.25}"
+"Nol kalsium/zinc tidak tersisa pada basis (diganti NaN, bukan nol)",LULUS,
+Skor = jumlah bobot x persentil HANYA dari nilai diketahui (dihitung ulang independen),LULUS,50 resep
+Prioritas kalsium saja: tidak ada resep berkalsium tidak diketahui di top-50 (65 resep punya data),LULUS,0 pelanggaran
+Kebijakan 'keluarkan': resep dengan prioritas tidak diketahui tidak muncul,LULUS,"{'waktu_masak': 0, 'bahan_dihindari': 0, 'bahan_tidak_cukup': 0, 'bahan_wajib_tidak_terdeteksi': 0, 'nutrisi_prioritas_tidak_tersedia': 29}"
+"Resep berkalsium tidak diketahui ditandai (tersedia=False, nilai=None) dan tidak diklaim memenuhi",LULUS,9 resep terkait ada di top-50
+Semua bahan wajib tersedia -> resep lolos filter 'semua_wajib',LULUS,93/93 resep
+Satu bahan wajib tidak tersedia -> resep dikeluarkan,LULUS,93/93 resep
+Mode 'semua_wajib': tidak ada hasil dengan bahan wajib kurang,LULUS,19 hasil
+Mode 'sebagian': semua hasil memenuhi min_kecocokan,LULUS,50 hasil
+Filter waktu masak dihormati,LULUS,11 hasil
+Bahan yang dihindari tidak muncul pada hasil,LULUS,50 hasil
+Prioritas protein saja: nilai protein menurun (non-increasing) sepanjang peringkat,LULUS,
+Mengganti prioritas (protein -> kalsium) mengubah daftar top-10,LULUS,irisan 3/10
+Menaikkan bobot protein tidak menurunkan peringkat resep berprotein tertinggi,LULUS,R083: peringkat 2 -> 1
+Nutrisi prioritas yang rendah dilaporkan 'rendah' (tidak diklaim terpenuhi),LULUS,
+Latih ulang dengan seed sama -> label cluster identik,LULUS,
+Stabilitas cluster antar 5 seed lain: ARI rata-rata >= 0.8,LULUS,ARI rata-rata 0.968

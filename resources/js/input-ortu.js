@@ -118,6 +118,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. Generate Recommendations (API real)
   const btnGenerate = document.getElementById('btn-generate');
   const recommendationsSection = document.getElementById('recommendations-section');
+  const menuGrid = document.getElementById('menu-cards-grid');
+
+  function tampilkanPesanMenu(pesan, denganGambar = false) {
+    if (!menuGrid) return;
+    menuGrid.innerHTML = '';
+
+    const kotak = document.createElement('div');
+    kotak.className = 'menu-empty-state';
+
+    if (denganGambar) {
+      const gambar = document.createElement('img');
+      gambar.src = '/img/placeholder-menu.svg';
+      gambar.alt = '';
+      gambar.className = 'menu-empty-image';
+      kotak.appendChild(gambar);
+    }
+
+    const teks = document.createElement('p');
+    teks.textContent = pesan;
+    kotak.appendChild(teks);
+    menuGrid.appendChild(kotak);
+  }
 
   async function resolveBahanId(item) {
     if (item.id) return item.id;
@@ -150,6 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (data.peringatan) {
       info += `<p style="margin:0 0 12px;color:#92400e;background:#fef3c7;padding:10px 14px;border-radius:10px;">${data.peringatan}</p>`;
     }
+    if (data.mode_demo) {
+      info += `<div class="demo-banner"><strong>Mode demo — data belum terverifikasi.</strong> ${data.peringatan_demo || ''}</div>`;
+    }
     if (data.saran) {
       info += `<p style="margin:0 0 12px;color:#92400e;background:#fef3c7;padding:10px 14px;border-radius:10px;">${data.saran}</p>`;
     }
@@ -165,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <h3 class="menu-title">Opsi ${idx + 1}</h3>
           <span class="menu-calories">${m.kecocokan_bahan ? `${m.kecocokan_bahan} cocok` : 'Rekomendasi umum'}</span>
         </div>
+        ${m.label_data === 'DEMO_BELUM_TERVERIFIKASI' ? '<div class="menu-demo-badge">Demo — belum terverifikasi</div>' : ''}
         <div class="menu-porsi-badge">
           Menghasilkan: ${m.jumlah_porsi_hasil || '-'} Porsi
         </div>
@@ -218,6 +244,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      recommendationsSection.style.display = 'block';
+      tampilkanPesanMenu('Sedang membuat rekomendasi...');
+
       const hasil = await window.NutriApi.rekomendasi(anakId, {
         bahan_tersedia: ids,
         top_k: 5
@@ -231,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tampilkanHasilReal(hasil);
     } catch (err) {
       console.error('Rekomendasi API gagal:', err && err.message);
+      tampilkanPesanMenu('Rekomendasi belum tersedia. Periksa koneksi lalu coba lagi.', true);
       alert((err && err.message) || 'Rekomendasi gagal dimuat. Periksa koneksi lalu coba lagi.');
     } finally {
       btnGenerate.innerHTML = originalText;

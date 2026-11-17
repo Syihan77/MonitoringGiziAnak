@@ -169,7 +169,8 @@ class AnakController extends Controller
                 continue;
             }
 
-            $jenis = $item['jenis'] ?? PantanganAnak::JENIS_ALERGI;
+            $jenis = $item['jenis']
+                ?? ($bahanId !== null ? PantanganAnak::JENIS_PANTANGAN : PantanganAnak::JENIS_ALERGI);
             $kunci = ($bahanId ?? '').'|'.($alergen ?? '').'|'.$jenis;
             if (isset($unik[$kunci])) {
                 continue;
@@ -204,11 +205,10 @@ class AnakController extends Controller
         if ($sertakanUkur) {
             $ukur = $ukurTerakhir;
             $data['ukur_terakhir'] = $ukur === null ? null : [
-                'pertumbuhan_id' => $ukur->id,
                 'tanggal_ukur' => $ukur->tanggal_ukur->toDateString(),
-                'usia_bulan_saat_ukur' => $ukur->umur_bulan,
-                'berat_badan_kg' => (float) $ukur->berat_kg,
-                'tinggi_badan_cm' => (float) $ukur->tinggi_cm,
+                'umur_bulan' => $ukur->umur_bulan,
+                'berat_kg' => (float) $ukur->berat_kg,
+                'tinggi_cm' => (float) $ukur->tinggi_cm,
                 'zscore_bb_u' => $ukur->z_bb_u === null ? null : (float) $ukur->z_bb_u,
                 'zscore_tb_u' => $ukur->z_tb_u === null ? null : (float) $ukur->z_tb_u,
                 'zscore_bb_tb' => $ukur->z_bb_tb === null ? null : (float) $ukur->z_bb_tb,

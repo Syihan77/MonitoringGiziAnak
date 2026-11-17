@@ -1,0 +1,176 @@
+{
+  "nama_paket": "ml-monitoring-gizi",
+  "versi_paket": "1.1.0",
+  "dibuat": "2026-11-15",
+  "catatan": "SHA-256 dihitung saat paket dikemas. Status verifikasi hanya mencatat apa yang benar-benar diuji.",
+  "berkas": [
+    {
+      "path": "app/ml1/model/model.joblib",
+      "modul": "ML1",
+      "fungsi": "Model RandomForest terlatih (fitur mentah, skenario B)",
+      "versi": "ml1-rf-fitur-mentah-1.0.0",
+      "sha256": "f6af6482eebcebf6bf756f628c7d493eeebc0372c1423e319114596c9f02e79d",
+      "status_verifikasi": "terverifikasi: SHA-256 = metadata.json; dimuat tanpa peringatan di scikit-learn 1.9.1; probabilitas sampel = sample_response asli"
+    },
+    {
+      "path": "app/ml1/model/metadata.json",
+      "modul": "ML1",
+      "fungsi": "Metadata: fitur, ambang, rentang data latih, evaluasi, SHA-256",
+      "versi": "ml1-rf-fitur-mentah-1.0.0",
+      "sha256": "567aba75c7bd214cec8dd15aa0fe94df77e17a7896424117cfde1acee09d950a",
+      "status_verifikasi": "diaudit; konsisten dengan model"
+    },
+    {
+      "path": "app/ml1/model/feature_schema.json",
+      "modul": "ML1",
+      "fungsi": "Kontrak input & batas validasi",
+      "versi": "ml1-rf-fitur-mentah-1.0.0",
+      "sha256": "89994908f39b5e49e942262e74523b7b32b0e5f346c2f056e9bb1726e8d41b2b",
+      "status_verifikasi": "diaudit; dipakai validasi (diuji)"
+    },
+    {
+      "path": "app/ml1/model/label_mapping.json",
+      "modul": "ML1",
+      "fungsi": "Pemetaan kelas 0/1/2 -> nama",
+      "versi": "ml1-rf-fitur-mentah-1.0.0",
+      "sha256": "21e2380bf96dddc500bc6a2e93016f7a3afa123efe6b60bdd5ca404f334ce7e6",
+      "status_verifikasi": "diaudit; dipakai inferensi"
+    },
+    {
+      "path": "app/ml1/inference.py",
+      "modul": "ML1",
+      "fungsi": "Modul inferensi mandiri (ML1Predictor). Perubahan dari asli: path artefak ke model/, impor pygrowup dijaga",
+      "versi": "1.0.0 (+penyesuaian path)",
+      "sha256": "4c4c13cf2e9afeacb041f3dbfd273e69751df792b0b0cad516ba4d0a336e86ed",
+      "status_verifikasi": "validasi & pemuatan diuji; jalur Z-score belum dijalankan (pygrowup tidak terpasang di sandbox)"
+    },
+    {
+      "path": "app/ml2/model/kmeans_pipeline.joblib",
+      "modul": "ML2",
+      "fungsi": "Pipeline log1p -> StandardScaler -> KMeans(K=4)",
+      "versi": "1.0.0",
+      "sha256": "18690b243464f53fafd6af5555fbfb67bf7dada48cc52e9265f135616e5028c1",
+      "status_verifikasi": "USANG_DATA_LAMA: dibuat di scikit-learn 1.8.0 dari basis 1.0.0; 93/93 label cluster lama identik dengan dataset_dengan_cluster.csv, tetapi label tidak dihitung ulang pada basis TKPI 1.1.0"
+    },
+    {
+      "path": "app/ml2/model/preprocessing.joblib",
+      "modul": "ML2",
+      "fungsi": "Bagian preprocessing saja (tidak dipakai saat inferensi API)",
+      "versi": "1.0.0",
+      "sha256": "e476156c37d0f98e9376960d8418fa78fe05c9abc158e9b0f0c39302fb4a1670",
+      "status_verifikasi": "artefak lama; tidak di-refit saat pembaruan basis"
+    },
+    {
+      "path": "app/ml2/model/config_model.json",
+      "modul": "ML2",
+      "fungsi": "Konfigurasi, fitur clustering, metadata nilai tidak diketahui, metrik",
+      "versi": "1.1.0-tkpi",
+      "sha256": "bb7dfefc3cb20d07c5d563b94312ae988fe17ae2995a9741ae4e990979054351",
+      "status_verifikasi": "diuji: status_cluster USANG_DATA_LAMA; metadata_missing TKPI; sel_dicurigai kosong"
+    },
+    {
+      "path": "app/ml2/model/basis_resep.csv",
+      "modul": "ML2",
+      "fungsi": "Basis 93 resep TKPI (nilai gizi tidak diketahui = kosong/NaN; cluster lama dipertahankan)",
+      "versi": "1.1.0-tkpi",
+      "sha256": "36d110a782ff98507b4b8730a02a54140cca77f23ecd1b93ce5e0bf20f4b6a23",
+      "status_verifikasi": "diuji: 93/93 bahan_json identik; 15 kalsium, 21 zinc, 54 vitamin C NaN; 14 resep all-NULL"
+    },
+    {
+      "path": "app/ml2/rekomendasi_gizi.py",
+      "modul": "ML2",
+      "fungsi": "Modul ranking, filter bahan, PemberiRekomendasi (TIDAK DIUBAH dari asli)",
+      "versi": "1.0.0",
+      "sha256": "27d7b7391acce03c8422d8d262a7238d55b45f1a151ebefd1432dc994f7686e4",
+      "status_verifikasi": "contoh_output baru direproduksi; 32 tes ML2 lulus"
+    },
+    {
+      "path": "app/main.py",
+      "modul": "API",
+      "fungsi": "Aplikasi FastAPI gabungan (lifespan memuat ML1 & ML2 terpisah)",
+      "versi": "1.0.0",
+      "sha256": "ed671b1e471c9e4563c7073136e1c5d83eb44a7433abd4fa688c3f61c5dd5da8",
+      "status_verifikasi": "diuji: 14 tes HTTP berjalan; jalur pygrowup dilewati"
+    },
+    {
+      "path": "app/api/routes.py",
+      "modul": "API",
+      "fungsi": "Endpoint /health, /ml1/*, /ml2/*",
+      "versi": "1.0.0",
+      "sha256": "4462dc28b641b63fa07481047d3ea2716bab06876b3a9f28a20a2fb22d09ac71",
+      "status_verifikasi": "diuji: 14 tes HTTP berjalan"
+    },
+    {
+      "path": "app/services.py",
+      "modul": "API",
+      "fungsi": "Pemuatan modul, kesiapan, health, pemanggilan inferensi (tanpa FastAPI)",
+      "versi": "1.0.0",
+      "sha256": "21dfcddc314ae5bbe090c3daddb9909ac53a0c1b8dfbde6816d488e22bbdac5d",
+      "status_verifikasi": "diuji"
+    },
+    {
+      "path": "app/settings.py",
+      "modul": "API",
+      "fungsi": "Konfigurasi dari environment",
+      "versi": "1.0.0",
+      "sha256": "0d21d634d2bff7091962c6209916fe3d6ec19b75289cf014a372bacbea02653d",
+      "status_verifikasi": "diuji tidak langsung"
+    },
+    {
+      "path": "app/schemas/ml1.py",
+      "modul": "API",
+      "fungsi": "Skema request ML1",
+      "versi": "1.0.0",
+      "sha256": "71feb5573e7dd12688367f1410f429a5573dd332d4c98b091b7176f90ead06f2",
+      "status_verifikasi": "diuji; 2 tes ML1 dilewati tanpa pygrowup"
+    },
+    {
+      "path": "app/schemas/ml2.py",
+      "modul": "API",
+      "fungsi": "Skema request ML2 (extra=forbid)",
+      "versi": "1.0.0",
+      "sha256": "fe8f07627016a6e731103a8bc75c38c3e58d1d055a74d638cd35bb2373585b07",
+      "status_verifikasi": "diuji"
+    },
+    {
+      "path": "examples/ml1_input.json",
+      "modul": "contoh",
+      "fungsi": "Contoh request ML1 (sampel teknis)",
+      "versi": "-",
+      "sha256": "ff6e6f710158d63513e2c704bfd9a55323a7d53c67e3bc1de84656e193e43ab4",
+      "status_verifikasi": "dari artefak ML1 asli"
+    },
+    {
+      "path": "examples/ml1_output.json",
+      "modul": "contoh",
+      "fungsi": "Contoh response ML1 (tanpa kunci status)",
+      "versi": "-",
+      "sha256": "e06026246ccc9a9ee24c3b8cde27070b01633c0e5e7971c6bc3a6353c7ed7511",
+      "status_verifikasi": "dari artefak ML1 asli; probabilitas ML diverifikasi ulang"
+    },
+    {
+      "path": "examples/ml1_output_422.json",
+      "modul": "contoh",
+      "fungsi": "Contoh response error ML1",
+      "versi": "-",
+      "sha256": "1a4407c8c3c16dd93bf58485e1e8a8b71a27e29ed5dbe43f8eed3991cdfeeed8",
+      "status_verifikasi": "dari artefak ML1 asli"
+    },
+    {
+      "path": "examples/ml2_input.json",
+      "modul": "contoh",
+      "fungsi": "Contoh request ML2",
+      "versi": "-",
+      "sha256": "1d7be7483fc35fbefcf57f00389727a903fdd2676ec1531ba8ef041d8d546e36",
+      "status_verifikasi": "dari artefak ML2 asli"
+    },
+    {
+      "path": "examples/ml2_output.json",
+      "modul": "contoh",
+      "fungsi": "Contoh response ML2 (basis TKPI 1.1.0)",
+      "versi": "-",
+      "sha256": "0979af5f4ed6969392e69b66ee8dc0b2a4df5b33ca5773f8637acc12415bf16d",
+      "status_verifikasi": "diregenerasi dan direproduksi oleh modul"
+    }
+  ]
+}

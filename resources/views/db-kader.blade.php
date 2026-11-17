@@ -10,9 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <!-- CSS Files -->
     @vite(['resources/css/globals.css', 'resources/css/db-kader.css'])
 </head>
@@ -35,8 +32,8 @@
         </a>
       </nav>
 
-      <div class="profile">
-        <div class="avatar-initial avatar-sm"><x-icon name="user" /></div>
+      <div class="profile profile-account">
+        <button type="button" class="avatar-initial avatar-sm profile-avatar-btn" id="avatar-kader" data-profile-trigger aria-label="Buka informasi profil akun"><x-icon name="user" /></button>
         <button type="button" class="btn-logout" data-logout title="Keluar" aria-label="Keluar dari akun"><x-icon name="logout" /></button>
       </div>
     </div>
@@ -96,11 +93,11 @@
         <div class="chart-card trend-chart-card">
           <div class="trend-header">
             <div>
-              <h3>Tren Prevalensi Gizi Kurang & Buruk</h3>
-              <p>Pemantauan efektivitas program intervensi pangan desa</p>
+              <h3>Prevalensi Perlu Perhatian</h3>
+              <p>Proporsi kategori At Risk dan High Risk dari pengukuran terakhir tiap bulan</p>
             </div>
-            <div class="badge-green" id="trend-badge">
-              <x-icon name="trend-down" /> <span id="trend-text">Memuat data...</span>
+            <div class="badge-neutral" id="trend-badge">
+              <x-icon name="chart" /> <span id="trend-text">Memuat data...</span>
             </div>
           </div>
           <div class="trend-graph-placeholder">
@@ -193,6 +190,7 @@
 
   <!-- JavaScript -->
     @vite(['resources/js/api.js'])
+    @vite(['resources/js/profile-menu.js'])
     @vite(['resources/js/db-kader.js'])
 </body>
 </html>

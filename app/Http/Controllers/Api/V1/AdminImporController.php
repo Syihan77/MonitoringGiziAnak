@@ -139,7 +139,6 @@ class AdminImporController extends Controller
                 'status_bb_u' => $hasil['status_bb_u'],
                 'status_tb_u' => $hasil['status_tb_u'],
                 'status_bb_tb' => $hasil['status_bb_tb'],
-                'status_gizi_antropometri' => $hasil['status_gizi_antropometri'],
                 'usia_bulan_saat_ukur' => $hasil['umur_bulan'],
                 'kategori_pemantauan' => $hasil['kategori_pemantauan'],
                 'metode_klasifikasi' => $hasil['metode_klasifikasi'],

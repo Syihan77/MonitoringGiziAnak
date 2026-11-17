@@ -290,8 +290,8 @@ class KonsumsiController extends Controller
         int $index,
     ): float {
         $resepBahan = $resepBahans->get($item['bahan_id']);
-        $ekuivalen = $resepBahan?->takaran_gram_ekuivalen ?? $resepBahan?->takaran_gram;
-        $jumlahPorsiHasil = (float) ($resep?->jumlah_porsi_hasil ?? $resep?->porsi_saji ?? 0);
+        $ekuivalen = $resepBahan?->takaran_gram_ekuivalen;
+        $jumlahPorsiHasil = (float) ($resep?->jumlah_porsi_hasil ?? 0);
 
         if ($ekuivalen === null || (float) $ekuivalen <= 0 || $jumlahPorsiHasil <= 0) {
             throw ValidationException::withMessages([

@@ -1,0 +1,24 @@
+{
+  "prioritas_gizi": {
+    "protein": 0.5,
+    "zat_besi": 0.5
+  },
+  "bahan_tersedia": [
+    "nasi",
+    "ayam",
+    "tahu",
+    "wortel",
+    "telur",
+    "tempe",
+    "santan",
+    "buncis",
+    "kentang",
+    "tomat",
+    "ikan",
+    "ubi rambat"
+  ],
+  "mode_bahan": "sebagian",
+  "min_kecocokan": 0.6,
+  "top_n": 3,
+  "maks_waktu_menit": 60
+}

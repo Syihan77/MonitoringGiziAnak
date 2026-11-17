@@ -1,0 +1,132 @@
+{
+  "versi_model": "1.1.0-tkpi",
+  "dibuat_pada": "2026-11-15T00:00:00+00:00",
+  "sumber_data": {
+    "nama_berkas": "dataset_resep_gizi_terstandarisasi_berlabelusia_tkpi.csv",
+    "asal": "TKPI 2020",
+    "jumlah_resep": 93
+  },
+  "status_cluster": "USANG_DATA_LAMA",
+  "alasan_status_cluster": "Label dan metrik cluster berasal dari basis 1.0.0 (data gizi lama) dan tidak dihitung ulang pada basis TKPI 1.1.0. Refit KMeans menunggu kebijakan nilai kosong yang disetujui.",
+  "tindakan_cluster": "Jangan tampilkan label cluster sebagai analisis gizi di Laravel. Artefak joblib dan kolom cluster dipertahankan hanya agar perilaku teknis lama tetap dapat diaudit.",
+  "kebijakan_nilai_hilang": "penalti",
+  "kolom_nutrisi": {
+    "energi": "energi_kcal_per_porsi",
+    "karbohidrat": "karbohidrat_g_per_porsi",
+    "protein": "protein_g_per_porsi",
+    "lemak": "lemak_g_per_porsi",
+    "zat_besi": "zat_besi_mg_per_porsi",
+    "vitamin_c": "vitamin_c_mg_per_porsi",
+    "kalsium": "kalsium_mg_per_porsi",
+    "zinc": "zinc_mg_per_porsi",
+    "vitamin_a": "vitamin_a_RE_per_porsi",
+    "serat": "serat_g_per_porsi"
+  },
+  "satuan": {
+    "energi": "kcal",
+    "karbohidrat": "g",
+    "protein": "g",
+    "lemak": "g",
+    "zat_besi": "mg",
+    "vitamin_c": "mg",
+    "kalsium": "mg",
+    "zinc": "mg",
+    "vitamin_a": "RE",
+    "serat": "g"
+  },
+  "alias_nol_dianggap_tidak_diketahui": [],
+  "metadata_missing": {
+    "energi": 14,
+    "karbohidrat": 14,
+    "protein": 14,
+    "lemak": 14,
+    "zat_besi": 15,
+    "vitamin_c": 54,
+    "kalsium": 15,
+    "zinc": 21,
+    "vitamin_a": 15,
+    "serat": 18
+  },
+  "sel_dicurigai_dianggap_tidak_diketahui": [],
+  "catatan_sel_dicurigai": "Daftar sel dicurigai lama (R024, R031, R063) tidak diterapkan pada basis TKPI baru; nilai baru sudah wajar dan dipertahankan.",
+  "sensitivitas_cluster_terhadap_sel_dicurigai_ARI": null,
+  "strategi_clustering": {
+    "kode": "S2",
+    "deskripsi": "8 fitur lengkap, log1p + standardisasi",
+    "log1p": true,
+    "imputasi": false
+  },
+  "fitur_clustering_alias": [
+    "energi",
+    "karbohidrat",
+    "protein",
+    "lemak",
+    "zat_besi",
+    "vitamin_c",
+    "vitamin_a",
+    "serat"
+  ],
+  "fitur_clustering_kolom": [
+    "energi_kcal_per_porsi",
+    "karbohidrat_g_per_porsi",
+    "protein_g_per_porsi",
+    "lemak_g_per_porsi",
+    "zat_besi_mg_per_porsi",
+    "vitamin_c_mg_per_porsi",
+    "vitamin_a_RE_per_porsi",
+    "serat_g_per_porsi"
+  ],
+  "kmeans": {
+    "n_clusters": 4,
+    "n_init": 50,
+    "random_state": 42
+  },
+  "metrik_cluster": {
+    "K": 4,
+    "inertia": 285.0401904169723,
+    "silhouette": 0.3363010055020941,
+    "davies_bouldin": 1.1285330407963319,
+    "calinski_harabasz": 47.7680276047337,
+    "ukuran_cluster": {
+      "0": 42,
+      "1": 5,
+      "2": 28,
+      "3": 18
+    },
+    "stabilitas_ARI_antar_seed": 0.9838791607818193
+  },
+  "nama_cluster_deskriptif": {
+    "0": "C0 (mendekati rata-rata)",
+    "1": "C1 (tinggi: serat, vitamin_c, karbohidrat; rendah: lemak, vitamin_a)",
+    "2": "C2 (tinggi: zat_besi, lemak, protein)",
+    "3": "C3 (rendah: protein, energi)"
+  },
+  "metode_default": "baseline",
+  "lambda_keragaman": 0.05,
+  "versi_library": {
+    "python": "3.12.3",
+    "scikit-learn": "1.8.0",
+    "pandas": "3.0.2",
+    "numpy": "2.4.4",
+    "joblib": "1.5.3"
+  },
+  "catatan": [
+    "Skor = peringkat relatif (persentil) dalam dataset, bukan kecukupan gizi.",
+    "Nilai tidak diketahui tidak diisi nol dan tidak dianggap memenuhi prioritas.",
+    "Basis 1.1.0-tkpi memuat 14 resep tanpa seluruh nilai gizi; nilai tetap NULL, tidak diganti 0, dan tidak mendapat kredit ranking.",
+    "Kebijakan nilai hilang bawaan adalah penalti; pada top_n=50 yang hanya memprioritaskan vitamin C, 14 resep tanpa gizi dapat muncul di ekor karena hanya 39 nilai vitamin C yang diketahui.",
+    "Label dan metrik cluster berasal dari basis lama dan berstatus USANG_DATA_LAMA; jangan ditampilkan sebagai analisis gizi.",
+    "Belum divalidasi terhadap ahli gizi/pengguna."
+  ],
+  "hasil_keputusan_eksperimen_cluster": {
+    "metode_default": "baseline",
+    "d_cluster": 0.0,
+    "d_div_bahan": 0.0,
+    "turun_skor_persen": 0.0,
+    "kesimpulan": "Aturan keputusan TIDAK terpenuhi: tidak ada peningkatan keragaman yang konsisten pada kedua metrik dengan biaya skor yang dapat diterima. Baseline dipertahankan; K-Means tetap menjadi komponen analisis ML yang terpisah."
+  },
+  "hasil_uji_teknis": {
+    "lulus": 25,
+    "total": 25
+  }
+}

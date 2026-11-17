@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    'ml' => [
+        'enabled' => env('ML_ENABLED', false),
+
+        'ml1' => [
+            'base_url' => env('ML1_BASE_URL', 'http://127.0.0.1:8000'),
+            'connect_timeout' => (int) env('ML1_CONNECT_TIMEOUT', 1),
+            'timeout' => (int) env('ML1_TIMEOUT', 2),
+        ],
+
+        'ml2' => [
+            'base_url' => env('ML2_BASE_URL', 'http://127.0.0.1:8000'),
+            'connect_timeout' => (int) env('ML2_CONNECT_TIMEOUT', 1),
+            'timeout' => (int) env('ML2_TIMEOUT', 5),
+            'basis_csv' => env('ML2_BASIS_CSV') ?: base_path(
+                'ml-monitoring-gizi/ml-monitoring-gizi/app/ml2/model/basis_resep.csv'
+            ),
+        ],
+    ],
+
 ];

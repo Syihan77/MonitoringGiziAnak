@@ -23,6 +23,8 @@ class NutritionService
 
     public const STATUS_TIDAK_ADA_DATA_VALID = 'TIDAK_DAPAT_DIANALISIS_TIDAK_ADA_DATA_VALID';
 
+    public const STATUS_DATA_TIDAK_LENGKAP = 'DATA_TIDAK_LENGKAP';
+
     public const CATATAN = 'Status bersifat indikatif (asupan di bawah acuan AKG), bukan diagnosis defisiensi.';
 
     public const PENANDA_ANAK_SAKIT = 'Anak tercatat sedang sakit pada tanggal ini — data konsumsi tidak digunakan dalam analisis.';
@@ -75,6 +77,7 @@ class NutritionService
             'kelompok_umur' => $akg['label'],
             'status_kondisi' => $statusKondisi,
             'catatan' => self::CATATAN,
+            'jumlah_konsumsi' => $konsumsi->count(),
         ];
 
         if ($konsumsi->isEmpty()) {
@@ -85,6 +88,7 @@ class NutritionService
                 'analisis_status' => 'tidak_dapat_dianalisis',
                 'penanda' => null,
                 'dikecualikan' => [],
+                'jumlah_konsumsi_dianalisis' => 0,
             ]);
         }
 
@@ -106,22 +110,11 @@ class NutritionService
                 'analisis_status' => 'tidak_dapat_dianalisis',
                 'penanda' => $sakit ? self::PENANDA_ANAK_SAKIT : null,
                 'dikecualikan' => $dikecualikan,
+                'jumlah_konsumsi_dianalisis' => 0,
             ]);
         }
 
-        $total = [];
-        foreach (array_keys(self::ZAT_GIZI) as $kolom) {
-            $total[$kolom] = 0.0;
-        }
-
-        foreach ($valid as $row) {
-            $faktor = ((float) $row->porsi_gram) / 100.0;
-
-            foreach (array_keys(self::ZAT_GIZI) as $kolom) {
-                $total[$kolom] += ((float) ($row->bahan->{$kolom} ?? 0.0)) * $faktor;
-            }
-        }
-
+        $total = $this->totalZatGizi($valid);
         $ringkasan = self::ringkasanDariTotal($total, $akg, $defisiensi);
 
         return array_merge($dasar, [
@@ -131,7 +124,48 @@ class NutritionService
             'analisis_status' => 'dianalisis',
             'penanda' => null,
             'dikecualikan' => $dikecualikan,
+            'jumlah_konsumsi_dianalisis' => $valid->count(),
         ]);
+    }
+
+    /**
+     * Total zat gizi; zat yang salah satu bahannya NULL dianggap tidak tersedia.
+     *
+     * @param  Collection<int, Konsumsi>  $items
+     * @return array<string, float|null>
+     */
+    private function totalZatGizi(Collection $items): array
+    {
+        $total = array_fill_keys(array_keys(self::ZAT_GIZI), 0.0);
+        $tidakTersedia = array_fill_keys(array_keys(self::ZAT_GIZI), false);
+
+        foreach ($items as $row) {
+            if ($row->status_validitas !== Konsumsi::VALID) {
+                continue;
+            }
+
+            $faktor = ((float) $row->porsi_gram) / 100.0;
+
+            foreach (array_keys(self::ZAT_GIZI) as $kolom) {
+                $nilai = $row->bahan?->{$kolom};
+
+                if ($nilai === null) {
+                    $tidakTersedia[$kolom] = true;
+
+                    continue;
+                }
+
+                $total[$kolom] += (float) $nilai * $faktor;
+            }
+        }
+
+        foreach ($tidakTersedia as $kolom => $missing) {
+            if ($missing) {
+                $total[$kolom] = null;
+            }
+        }
+
+        return $total;
     }
 
     /**
@@ -156,7 +190,7 @@ class NutritionService
      * Agregat bulanan: rata-rata %AKG harian antar hari tercatat.
      * Konsumsi INVALID (mis. anak sakit) tidak dihitung sebagai hari tercatat.
      *
-     * @return array{bulan: string, hari_tercatat: int, hari_dikecualikan: int, rata_persen_akg: float|null, status: string, zat_terendah: string|null, rata_per_zat: array<string, float>}
+     * @return array{bulan: string, hari_tercatat: int, hari_dikecualikan: int, rata_persen_akg: float|null, status: string, zat_terendah: string|null, rata_per_zat: array<string, float|null>}
      */
     public function agregatBulanan(Anak $anak, string $bulan): array
     {
@@ -212,23 +246,16 @@ class NutritionService
             $umur = ZScoreService::umurBulanPenuh($anak->tanggal_lahir->toDateString(), $tanggal);
             $akg = config('nutrition.akg.'.self::kelompokUmur($umur));
 
-            $total = [];
-            foreach (array_keys(self::ZAT_GIZI) as $kolom) {
-                $total[$kolom] = 0.0;
-            }
-            foreach ($items as $row) {
-                if ($row->status_validitas !== Konsumsi::VALID) {
-                    continue;
-                }
-
-                $faktor = ((float) $row->porsi_gram) / 100.0;
-                foreach (array_keys(self::ZAT_GIZI) as $kolom) {
-                    $total[$kolom] += ((float) ($row->bahan->{$kolom} ?? 0.0)) * $faktor;
-                }
-            }
+            $total = $this->totalZatGizi($items);
 
             $persen = [];
             foreach (self::ZAT_GIZI as $kolom => $nama) {
+                if ($total[$kolom] === null) {
+                    $persen[$nama] = null;
+
+                    continue;
+                }
+
                 $target = (float) $akg[$nama];
                 // Cap 100%: semantik pemenuhan — kelebihan satu zat tidak boleh
                 // menyeret rata-rata (mis. seng 5000% -> rata 2315%).
@@ -239,13 +266,23 @@ class NutritionService
 
         $rataPerZat = [];
         foreach (array_values(self::ZAT_GIZI) as $nama) {
-            $rataPerZat[$nama] = round(
-                collect($perHari)->avg(fn ($p) => $p[$nama] ?? 0.0), 1
-            );
+            $tersedia = collect($perHari)
+                ->pluck($nama)
+                ->filter(fn ($nilai) => $nilai !== null);
+
+            $rataPerZat[$nama] = $tersedia->isEmpty()
+                ? null
+                : round((float) $tersedia->avg(), 1);
         }
 
-        $rata = round(collect($rataPerZat)->avg(), 1);
-        $tanpaEnergi = collect($rataPerZat)->except('energi');
+        $rataTersedia = collect($rataPerZat)->filter(fn ($nilai) => $nilai !== null);
+        $rata = $rataTersedia->isEmpty() ? null : round((float) $rataTersedia->avg(), 1);
+        $dataLengkap = collect($perHari)->every(
+            fn (array $hari) => collect($hari)->every(fn ($nilai) => $nilai !== null)
+        );
+        $tanpaEnergi = collect($rataPerZat)
+            ->except('energi')
+            ->filter(fn ($nilai) => $nilai !== null);
         $zatTerendah = $tanpaEnergi->sort()->keys()->first();
 
         return [
@@ -253,18 +290,22 @@ class NutritionService
             'hari_tercatat' => count($perHari),
             'hari_dikecualikan' => $semua->count() - count($perHari),
             'rata_persen_akg' => $rata,
-            'status' => $rata >= (float) config('nutrition.cutoff_cukup', 80.0)
-                ? 'TERPENUHI'
-                : ($rata >= (float) config('nutrition.cutoff_kurang', 70.0) ? 'KURANG TERPENUHI' : 'TIDAK TERPENUHI'),
+            'status' => $rata === null
+                ? 'tidak_tersedia'
+                : (! $dataLengkap
+                    ? self::STATUS_DATA_TIDAK_LENGKAP
+                    : ($rata >= (float) config('nutrition.cutoff_cukup', 80.0)
+                        ? 'TERPENUHI'
+                        : ($rata >= (float) config('nutrition.cutoff_kurang', 70.0) ? 'KURANG TERPENUHI' : 'TIDAK TERPENUHI'))),
             'zat_terendah' => $zatTerendah,
             'rata_per_zat' => $rataPerZat,
         ];
     }
 
     /**
-     * @param  array<string, float>  $total
+     * @param  array<string, float|null>  $total
      * @param  array<string, mixed>  $akg
-     * @return list<array{zat_gizi: string, total: float, akg: float, persentase_akg: float, status: string}>
+     * @return list<array{zat_gizi: string, total: float|null, akg: float, persentase_akg: float|null, status: string}>
      */
     private static function ringkasanDariTotal(array $total, array $akg, ?bool &$defisiensi = null): array
     {
@@ -273,6 +314,19 @@ class NutritionService
 
         foreach (self::ZAT_GIZI as $kolom => $nama) {
             $target = (float) $akg[$nama];
+
+            if ($total[$kolom] === null) {
+                $ringkasan[] = [
+                    'zat_gizi' => $nama,
+                    'total' => null,
+                    'akg' => $target,
+                    'persentase_akg' => null,
+                    'status' => 'tidak_tersedia',
+                ];
+
+                continue;
+            }
+
             $persen = $target > 0 ? round($total[$kolom] / $target * 100.0, 1) : 0.0;
             $status = self::status($persen);
 

@@ -1,0 +1,98 @@
+{
+  "versi_artefak": "ml1-rf-fitur-mentah-1.0.0",
+  "tujuan": "ML #1 — replikasi kriteria pemantauan pertumbuhan anak (kategori Normal / At Risk / High Risk)",
+  "algoritma": "RandomForestClassifier(n_estimators=300, class_weight='balanced', random_state=42)",
+  "skenario_fitur": "B_mentah",
+  "fitur": [
+    "usia_bulan",
+    "jk_num",
+    "bb_kg",
+    "tb_cm"
+  ],
+  "target": "y = kategori_acuan(waz, haz, whz) — aturan acuan v0-provisional",
+  "aturan_versi": "v0-provisional",
+  "ambang": {
+    "high_risk": -3.0,
+    "at_risk": -2.0
+  },
+  "batas_plausibel_zscore": {
+    "waz": [
+      -6,
+      5
+    ],
+    "haz": [
+      -6,
+      6
+    ],
+    "whz": [
+      -5,
+      5
+    ]
+  },
+  "cakupan_usia_bulan": [
+    12,
+    59
+  ],
+  "status": "EKSPERIMEN - belum lolos evaluasi/validasi, jangan dipakai sebagai kategori di tampilan pengguna",
+  "catatan_penggunaan": "Alat bantu pemantauan, BUKAN diagnosis stunting dan bukan kategori WHO. Kategori adalah rancangan sistem dari aturan sementara v0-provisional (belum divalidasi ahli gizi, KONF-02). Model ML hanya mereplikasi aturan tersebut dan belum lolos evaluasi/validasi; tampilkan kategori acuan kepada pengguna.",
+  "data_latih": {
+    "baris_input": 3642,
+    "baris_dipakai": 3635,
+    "anak": 478,
+    "distribusi_kelas": {
+      "0": 2458,
+      "1": 957,
+      "2": 220
+    }
+  },
+  "rentang_data_latih": {
+    "usia_bulan": {
+      "min": 12,
+      "maks": 59
+    },
+    "bb_kg": {
+      "min": 5.9,
+      "maks": 27.2
+    },
+    "tb_cm": {
+      "min": 65.3,
+      "maks": 118.3
+    }
+  },
+  "preprocessing": "Tidak ada scaling/imputasi. jk: L->1, P->0. Nilai kosong ditolak (tidak diimputasi). Z-score WHO (pygrowup) dipakai untuk penyaringan nilai tak masuk akal dan aturan acuan, bukan sebagai fitur model.",
+  "evaluasi": {
+    "skema": "GroupKFold(n_splits=5) pada id_anak, cross_val_predict; bukan hold-out terpisah",
+    "catatan": "Estimasi CV TIDAK identik antar eksekusi: akurasi RF sama (0.914) tetapi macro-F1 dan recall High Risk berbeda (0.505 vs 0.641). Penyebab belum diverifikasi (dugaan: perbedaan versi library/penugasan fold). Gunakan kisaran, jangan satu angka. Recall High Risk rendah pada kedua eksekusi.",
+    "RandomForest_fitur_mentah_B": {
+      "output_notebook_tersimpan": {
+        "akurasi": 0.914,
+        "macro_F1": 0.813,
+        "recall_AtRisk": 0.838,
+        "recall_HighRisk": 0.505,
+        "presisi_HighRisk": 0.867
+      },
+      "eksekusi_ulang_finalisasi": {
+        "akurasi": 0.914,
+        "macro_F1": 0.842,
+        "recall_AtRisk": 0.879,
+        "recall_HighRisk": 0.641,
+        "presisi_HighRisk": 0.834,
+        "lingkungan": "python 3.13, scikit-learn 1.9.1"
+      }
+    },
+    "RandomForest_zscore_A_output_notebook": {
+      "akurasi": 0.998,
+      "macro_F1": 0.996,
+      "catatan": "Label adalah fungsi deterministik dari Z-score; BUKAN bukti validitas klinis."
+    }
+  },
+  "tanggal_dibuat": "2026-10-29",
+  "sha256_model": "f6af6482eebcebf6bf756f628c7d493eeebc0372c1423e319114596c9f02e79d",
+  "lingkungan": {
+    "python": "3.13.18",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "pygrowup": "0.8.2"
+  }
+}

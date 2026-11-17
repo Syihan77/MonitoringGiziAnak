@@ -127,7 +127,7 @@ class ImporCsvTest extends TestCase
         $this->assertDatabaseHas('pertumbuhans', [
             'anak_id' => $anak->id,
             'z_bb_u' => 0.21,
-            'status_gizi_antropometri' => 'normal',
+            'kategori_pemantauan' => 'NORMAL_LOW_RISK',
         ]);
         $this->assertDatabaseHas('audit_logs', ['aksi' => 'impor_ukur']);
     }

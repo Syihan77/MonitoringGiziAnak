@@ -27,6 +27,63 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Ambang klasifikasi Z-score (baseline sementara)
+    |--------------------------------------------------------------------------
+    |
+    | Nilai ini mengikuti baseline Permenkes No. 2/2020 dan masih menunggu
+    | validasi ahli gizi. Kategori pemantauan adalah rancangan sistem, bukan
+    | diagnosis.
+    |
+    */
+    'zscore' => [
+        'versi_aturan' => 'permenkes-2-2020-baseline-v1',
+        'umur_min_bulan' => 0,
+        'umur_max_bulan' => 60,
+        'ambang' => [
+            'bb_u' => [
+                'sangat_kurang_max' => -3.0,
+                'kurang_max' => -2.0,
+                'normal_max' => 1.0,
+            ],
+            'tb_u' => [
+                'sangat_pendek_max' => -3.0,
+                'pendek_max' => -2.0,
+                'normal_max' => 3.0,
+            ],
+            'bb_tb' => [
+                'gizi_buruk_max' => -3.0,
+                'gizi_kurang_max' => -2.0,
+                'normal_max' => 1.0,
+                'berisiko_lebih_max' => 2.0,
+                'gizi_lebih_max' => 3.0,
+            ],
+            'pemantauan' => [
+                'high_risk_max' => -3.0,
+                'at_risk_max' => -2.0,
+                'bb_tb_at_risk_max' => 2.0,
+                'bb_u_at_risk_max' => 1.0,
+            ],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Agregat dashboard kader
+    |--------------------------------------------------------------------------
+    |
+    | Prevalensi memakai kategori_pemantauan (bukan diagnosis). Persentase
+    | hanya bermakna bila denominator memadai; bulan tanpa data memakai null.
+    |
+    */
+    'kader' => [
+        'bulan_default' => 6,
+        'bulan_maks' => 12,
+        'denominator_min' => 5,
+        'zona_waktu' => 'Asia/Jakarta',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Baseline Hybrid Recipe Ranking (KONF-11 belum final)
     |--------------------------------------------------------------------------
     |
@@ -40,6 +97,6 @@ return [
         'bobot_relevansi' => 0.4,
         'top_k_default' => 5,
         'top_k_maks' => 5,
-        'wajib_data_lengkap' => true,
+        'demo_allow_data_lengkap' => (bool) env('NUTRITION_DEMO_ALLOW_DATA_LENGKAP', false),
     ],
 ];

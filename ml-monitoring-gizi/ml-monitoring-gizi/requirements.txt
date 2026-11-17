@@ -1,0 +1,13 @@
+# Paket gabungan ML1 + ML2. Python 3.13 (diuji 3.13.18). Lihat README bagian "Versi Python dan dependensi".
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2.5
+# scikit-learn HARUS 1.9.1: model ML1 (RandomForest) dibuat dengan 1.9.1; pickle tidak dijamin lintas versi.
+# Model ML2 (KMeans) dibuat dengan 1.8.0 tetapi terverifikasi memuat dan menghasilkan 93/93 label cluster identik di 1.9.1.
+scikit-learn==1.9.1
+numpy>=2.0
+pandas>=2.0
+joblib>=1.3
+# ML1: Z-score WHO (aturan acuan). Wajib; tanpa ini ML1 dilaporkan TIDAK siap.
+pygrowup==0.8.2
+six

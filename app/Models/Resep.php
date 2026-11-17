@@ -18,14 +18,26 @@ class Resep extends Model
     public const VERIFIKASI_DATA_LENGKAP = 'DATA_LENGKAP';
 
     /**
+     * Status DATA_LENGKAP hanya mensyaratkan empat makronutrisi per porsi.
+     *
+     * @var list<string>
+     */
+    public const MAKRO_WAJIB = [
+        'energi_per_porsi',
+        'karbohidrat_per_porsi',
+        'protein_per_porsi',
+        'lemak_per_porsi',
+    ];
+
+    public const CATATAN_MAKRO_TIDAK_LENGKAP = 'Catatan data: energi, karbohidrat, protein, dan lemak per porsi wajib lengkap untuk status DATA_LENGKAP; status diturunkan ke PERLU_VERIFIKASI.';
+
+    /**
      * @var list<string>
      */
     protected $fillable = [
         'nama_resep',
         'cara_memasak',
         'kategori_gizi',
-        'estimasi_biaya',
-        'porsi_saji',
         'jumlah_porsi_hasil',
         'energi_per_porsi',
         'protein_per_porsi',
@@ -38,10 +50,13 @@ class Resep extends Model
         'vitamin_a_per_porsi',
         'vitamin_c_per_porsi',
         'usia_min_bulan',
+        'usia_label_bulan',
         'usia_maks_bulan',
         'tekstur_sajian',
         'sumber_resep',
         'status_verifikasi_data',
+        'nama_pemverifikasi',
+        'tanggal_verifikasi',
         'tingkat_kesulitan',
         'id_resep',
         'usia_minimal_bulan_jika_dimodifikasi',
@@ -58,8 +73,6 @@ class Resep extends Model
     protected function casts(): array
     {
         return [
-            'estimasi_biaya' => 'float',
-            'porsi_saji' => 'integer',
             'jumlah_porsi_hasil' => 'integer',
             'energi_per_porsi' => 'float',
             'protein_per_porsi' => 'float',
@@ -72,8 +85,10 @@ class Resep extends Model
             'vitamin_a_per_porsi' => 'float',
             'vitamin_c_per_porsi' => 'float',
             'usia_min_bulan' => 'integer',
+            'usia_label_bulan' => 'integer',
             'usia_maks_bulan' => 'integer',
             'usia_minimal_bulan_jika_dimodifikasi' => 'integer',
+            'tanggal_verifikasi' => 'date',
             'alergen' => 'array',
         ];
     }
@@ -107,52 +122,64 @@ class Resep extends Model
         return $this->status_verifikasi_data === self::VERIFIKASI_DATA_LENGKAP;
     }
 
-    public function layakRekomendasi(): bool
+    public function makroLengkap(): bool
     {
-        return in_array($this->status_verifikasi_data, [
-            self::VERIFIKASI_DATA_LENGKAP,
-            self::VERIFIKASI_TERVERIFIKASI,
-        ], true);
-    }
-
-    public function bahans(): HasMany
-    {
-        return $this->hasMany(ResepBahan::class);
-    }
-
-    /**
-     * Hitung ulang estimasi biaya dari takaran × harga bahan.
-     * NULL bila ada bahan tanpa info harga.
-     */
-    public function hitungUlangBiaya(): ?float
-    {
-        $this->loadMissing('bahans.bahan');
-
-        $total = 0.0;
-
-        foreach ($this->bahans as $rb) {
-            $harga = $rb->bahan->estimasi_harga_per100g;
-
-            if ($harga === null) {
-                return null;
-            }
-
-            $total += ((float) $rb->takaran_gram) / 100.0 * ((float) $harga);
-        }
-
-        return round($total, 2);
-    }
-
-    public function biayaLengkap(): bool
-    {
-        $this->loadMissing('bahans.bahan');
-
-        foreach ($this->bahans as $rb) {
-            if ($rb->bahan->estimasi_harga_per100g === null) {
+        foreach (self::MAKRO_WAJIB as $kolom) {
+            if ($this->{$kolom} === null) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    public static function tambahkanAlasanMakro(?string $catatan): string
+    {
+        $catatan = trim((string) $catatan);
+
+        if (str_contains($catatan, self::CATATAN_MAKRO_TIDAK_LENGKAP)) {
+            return $catatan;
+        }
+
+        return $catatan === ''
+            ? self::CATATAN_MAKRO_TIDAK_LENGKAP
+            : $catatan.' '.self::CATATAN_MAKRO_TIDAK_LENGKAP;
+    }
+
+    public function turunkanKePerluVerifikasiKarenaMakro(): bool
+    {
+        if ($this->makroLengkap()) {
+            return false;
+        }
+
+        $atribut = [];
+
+        if ($this->status_verifikasi_data !== self::VERIFIKASI_PERLU_VERIFIKASI) {
+            $atribut['status_verifikasi_data'] = self::VERIFIKASI_PERLU_VERIFIKASI;
+        }
+
+        $catatan = self::tambahkanAlasanMakro($this->catatan_resep);
+        if ($catatan !== (string) $this->catatan_resep) {
+            $atribut['catatan_resep'] = $catatan;
+        }
+
+        if ($atribut === []) {
+            return false;
+        }
+
+        $this->update($atribut);
+
+        return true;
+    }
+
+    public function layakRekomendasi(bool $bolehDemo = false): bool
+    {
+        return $this->terverifikasi()
+            || ($bolehDemo && $this->dataLengkap());
+    }
+
+    public function bahans(): HasMany
+    {
+        return $this->hasMany(ResepBahan::class);
     }
 }

@@ -46,9 +46,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (Array.isArray(data.alergen) && data.alergen.length) {
       pesan.push(`Mengandung alergen: ${data.alergen.join(', ')}.`);
     }
-    if (data.porsi_saji === null) {
-      pesan.push('Takaran porsi saji belum tersedia; gunakan jumlah porsi hasil sebagai acuan.');
-    }
     if (pesan.length) {
       peringatan.innerHTML = pesan.join('<br>');
       peringatan.style.display = 'block';
@@ -56,11 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const gizi = data.gizi_per_porsi || {};
-  const energi = gizi.energi ?? 0;
-  setText('resep-kalori', `±${energi} kkal`);
+  const angka = (nilai) => (nilai === null || nilai === undefined ? null : nilai);
+  const teks = (nilai, satuan) => (nilai === null ? 'Tidak tersedia' : `${nilai}${satuan}`);
+  const energi = angka(gizi.energi);
+  setText('resep-kalori', energi === null ? 'Energi tidak tersedia' : `±${energi} kkal`);
 
   const img = document.getElementById('resep-image');
-  if (img) img.src = 'https://placehold.co/600x400/006a38/ffffff?text=Resep';
+  if (img) img.src = '/img/placeholder-menu.svg';
 
   // ============================================
   // RENDER BAHAN
@@ -74,7 +73,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     bahans.forEach(bahan => {
       const jumlah = bahan.takaran_jumlah
         ? `${bahan.takaran_jumlah} ${bahan.takaran_satuan || 'g'}`
-        : (bahan.takaran_gram === null ? 'Takaran belum tersedia' : `${bahan.takaran_gram} gram`);
+        : (bahan.takaran_gram_ekuivalen === null || bahan.takaran_gram_ekuivalen === undefined
+          ? 'Takaran belum tersedia'
+          : `${bahan.takaran_gram_ekuivalen} gram`);
       const li = document.createElement('li');
       li.innerHTML = `
         <div class="bahan-bullet"></div>
@@ -88,16 +89,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ============================================
   // RENDER GIZI PER PORSI
   // ============================================
-  setText('gizi-energi', `${energi} kkal`);
-  setText('gizi-protein', `${gizi.protein ?? 0} g`);
-  setText('gizi-karbo', `${gizi.karbohidrat ?? 0} g`);
-  setText('gizi-lemak', `${gizi.lemak ?? 0} g`);
+  const protein = angka(gizi.protein);
+  const karbo = angka(gizi.karbohidrat);
+  const lemak = angka(gizi.lemak);
+
+  setText('gizi-energi', teks(energi, ' kkal'));
+  setText('gizi-protein', teks(protein, ' g'));
+  setText('gizi-karbo', teks(karbo, ' g'));
+  setText('gizi-lemak', teks(lemak, ' g'));
 
   const maxValues = { energi: 400, protein: 30, karbo: 60, lemak: 20 };
-  setLebar('.gizi-bar-fill.calorie', (energi / maxValues.energi) * 100);
-  setLebar('.gizi-bar-fill.protein', ((gizi.protein ?? 0) / maxValues.protein) * 100);
-  setLebar('.gizi-bar-fill.carb', ((gizi.karbohidrat ?? 0) / maxValues.karbo) * 100);
-  setLebar('.gizi-bar-fill.fat', ((gizi.lemak ?? 0) / maxValues.lemak) * 100);
+  setLebar('.gizi-bar-fill.calorie', energi === null ? 0 : (energi / maxValues.energi) * 100);
+  setLebar('.gizi-bar-fill.protein', protein === null ? 0 : (protein / maxValues.protein) * 100);
+  setLebar('.gizi-bar-fill.carb', karbo === null ? 0 : (karbo / maxValues.karbo) * 100);
+  setLebar('.gizi-bar-fill.fat', lemak === null ? 0 : (lemak / maxValues.lemak) * 100);
 
   // ============================================
   // RENDER LANGKAH MEMASAK

@@ -35,8 +35,8 @@
         </a>
       </nav>
 
-      <div class="profile-ortu">
-        <div class="avatar-initial avatar-sm"><x-icon name="user" /></div>
+      <div class="profile-ortu profile-account">
+        <button type="button" class="avatar-initial avatar-sm profile-avatar-btn" id="avatar-ortu" data-profile-trigger aria-label="Buka informasi profil akun"><x-icon name="user" /></button>
         <button type="button" class="btn-logout" data-logout title="Keluar" aria-label="Keluar dari akun"><x-icon name="logout" /></button>
       </div>
     </div>
@@ -101,110 +101,11 @@
     <div class="recommendations-section" id="recommendations-section" style="display: none;">
       <h2 class="recommendations-title">Menu Rekomendasi untuk Hari Ini</h2>
       
-      <div class="menu-cards-grid">
-        
-        <!-- Menu Card 1 -->
-        <div class="menu-card">
-          <div class="menu-card-header">
-            <h3 class="menu-title">Opsi 1</h3>
-            <span class="menu-calories">320 kkal / Porsi</span>
-          </div>
-          
-          <div class="menu-porsi-badge">Menghasilkan: 2 Porsi</div>
-          
-          <div class="meal-section">
-            <div class="meal-type">
-              <span class="meal-icon"><x-icon name="sunrise" /></span> Sarapan
-            </div>
-            <div class="meal-content">
-              <img src="/img/omelet.jpg" alt="Omelet" class="meal-image" onerror="this.src='https://placehold.co/80x80/006a38/ffffff?text=Omelet'">
-              <div class="meal-info">
-                <h4 class="meal-name">Omelet Bayam & Roti Gandum</h4>
-              </div>
-            </div>
-            <ul class="meal-ingredients">
-              <li>Telur ayam 2 butir (120g)</li>
-              <li>Bayam 1 ikat (100g)</li>
-              <li>Roti gandum 2 lembar (60g)</li>
-            </ul>
-            <div class="meal-nutrition">
-              <span>Prot: 12g</span>
-              <span>Lemak: 8g</span>
-              <span>Karbo: 30g</span>
-            </div>
-          </div>
-
-          <a href="#" class="btn-see-more" data-resep="1">Lihat Resep </a>
+      <div class="menu-cards-grid" id="menu-cards-grid">
+        <div class="menu-empty-state" hidden>
+          <img src="/img/placeholder-menu.svg" alt="" class="menu-empty-image">
+          <p>Belum ada rekomendasi. Pilih bahan lalu tekan “Buat Rekomendasi Makanan”.</p>
         </div>
-
-        <!-- Menu Card 2 -->
-        <div class="menu-card">
-          <div class="menu-card-header">
-            <h3 class="menu-title">Opsi 2</h3>
-            <span class="menu-calories">350 kkal / Porsi</span>
-          </div>
-          
-          <div class="menu-porsi-badge">Menghasilkan: 3 Porsi</div>
-          
-          <div class="meal-section">
-            <div class="meal-type">
-              <span class="meal-icon"><x-icon name="sun" /></span> Siang
-            </div>
-            <div class="meal-content">
-              <img src="/img/bubur.jpg" alt="Bubur" class="meal-image" onerror="this.src='https://placehold.co/80x80/006a38/ffffff?text=Bubur'">
-              <div class="meal-info">
-                <h4 class="meal-name">Bubur Kacang Hijau Susu</h4>
-              </div>
-            </div>
-            <ul class="meal-ingredients">
-              <li>Kacang hijau 100g</li>
-              <li>Beras 60g</li>
-              <li>Susu cair 150ml</li>
-            </ul>
-            <div class="meal-nutrition">
-              <span>Prot: 14g</span>
-              <span>Lemak: 6g</span>
-              <span>Karbo: 55g</span>
-            </div>
-          </div>
-
-          <a href="#" class="btn-see-more">Lihat Resep </a>
-        </div>
-
-        <!-- Menu Card 3 -->
-        <div class="menu-card">
-          <div class="menu-card-header">
-            <h3 class="menu-title">Opsi 3</h3>
-            <span class="menu-calories">310 kkal / Porsi</span>
-          </div>
-          
-          <div class="menu-porsi-badge">Menghasilkan: 2 Porsi</div>
-          
-          <div class="meal-section">
-            <div class="meal-type">
-              <span class="meal-icon"><x-icon name="moon" /></span> Malam
-            </div>
-            <div class="meal-content">
-              <img src="/img/pancake.jpg" alt="Pancake" class="meal-image" onerror="this.src='https://placehold.co/80x80/006a38/ffffff?text=Pancake'">
-              <div class="meal-info">
-                <h4 class="meal-name">Pancake Pisang Oatmeal</h4>
-              </div>
-            </div>
-            <ul class="meal-ingredients">
-              <li>Pisang 1 buah (80g)</li>
-              <li>Oatmeal 40g</li>
-              <li>Telur 1 butir (50g)</li>
-            </ul>
-            <div class="meal-nutrition">
-              <span>Prot: 10g</span>
-              <span>Lemak: 8g</span>
-              <span>Karbo: 45g</span>
-            </div>
-          </div>
-
-          <a href="#" class="btn-see-more">Lihat Resep </a>
-        </div>
-
       </div>
     </div>
 
@@ -212,6 +113,7 @@
 
   <!-- JavaScript -->
     @vite(['resources/js/api.js'])
+    @vite(['resources/js/profile-menu.js'])
     @vite(['resources/js/input-ortu.js'])
   
   <script>

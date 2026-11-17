@@ -7,8 +7,10 @@ use App\Models\BahanMakanan;
 use App\Models\Konsumsi;
 use App\Models\Resep;
 use App\Models\ResepBahan;
+use App\Support\AliasBahan;
 use App\Support\ApiResponse;
 use App\Support\AuditLogger;
+use App\Support\BahanResolver;
 use App\Support\TakaranConverter;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -34,13 +36,37 @@ class AdminReferensiController extends Controller
             'q' => ['sometimes', 'string', 'max:100'],
             'page' => ['sometimes', 'integer', 'min:1'],
             'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'untuk_konsumsi' => ['sometimes', 'boolean'],
         ]);
 
+        $untukKonsumsi = (bool) ($filter['untuk_konsumsi'] ?? false);
+        $target = isset($filter['q']) ? AliasBahan::target($filter['q']) : null;
+
         $page = BahanMakanan::query()
-            ->when(isset($filter['q']), fn ($q) => $q->whereRaw(
-                'LOWER(nama_bahan) LIKE ?',
-                ['%'.mb_strtolower($filter['q']).'%']
-            ))
+            ->when($untukKonsumsi, fn ($q) => $q
+                ->where(fn ($sub) => $sub
+                    ->whereNull('sumber_rujukan')
+                    ->orWhere('sumber_rujukan', 'not like', BahanResolver::LABEL_PLACEHOLDER.'%'))
+                ->where(fn ($sub) => $sub
+                    ->whereNotNull('energi_per100g')
+                    ->orWhereNotNull('protein_per100g')
+                    ->orWhereNotNull('lemak_per100g')
+                    ->orWhereNotNull('karbohidrat_per100g')
+                    ->orWhereNotNull('zat_besi_per100g')
+                    ->orWhereNotNull('zinc_per100g')))
+            ->when(isset($filter['q']), fn ($q) => $q->where(function ($sub) use ($filter, $target) {
+                $sub->whereRaw(
+                    'LOWER(nama_bahan) LIKE ?',
+                    ['%'.mb_strtolower($filter['q']).'%']
+                );
+
+                if ($target !== null && $target !== mb_strtolower($filter['q'])) {
+                    $sub->orWhereRaw('LOWER(nama_bahan) LIKE ?', ['%'.$target.'%']);
+                }
+            }))
+            ->when($target !== null, fn ($q) => $q
+                ->orderByRaw('CASE WHEN LOWER(nama_bahan) = ? THEN 0 ELSE 1 END', [$target])
+                ->orderByRaw('CASE WHEN LOWER(nama_bahan) LIKE ? THEN 0 ELSE 1 END', [$target.'%']))
             ->orderBy('nama_bahan')
             ->paginate($filter['limit'] ?? 20);
 
@@ -138,14 +164,11 @@ class AdminReferensiController extends Controller
         $data = $request->validate($this->aturanResep());
 
         $resep = DB::transaction(function () use ($request, $data) {
-            $porsi = $data['jumlah_porsi_hasil'] ?? $data['porsi_saji'] ?? 1;
             $dibuat = Resep::create([
                 ...$this->atributResep($data),
-                'porsi_saji' => $porsi,
-                'jumlah_porsi_hasil' => $porsi,
+                'jumlah_porsi_hasil' => $data['jumlah_porsi_hasil'],
                 'kategori_gizi' => $data['kategori_gizi'] ?? 'umum',
                 'status_verifikasi_data' => $data['status_verifikasi_data'] ?? Resep::VERIFIKASI_PERLU_VERIFIKASI,
-                'estimasi_biaya' => null,
             ]);
 
             $this->simpanBahan($dibuat, $data['bahans']);
@@ -171,10 +194,10 @@ class AdminReferensiController extends Controller
         DB::transaction(function () use ($request, $resep, $data, $id) {
             $atribut = collect($data)->except(['bahans'])->all();
 
-            if (array_key_exists('jumlah_porsi_hasil', $atribut)) {
-                $atribut['porsi_saji'] = $atribut['jumlah_porsi_hasil'];
-            } elseif (array_key_exists('porsi_saji', $atribut)) {
-                $atribut['jumlah_porsi_hasil'] = $atribut['porsi_saji'];
+            if ($resep->terverifikasi() && $this->adaPerubahanSubstantif($data)) {
+                $atribut['status_verifikasi_data'] = Resep::VERIFIKASI_DATA_LENGKAP;
+                $atribut['nama_pemverifikasi'] = null;
+                $atribut['tanggal_verifikasi'] = null;
             }
 
             $resep->update($atribut);
@@ -205,6 +228,54 @@ class AdminReferensiController extends Controller
         });
 
         return ApiResponse::success([], 'Resep dihapus');
+    }
+
+    public function verifikasiResep(Request $request, string $id): JsonResponse
+    {
+        $this->wajibAdmin($request);
+        $resep = $this->resepOrFail($id);
+
+        $data = $request->validate([
+            'status_verifikasi_data' => ['required', 'in:TERVERIFIKASI'],
+            'nama_pemverifikasi' => ['required', 'string', 'max:100'],
+            'tanggal_verifikasi' => ['required', 'date', 'before_or_equal:today'],
+        ]);
+
+        if (! $resep->dataLengkap()) {
+            throw ValidationException::withMessages([
+                'status_verifikasi_data' => 'Hanya resep DATA_LENGKAP yang dapat diverifikasi.',
+            ]);
+        }
+
+        $this->pastikanVerifikasiLengkap($resep);
+
+        if (! $resep->fresh()->dataLengkap()) {
+            throw ValidationException::withMessages([
+                'status_verifikasi_data' => 'Resep tanpa energi, karbohidrat, protein, dan lemak per porsi tidak dapat diverifikasi.',
+            ]);
+        }
+
+        DB::transaction(function () use ($request, $resep, $data, $id) {
+            $statusLama = $resep->status_verifikasi_data;
+            $resep->update([
+                'status_verifikasi_data' => Resep::VERIFIKASI_TERVERIFIKASI,
+                'nama_pemverifikasi' => $data['nama_pemverifikasi'],
+                'tanggal_verifikasi' => $data['tanggal_verifikasi'],
+            ]);
+
+            AuditLogger::log($request->user(), 'resep_verify', [
+                'resep_id' => $id,
+                'status_lama' => $statusLama,
+                'status_baru' => Resep::VERIFIKASI_TERVERIFIKASI,
+                'nama_pemverifikasi' => $data['nama_pemverifikasi'],
+                'tanggal_verifikasi' => $data['tanggal_verifikasi'],
+            ]);
+        });
+
+        return ApiResponse::success(
+            $this->resepData($resep->refresh()->load('bahans.bahan'), true),
+            'Resep terverifikasi',
+        );
     }
 
     /**
@@ -242,8 +313,7 @@ class AdminReferensiController extends Controller
             ],
             'cara_memasak' => [...$parsial, 'required', 'string'],
             'kategori_gizi' => ['nullable', 'string', 'max:50'],
-            'porsi_saji' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'jumlah_porsi_hasil' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'jumlah_porsi_hasil' => [...$parsial, 'required', 'integer', 'min:1', 'max:100'],
             'tingkat_kesulitan' => ['nullable', 'in:Mudah,Sedang,Sulit'],
             'energi_per_porsi' => ['nullable', 'numeric', 'min:0', 'max:5000'],
             'protein_per_porsi' => ['nullable', 'numeric', 'min:0', 'max:500'],
@@ -256,6 +326,7 @@ class AdminReferensiController extends Controller
             'vitamin_a_per_porsi' => ['nullable', 'numeric', 'min:0', 'max:5000'],
             'vitamin_c_per_porsi' => ['nullable', 'numeric', 'min:0', 'max:5000'],
             'usia_min_bulan' => ['nullable', 'integer', 'min:0', 'max:60'],
+            'usia_label_bulan' => ['nullable', 'integer', 'min:0', 'max:60'],
             'usia_maks_bulan' => ['nullable', 'integer', 'min:0', 'max:60', 'gte:usia_min_bulan'],
             'usia_minimal_bulan_jika_dimodifikasi' => ['nullable', 'integer', 'min:0', 'max:60', 'lte:usia_min_bulan'],
             'modifikasi_untuk_turunkan_usia' => ['nullable', 'string', 'max:200'],
@@ -266,12 +337,11 @@ class AdminReferensiController extends Controller
             'catatan_resep' => ['nullable', 'string'],
             'tekstur_sajian' => ['nullable', 'string', 'max:50'],
             'sumber_resep' => ['nullable', 'string', 'max:200'],
-            'status_verifikasi_data' => ['nullable', 'in:DATA_LENGKAP,TERVERIFIKASI,PERLU_VERIFIKASI'],
+            'status_verifikasi_data' => ['nullable', 'in:DATA_LENGKAP,PERLU_VERIFIKASI'],
             'bahans' => [...$parsial, 'required', 'array', 'min:1', 'max:50'],
             'bahans.*.bahan_id' => ['required', 'uuid', 'exists:bahan_makanans,id'],
-            'bahans.*.takaran_gram' => ['nullable', 'numeric', 'min:0.1', 'max:5000'],
             'bahans.*.takaran_jumlah' => ['nullable', 'numeric', 'min:0.1', 'max:5000'],
-            'bahans.*.takaran_satuan' => ['nullable', 'string', 'max:20'],
+            'bahans.*.takaran_satuan' => ['required', 'string', 'max:20'],
             'bahans.*.takaran_gram_ekuivalen' => ['nullable', 'numeric', 'min:0.1', 'max:5000'],
             'bahans.*.catatan_bahan' => ['nullable', 'string', 'max:200'],
             'estimasi_biaya' => ['prohibited'],
@@ -300,6 +370,7 @@ class AdminReferensiController extends Controller
             'vitamin_a_per_porsi',
             'vitamin_c_per_porsi',
             'usia_min_bulan',
+            'usia_label_bulan',
             'usia_maks_bulan',
             'usia_minimal_bulan_jika_dimodifikasi',
             'modifikasi_untuk_turunkan_usia',
@@ -319,7 +390,7 @@ class AdminReferensiController extends Controller
     private function simpanBahan(Resep $resep, array $bahans): void
     {
         foreach ($bahans as $index => $item) {
-            $gram = $item['takaran_gram_ekuivalen'] ?? $item['takaran_gram'] ?? null;
+            $gram = $item['takaran_gram_ekuivalen'] ?? null;
 
             if ($gram === null && ($item['takaran_satuan'] ?? null) === 'kg') {
                 $gram = ((float) ($item['takaran_jumlah'] ?? 0)) * 1000;
@@ -342,9 +413,8 @@ class AdminReferensiController extends Controller
 
             $resep->bahans()->create([
                 'bahan_id' => $item['bahan_id'],
-                'takaran_gram' => $gram,
                 'takaran_jumlah' => $item['takaran_jumlah'] ?? $gram,
-                'takaran_satuan' => $item['takaran_satuan'] ?? 'g',
+                'takaran_satuan' => $item['takaran_satuan'],
                 'takaran_gram_ekuivalen' => $gram,
                 'catatan_bahan' => $item['catatan_bahan'] ?? ($gram === null ? 'Pelengkap tanpa takaran' : null),
             ]);
@@ -360,7 +430,7 @@ class AdminReferensiController extends Controller
             return;
         }
 
-        $resep->loadMissing('bahans');
+        $resep->loadMissing('bahans.bahan');
         $galat = [];
 
         if ($resep->jumlah_porsi_hasil === null || (int) $resep->jumlah_porsi_hasil < 1) {
@@ -375,19 +445,30 @@ class AdminReferensiController extends Controller
             $galat['alergen'] = 'Status alergen wajib diisi untuk resep data lengkap.';
         }
 
-        foreach ($resep->giziPerPorsi() as $nama => $nilai) {
-            if ($nilai === null) {
-                $galat['gizi_per_porsi'] = "Nilai gizi per porsi ({$nama}) belum lengkap.";
-            }
-        }
-
         if ($resep->bahans->isEmpty()) {
             $galat['bahans'] = 'Resep data lengkap wajib memiliki bahan.';
+        }
+
+        foreach ($resep->bahans as $rb) {
+            $namaBahan = $rb->bahan?->nama_bahan ?? 'bahan';
+
+            if ($rb->takaran_satuan === null) {
+                $galat['bahans'] = "Satuan takaran {$namaBahan} belum lengkap.";
+
+                continue;
+            }
+
+            if ($rb->takaran_gram_ekuivalen === null
+                && ! TakaranConverter::pelengkap($namaBahan)) {
+                $galat['bahans'] = "Takaran gram {$namaBahan} belum lengkap.";
+            }
         }
 
         if ($galat !== []) {
             throw ValidationException::withMessages($galat);
         }
+
+        $resep->turunkanKePerluVerifikasiKarenaMakro();
     }
 
     /**
@@ -410,6 +491,41 @@ class AdminReferensiController extends Controller
         ];
     }
 
+    private function adaPerubahanSubstantif(array $data): bool
+    {
+        foreach ([
+            'cara_memasak',
+            'jumlah_porsi_hasil',
+            'energi_per_porsi',
+            'protein_per_porsi',
+            'lemak_per_porsi',
+            'karbohidrat_per_porsi',
+            'serat_per_porsi',
+            'kalsium_per_porsi',
+            'zat_besi_per_porsi',
+            'zinc_per_porsi',
+            'vitamin_a_per_porsi',
+            'vitamin_c_per_porsi',
+            'usia_min_bulan',
+            'usia_label_bulan',
+            'usia_maks_bulan',
+            'usia_minimal_bulan_jika_dimodifikasi',
+            'modifikasi_untuk_turunkan_usia',
+            'alergen',
+            'jenis_menu',
+            'tingkat_kesulitan',
+            'tekstur_sajian',
+            'bahans',
+            'status_verifikasi_data',
+        ] as $field) {
+            if (array_key_exists($field, $data)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -422,9 +538,9 @@ class AdminReferensiController extends Controller
             'cara_memasak' => $resep->cara_memasak,
             'kategori_gizi' => $resep->kategori_gizi,
             'jumlah_porsi_hasil' => $resep->jumlah_porsi_hasil,
-            'porsi_saji' => $resep->porsi_saji,
             'gizi_per_porsi' => $resep->giziPerPorsi(),
             'usia_min_bulan' => $resep->usia_min_bulan,
+            'usia_label_bulan' => $resep->usia_label_bulan,
             'usia_maks_bulan' => $resep->usia_maks_bulan,
             'usia_minimal_bulan_jika_dimodifikasi' => $resep->usia_minimal_bulan_jika_dimodifikasi,
             'modifikasi_untuk_turunkan_usia' => $resep->modifikasi_untuk_turunkan_usia,
@@ -435,6 +551,8 @@ class AdminReferensiController extends Controller
             'tekstur_sajian' => $resep->tekstur_sajian,
             'sumber_resep' => $resep->sumber_resep,
             'status_verifikasi_data' => $resep->status_verifikasi_data,
+            'nama_pemverifikasi' => $resep->nama_pemverifikasi,
+            'tanggal_verifikasi' => $resep->tanggal_verifikasi?->toDateString(),
             'tingkat_kesulitan' => $resep->tingkat_kesulitan,
             'jumlah_bahan' => $resep->bahans_count ?? $resep->bahans()->count(),
         ];
@@ -443,7 +561,6 @@ class AdminReferensiController extends Controller
             $data['bahans'] = $resep->bahans->map(fn (ResepBahan $rb) => [
                 'bahan_id' => $rb->bahan_id,
                 'nama_bahan' => $rb->bahan?->nama_bahan,
-                'takaran_gram' => $rb->takaran_gram,
                 'takaran_jumlah' => $rb->takaran_jumlah,
                 'takaran_satuan' => $rb->takaran_satuan,
                 'takaran_gram_ekuivalen' => $rb->takaran_gram_ekuivalen,

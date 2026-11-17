@@ -4,6 +4,9 @@
  * Layout 2 (filter bulan): kartu pengukuran pada bulan terpilih.
  */
 
+import { renderPertumbuhan } from './grafik.js';
+import { daftarBulanAnalisis, formatPersentaseAkg, labelStatusGizi } from './gizi-format.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   // ============================================
   // 1. IDENTITAS ANAK + MUAT LOGBOOK
@@ -33,6 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  const grafikPertumbuhan = await window.NutriApi.trenPertumbuhan(logbook.anak_id)
+    .catch(() => null);
+
   function safeParse(s) {
     try {
       return s ? JSON.parse(s) : null;
@@ -60,8 +66,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function kelasStatus(status) {
-    if (status === 'NORMAL_LOW_RISK' || status === 'normal') return 'baik';
-    if (status === 'AT_RISK_MONITORING' || status === 'kurang') return 'kurang';
+    if (status === 'NORMAL_LOW_RISK') return 'baik';
+    if (status === 'AT_RISK_MONITORING') return 'kurang';
     return 'buruk';
   }
 
@@ -70,11 +76,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       NORMAL_LOW_RISK: 'Normal / Risiko Rendah',
       AT_RISK_MONITORING: 'Perlu Pemantauan',
       HIGH_RISK_REFERRAL: 'Perlu Rujukan',
-      normal: 'Gizi Baik',
-      kurang: 'Gizi Kurang',
-      stunting_terindikasi: 'Stunting Terindikasi',
-      gizi_buruk: 'Gizi Buruk',
-      lebih: 'Gizi Lebih',
     };
     return (status && peta[status]) || 'Belum Diukur';
   }
@@ -100,9 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setText('profile-wilayah', logbook.wilayah || '-');
   setText('ai-child-name', namaAnak.split(' ')[0]);
 
-  const statusTerakhir = terakhir
-    ? (terakhir.kategori_pemantauan || terakhir.status_gizi_antropometri)
-    : null;
+  const statusTerakhir = terakhir ? terakhir.kategori_pemantauan : null;
   setText('profile-status-text', labelStatus(statusTerakhir));
   const statusEl = document.getElementById('profile-status');
   if (statusEl) {
@@ -114,6 +113,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     const el = document.getElementById(id);
     if (el) el.textContent = nilai;
   }
+
+  // ============================================
+  // 2b. GRAFIK PERTUMBUHAN
+  // ============================================
+  let indikatorGrafik = 'bb_u';
+
+  function renderGrafikPertumbuhan() {
+    const canvas = document.getElementById('growthChartKader');
+    const kosong = document.getElementById('growth-empty-kader');
+    if (!canvas) return;
+
+    const adaTitik = grafikPertumbuhan
+      && Array.isArray(grafikPertumbuhan.titik)
+      && grafikPertumbuhan.titik.length > 0;
+
+    canvas.style.display = adaTitik ? '' : 'none';
+    if (kosong) kosong.hidden = adaTitik;
+
+    if (adaTitik) {
+      renderPertumbuhan(canvas, grafikPertumbuhan, indikatorGrafik);
+    }
+  }
+
+  document.querySelectorAll('.growth-tab').forEach((tombol) => {
+    tombol.addEventListener('click', () => {
+      indikatorGrafik = tombol.dataset.indikator || 'bb_u';
+      document.querySelectorAll('.growth-tab').forEach((el) => {
+        el.classList.toggle('active', el === tombol);
+      });
+      renderGrafikPertumbuhan();
+    });
+  });
+
+  renderGrafikPertumbuhan();
 
   // ============================================
   // 3. TIMELINE KONSUMSI (Layout 1)
@@ -175,11 +208,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!wadah || !anakId) return;
     wadah.classList.add('carousel-x');
 
-    const now = new Date();
-    const daftar = [];
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      daftar.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    const daftar = daftarBulanAnalisis(logbook.tanggal_lahir);
+
+    if (daftar.length === 0) {
+      wadah.innerHTML = '<p class="month-desc">Belum ada periode analisis yang dapat ditampilkan.</p>';
+      return;
     }
 
     const hasil = await Promise.all(daftar.map((b) =>
@@ -190,6 +223,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       'TERPENUHI': { dot: 'green', badge: 'fulfilled' },
       'KURANG TERPENUHI': { dot: 'yellow', badge: 'partial' },
       'TIDAK TERPENUHI': { dot: 'red', badge: 'unfulfilled' },
+      'DATA_TIDAK_LENGKAP': { dot: 'yellow', badge: 'partial' },
+      'tidak_tersedia': { dot: 'gray', badge: 'belum' },
     };
 
     wadah.innerHTML = hasil.map((h, idx) => {
@@ -200,14 +235,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `<div class="nutrition-status-item"><div class="status-dot gray"></div>`
           + `<div class="status-info"><div class="month-name">${label}</div>`
           + `<div class="month-desc">Belum ada catatan konsumsi.</div></div>`
-          + `<div class="status-badge belum">BELUM TERCATAT</div></div>`;
+          + `<div class="status-badge belum">${labelStatusGizi(h.status)}</div></div>`;
       }
       const mt = meta[h.status] || { dot: 'gray', badge: 'belum' };
       const saran = h.zat_terendah ? ` Perlu peningkatan konsumsi ${h.zat_terendah}.` : '';
+      const rata = formatPersentaseAkg(h.rata_persen_akg);
+      const keterangan = h.rata_persen_akg === null || h.rata_persen_akg === undefined
+        ? `${rata} (${h.hari_tercatat} hari tercatat).${saran}`
+        : `${rata} rata-rata pemenuhan (${h.hari_tercatat} hari tercatat).${saran}`;
       return `<div class="nutrition-status-item"><div class="status-dot ${mt.dot}"></div>`
         + `<div class="status-info"><div class="month-name">${label}</div>`
-        + `<div class="month-desc">${h.rata_persen_akg}% rata-rata pemenuhan (${h.hari_tercatat} hari tercatat).${saran}</div></div>`
-        + `<div class="status-badge ${mt.badge}">${h.status}</div></div>`;
+        + `<div class="month-desc">${keterangan}</div></div>`
+        + `<div class="status-badge ${mt.badge}">${labelStatusGizi(h.status)}</div></div>`;
     }).join('');
 
     pasangNavigasiKarosel(wadah);
@@ -297,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = document.createElement('div');
       card.className = 'daily-card';
 
-      const kategori = ukur.kategori_pemantauan || ukur.status_gizi_antropometri;
+      const kategori = ukur.kategori_pemantauan;
       const usia = ukur.usia_bulan_saat_ukur ?? ukur.umur_bulan;
 
       card.innerHTML = `

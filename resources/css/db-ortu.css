@@ -1007,6 +1007,110 @@
     color: #111827;
 }
 
+/* Ukur BB/TB dari dashboard orang tua */
+.btn-ukur-ortu {
+    margin-left: auto;
+    border: 1px solid #006a38;
+    background: #006a38;
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 9px 14px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-ukur-ortu:hover {
+    background: #004d29;
+    border-color: #004d29;
+}
+
+.ukur-ortu-hasil {
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.ukur-ortu-card {
+    max-width: 480px;
+}
+
+.ukur-ortu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.ukur-ortu-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.ukur-ortu-field label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.ukur-ortu-field input,
+.ukur-ortu-field select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #111827;
+    background: #ffffff;
+    outline: none;
+}
+
+.ukur-ortu-field input:focus,
+.ukur-ortu-field select:focus {
+    border-color: #006a38;
+    box-shadow: 0 0 0 3px rgba(0, 106, 56, 0.12);
+}
+
+.ukur-ortu-helper {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.ukur-ortu-error {
+    margin: 4px 0 0;
+    color: #b91c1c;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.ukur-ortu-submit {
+    background: #006a38 !important;
+    color: #ffffff !important;
+}
+
+.ukur-ortu-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+    .ukur-ortu-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Banner Peringatan Anak Sakit di Monitoring */
 .banner-sakit {
     background: #fef2f2;

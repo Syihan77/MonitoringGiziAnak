@@ -171,6 +171,25 @@ final class TakaranConverter
 
     private static function satuan(string $kuantitas): ?string
     {
+        $teks = mb_strtolower($kuantitas);
+
+        foreach ([
+            'helai' => 'lembar',
+            'btr' => 'butir',
+            'lbr' => 'lembar',
+            'bh' => 'buah',
+            'bks' => 'bungkus',
+            'btg' => 'batang',
+            'sm' => 'sdm',
+            'sd' => 'sdm',
+            'biji' => 'butir',
+            'ukuran besar' => 'buah',
+        ] as $alias => $satuanAlias) {
+            if (preg_match('/\b'.preg_quote($alias, '/').'\b/u', $teks) === 1) {
+                return $satuanAlias;
+            }
+        }
+
         foreach ([
             'sdm', 'sdt', 'gram', 'kg', 'ml', 'gls', 'gelas', 'butir', 'siung',
             'lembar', 'batang', 'ruas', 'potong', 'ptg', 'buah', 'ikat', 'ekor',

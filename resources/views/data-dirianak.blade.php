@@ -130,7 +130,7 @@
         if (savedAnak.namaAnak) document.getElementById('namaAnak').value = savedAnak.namaAnak;
         if (savedAnak.tanggalLahirAnak) document.getElementById('tanggalLahirAnak').value = savedAnak.tanggalLahirAnak;
         if (savedAnak.alamatAnak) document.getElementById('alamatAnak').value = savedAnak.alamatAnak;
-        
+
         // Centang ulang jenis kelamin
         if (savedAnak.jenisKelamin) {
           const radioJk = document.querySelector(`input[name="jenisKelamin"][value="${savedAnak.jenisKelamin}"]`);
