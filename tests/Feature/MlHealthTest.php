@@ -8,6 +8,14 @@ use Tests\TestCase;
 
 class MlHealthTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Kunci alamat ML agar tes tidak bergantung pada .env mesin pengembang.
+        config()->set('services.ml.ml1.base_url', 'http://127.0.0.1:8000');
+        config()->set('services.ml.ml2.base_url', 'http://127.0.0.1:8000');
+    }
+
     private function body(bool $ml1 = true, bool $ml2 = true, array $catatan = []): array
     {
         return [

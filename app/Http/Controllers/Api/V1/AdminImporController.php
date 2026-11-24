@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Anak;
 use App\Models\Pertumbuhan;
+use App\Rules\UsiaAnakMaksimal;
 use App\Services\ZScoreService;
 use App\Support\ApiResponse;
 use App\Support\AuditLogger;
@@ -37,7 +38,7 @@ class AdminImporController extends Controller
             $baris = $i + 2; // +1 header, +1 basis-1
             $v = Validator::make($row, [
                 'nama' => ['required', 'string', 'max:100'],
-                'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
+                'tanggal_lahir' => ['required', 'date', 'before_or_equal:today', new UsiaAnakMaksimal],
                 'jenis_kelamin' => ['required', 'in:L,P'],
                 'wilayah_posyandu' => ['required', 'string', 'max:100', 'exists:wilayahs,nama'],
                 'user_id' => ['required', 'uuid', 'exists:users,id'],

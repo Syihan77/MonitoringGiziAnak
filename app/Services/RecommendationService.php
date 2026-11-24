@@ -33,7 +33,7 @@ class RecommendationService
      * @var list<string>
      */
     private const NUTRISI_ML2 = [
-        'energi',
+        // Energi tidak lagi menjadi prioritas ML2; lihat $pemicu di rekomendasikan().
         'protein',
         'lemak',
         'karbohidrat',
@@ -75,6 +75,10 @@ class RecommendationService
                 ->pluck('zat_gizi')
                 ->values()
                 ->all();
+
+        // Energi tetap dinilai pada skor gizi umum, tetapi bukan pemicu
+        // rekomendasi/ML2. Hanya defisiensi non-energi yang menjadi fokus.
+        $pemicu = array_values(array_diff($defisiensi, ['energi']));
 
         $umurBulan = ZScoreService::umurBulanPenuh($anak->tanggal_lahir->toDateString(), $tanggal);
         $akg = $this->akgUntukUsia($umurBulan);
@@ -131,7 +135,7 @@ class RecommendationService
 
             $gizi = $resep->giziPerPorsi();
             $skorUmum = $this->skorGiziUmum($gizi, $akg);
-            $skorRelevansi = $this->skorRelevansi($gizi, $akg, $defisiensi);
+            $skorRelevansi = $this->skorRelevansi($gizi, $akg, $pemicu);
             $skorAkhir = round(
                 $skorUmum * (float) config('nutrition.rekomendasi.bobot_gizi_umum', 0.6)
                 + $skorRelevansi * (float) config('nutrition.rekomendasi.bobot_relevansi', 0.4),
@@ -158,7 +162,7 @@ class RecommendationService
         $ml2 = $this->panggilMl2(
             $namaBahanTersedia,
             $bahanDihindari,
-            $defisiensi,
+            $pemicu,
             $kandidatLokal,
         );
         $terpilih = $this->pilihMenu($kandidatLokal, $ml2['items'], $topK);
@@ -180,7 +184,7 @@ class RecommendationService
             'jumlah_dikembalikan' => $ml2['jumlah_dikembalikan'],
             'jumlah_dipakai' => $jumlahMl2,
         ];
-        $fokus = $defisiensi[0] ?? null;
+        $fokus = $pemicu[0] ?? null;
         $menu = [];
 
         foreach ($terpilih as $index => $k) {
@@ -321,7 +325,7 @@ class RecommendationService
             'jumlah_rekomendasi' => count($menu),
             'metode_ranking' => $metode,
             'menu' => $menu,
-            'defisiensi_terdeteksi' => $defisiensi,
+            'defisiensi_terdeteksi' => $pemicu,
             'saran' => $saran,
             'peringatan' => $peringatan,
             'pemeriksaan_pantangan' => $punyaPantangan ? 'dilakukan' : 'tidak_dilakukan',

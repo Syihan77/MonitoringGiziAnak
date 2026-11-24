@@ -26,6 +26,9 @@ class RekomendasiMl2Test extends TestCase
         parent::setUp();
         Http::preventStrayRequests();
         config()->set('services.ml.enabled', true);
+        // Kunci alamat ML agar tes tidak bergantung pada .env mesin pengembang.
+        config()->set('services.ml.ml1.base_url', 'http://127.0.0.1:8000');
+        config()->set('services.ml.ml2.base_url', 'http://127.0.0.1:8000');
     }
 
     private function as(User $user): array
@@ -192,6 +195,53 @@ class RekomendasiMl2Test extends TestCase
 
         $this->assertSame(['protein'], $res->json('data.defisiensi_terdeteksi'));
         $this->assertSame(RekomendasiLog::METODE_BASELINE_ATURAN, $res->json('data.metode_ranking'));
+    }
+
+    public function test_energi_saja_tidak_memicu_ml2_atau_defisiensi(): void
+    {
+        ['ortu' => $ortu, 'anak' => $anak] = $this->fixtures();
+        $this->mockAnalisis([
+            ['zat_gizi' => 'energi', 'status' => 'kurang'],
+        ]);
+
+        $res = $this->minta($ortu, $anak, ['top_k' => 2])->assertOk()
+            ->assertJsonPath('data.metode_ranking', RekomendasiLog::METODE_BASELINE_ATURAN)
+            ->assertJsonPath('data.ml2.tersedia', false)
+            ->assertJsonPath('data.ml2.alasan_tidak_tersedia', 'tanpa_defisiensi');
+
+        $this->assertSame([], $res->json('data.defisiensi_terdeteksi'));
+
+        foreach ($res->json('data.menu') as $item) {
+            $this->assertSame('LOKAL', $item['sumber_ranking']);
+            $this->assertStringContainsString('tidak ada defisiensi terdeteksi', $item['alasan_peringkat']);
+        }
+    }
+
+    public function test_energi_tidak_diteruskan_sebagai_prioritas_ml2(): void
+    {
+        ['ortu' => $ortu, 'anak' => $anak] = $this->fixtures();
+        $this->mockAnalisis([
+            ['zat_gizi' => 'energi', 'status' => 'kurang'],
+            ['zat_gizi' => 'protein', 'status' => 'kurang'],
+        ]);
+
+        Http::fake([
+            'http://127.0.0.1:8000/ml2/rekomendasi' => Http::response(
+                $this->responsMl2(['R1']),
+                200,
+            ),
+        ]);
+
+        $res = $this->minta($ortu, $anak, ['top_k' => 1])->assertOk();
+
+        $this->assertSame(['protein'], $res->json('data.defisiensi_terdeteksi'));
+
+        Http::assertSent(function (Request $request): bool {
+            $prioritas = $request->data()['prioritas_gizi'] ?? [];
+
+            return array_keys($prioritas) === ['protein']
+                && (float) $prioritas['protein'] === 1.0;
+        });
     }
 
     public function test_ml2_sukses_mengurutkan_hasil_dan_mengabaikan_id_tidak_dikenal(): void
