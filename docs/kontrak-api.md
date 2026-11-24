@@ -35,16 +35,15 @@ untuk endpoint daftar; timestamp ISO-8601 UTC (`config/app.php` timezone UTC).
 - `POST /auth/login` → 200 `{token, role, user_id}`.
 - `POST /auth/logout`, `GET /me` (auth).
 
-### Anak (SKPL-F-03, ortu = pemilik; kader = baca sewilayah; admin = semua)
+### Anak (SKPL-F-03, ortu = pemilik; kader = baca sewilayah; admin = baca semua)
 - `POST /anak` → 201 `{anak_id, nama, tanggal_lahir, usia_bulan, jenis_kelamin}`.
-  Body: `nama, tanggal_lahir (≤ hari ini), jenis_kelamin (L|P), alamat?`.
+  Body: `nama, tanggal_lahir (≤ hari ini, usia 0–60 bulan), jenis_kelamin (L|P), alamat?`.
 - `GET /anak?page&limit` → paginator Laravel (`data.data[]` + `total`).
   Tambahan `?ringkas_ukur=1`: tiap item sertakan `pemilik_nama`, `wilayah`,
   dan `ukur_terakhir {..., kategori_pemantauan, metode_klasifikasi,
   versi_aturan, status_validitas_pengukuran, pesan}` (null bila belum diukur).
 - `GET /anak/{id}` → detail + `alamat` + `pemilik_wilayah`.
-- `PUT|PATCH /anak/{id}` (pemilik/admin), `DELETE /anak/{id}` (pemilik/admin,
-  superset SKPL — hapus измерения ikut cascade).
+- `PUT|PATCH /anak/{id}` (pemilik), `DELETE /anak/{id}` (pemilik; superset SKPL, hapus ikut cascade). Admin baca-saja untuk data anak.
 
 ### Pertumbuhan (SKPL-F-04/F-05)
 - `POST /anak/{id}/pertumbuhan` → 201 `{pertumbuhan_id, usia_bulan_saat_ukur,
@@ -60,7 +59,7 @@ untuk endpoint daftar; timestamp ISO-8601 UTC (`config/app.php` timezone UTC).
 - `GET /anak/{id}/pertumbuhan?dari_tanggal&sampai_tanggal&limit` → riwayat
   terurut tanggal (kosong → 200 `[]`).
 
-### Konsumsi & gizi (SKPL-F-06/F-07, tulis = pemilik/admin)
+### Konsumsi & gizi (SKPL-F-06/F-07, tulis = pemilik; kader/admin = baca)
 - `POST /anak/{id}/konsumsi` → 201. Body: `tanggal_konsumsi`,
   `items[{bahan_id, porsi_gram, satuan? (gram|kg, default gram)}]` (gram disimpan).
 - `GET /anak/{id}/konsumsi?tanggal=` → item + nama bahan.
@@ -86,7 +85,7 @@ untuk endpoint daftar; timestamp ISO-8601 UTC (`config/app.php` timezone UTC).
   lengkap pada semua hari tercatat. Jika semua zat tidak tersedia,
   `rata_persen_akg=null` dan status `tidak_tersedia`.
 
-### Rekomendasi & resep (SKPL-F-08/F-09, pemilik/admin)
+### Rekomendasi & resep (SKPL-F-08/F-09, minta menu = pemilik; detail resep = semua peran login)
 - `POST /anak/{id}/rekomendasi-menu` → 200 `{jumlah_rekomendasi,
   metode_ranking (MODEL_ML|BASELINE_ATURAN),
   ml2{tersedia, alasan_tidak_tersedia, status_model, jenis_ranking,
@@ -132,6 +131,11 @@ untuk endpoint daftar; timestamp ISO-8601 UTC (`config/app.php` timezone UTC).
   `status_model=EKSPERIMEN`, `jenis_ranking=PERSENTIL_CONTENT_BASED`, dan
   `status_validasi=BELUM_DIVALIDASI_AHLI_GIZI` adalah metadata Laravel,
   bukan klaim dari paket ML.
+  Energi bukan pemicu: status `kurang`/`sangat_kurang` pada energi tidak masuk
+  `defisiensi_terdeteksi`, tidak menjadi fokus, dan tidak dikirim sebagai
+  `prioritas_gizi` ML2. Energi tetap diperhitungkan pada `skor_gizi_umum`
+  sebagai faktor sekunder. Zat non-energi lain (mis. vitamin C) tetap dapat
+  menjadi pemicu ML2.
 - `GET /resep/{resepId}` (semua peran login) → bahan + takaran +
   `gizi_per_porsi` {energi, protein, lemak, karbohidrat, serat, kalsium,
   zat_besi, zinc, vitamin_a, vitamin_c} + `status_verifikasi_data`.
@@ -169,8 +173,10 @@ untuk endpoint daftar; timestamp ISO-8601 UTC (`config/app.php` timezone UTC).
 
 | Area | Orang tua | Kader | Admin |
 |---|---|---|---|
-| anak | CRUD milik sendiri | baca sewilayah | semua |
-| pertumbuhan/konsumsi/rekomendasi | tulis milik sendiri | baca | semua |
+| anak | CRUD milik sendiri | baca sewilayah | baca semua |
+| pertumbuhan | tulis milik sendiri | catat ukur binaan | baca |
+| konsumsi/kondisi | tulis milik sendiri | baca | baca |
+| rekomendasi | minta milik sendiri | tidak dapat | tidak dapat |
 | dashboard/logbook/impor | — (403) | dashboard+logbook | semua |
 | bahan/resep | baca | baca | CRUD |
 

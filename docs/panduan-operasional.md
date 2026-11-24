@@ -229,10 +229,11 @@ Python terpisah dari Laravel.
 
 ```dotenv
 ML_ENABLED=false
-ML1_BASE_URL=http://127.0.0.1:8000
+# Laravel memakai 8000; layanan ML dijalankan di 8001 agar tidak bertabrakan.
+ML1_BASE_URL=http://127.0.0.1:8001
 ML1_CONNECT_TIMEOUT=1
 ML1_TIMEOUT=2
-ML2_BASE_URL=http://127.0.0.1:8000
+ML2_BASE_URL=http://127.0.0.1:8001
 ML2_CONNECT_TIMEOUT=1
 ML2_TIMEOUT=5
 NUTRITION_DEMO_ALLOW_DATA_LENGKAP=false
@@ -250,28 +251,30 @@ folder model di dalam paket.
 
 **(c) Kebutuhan layanan ML**
 
-- Python 3.13 (diuji 3.13.18); scikit-learn `1.9.1`; `pygrowup 0.8.2`.
+- Produksi: Python 3.13 (diuji 3.13.18). Paket juga lulus diuji pada Python
+  3.14.6; gunakan 3.14 untuk verifikasi lokal bila 3.13 tidak tersedia.
+  scikit-learn `1.9.1`; `pygrowup 0.8.2`.
 - Windows:
   ```bat
   cd ml-monitoring-gizi\ml-monitoring-gizi
-  py -3.13 -m venv .venv
+  py -3.13 -m venv .venv        # atau: py -3.14 -m venv .venv (uji lokal)
   .venv\Scripts\activate
   python -m pip install --upgrade pip
   python -m pip install setuptools six wheel
   python -m pip install --no-build-isolation -r requirements.txt
-  python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+  python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
   ```
 - Linux:
   ```sh
   cd ml-monitoring-gizi/ml-monitoring-gizi
-  python3.13 -m venv .venv
+  python3.13 -m venv .venv      # atau python3.14 untuk uji lokal
   source .venv/bin/activate
   python -m pip install --upgrade pip
   python -m pip install setuptools six wheel
   python -m pip install --no-build-isolation -r requirements.txt
-  python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+  python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
   ```
-- **Layanan ML tidak memiliki autentikasi.** Jangan buka port `8000` ke publik;
+- **Layanan ML tidak memiliki autentikasi.** Jangan buka port `8001` ke publik;
   gunakan `127.0.0.1` atau jaringan privat. Aktifkan Swagger hanya saat
   debugging lokal (`API_DOCS_ENABLED=false` di server).
 

@@ -73,18 +73,21 @@ Keputusan historis: satu lingkungan dengan scikit-learn 1.9.1. Verifikasi 15 Nov
 
 ```bash
 cd ml-monitoring-gizi
-python3.13 -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
+python3.13 -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate; uji lokal boleh 3.14
 pip install --upgrade pip setuptools wheel six
 pip install -r requirements.txt
 # bila build pygrowup gagal ("No module named six" / "install_layout"):
 pip install --no-build-isolation -r requirements.txt
 
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+uvicorn app.main:app --host 127.0.0.1 --port 8001
 ```
+
+Port `8001` dipakai agar tidak bertabrakan dengan Laravel yang berjalan di
+`8000`; ganti bila lingkungan Anda berbeda.
 
 Semua konfigurasi opsional lewat environment (lihat `.env.example`): `ML1_MODEL_DIR`, `ML2_MODEL_DIR`, `API_DOCS_ENABLED`, `LOG_LEVEL`. Muat variabel dari proses manager (mis. `EnvironmentFile` systemd) atau `export`; aplikasi tidak membaca berkas `.env` sendiri.
 
-**Swagger / dokumentasi interaktif:** `http://127.0.0.1:8000/docs` (ReDoc: `/redoc`). Matikan di server publik dengan `API_DOCS_ENABLED=false`.
+**Swagger / dokumentasi interaktif:** `http://127.0.0.1:8001/docs` (ReDoc: `/redoc`). Matikan di server publik dengan `API_DOCS_ENABLED=false`.
 
 ## 5. Endpoint
 
@@ -195,27 +198,38 @@ Laravel yang bertanggung jawab atas: **mengirim input yang sesuai** (tipe & rent
 
 `.env` Laravel (alamat produksi ditentukan tim deployment; jangan di-hardcode):
 ```
-ML_API_URL=http://127.0.0.1:8000
-ML_API_TIMEOUT=5
+ML_ENABLED=false
+ML1_BASE_URL=http://127.0.0.1:8001
+ML1_CONNECT_TIMEOUT=1
+ML1_TIMEOUT=2
+ML2_BASE_URL=http://127.0.0.1:8001
+ML2_CONNECT_TIMEOUT=1
+ML2_TIMEOUT=5
 ```
-`config/services.php`:
-```php
-'ml' => ['url' => env('ML_API_URL', 'http://127.0.0.1:8000'), 'timeout' => (int) env('ML_API_TIMEOUT', 5)],
-```
+`config/services.php` di repo Laravel memakai kunci `services.ml.ml1.*` dan
+`services.ml.ml2.*` (bukan `ML_API_URL`). Jalankan layanan ini di port `8001`
+bila Laravel memakai `8000` agar tidak bertabrakan.
 Pemanggilan:
 ```php
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\ConnectionException;
 
-$http = Http::baseUrl(config('services.ml.url'))->acceptJson()->asJson()->timeout(config('services.ml.timeout'));
 try {
-    $ml1 = $http->post('/ml1/prediksi', [
-        'usia_bulan' => (int) $anak->usia_bulan,
-        'jk'         => $anak->jk,                 // "L" | "P"
-        'bb_kg'      => (float) $ukur->bb_kg,
-        'tb_cm'      => (float) $ukur->tb_cm,
-    ]);
-    $ml2 = $http->post('/ml2/rekomendasi', ['prioritas_gizi' => ['protein' => 0.5, 'zat_besi' => 0.5], 'top_n' => 5]);
+    $ml1 = Http::baseUrl(config('services.ml.ml1.base_url'))
+        ->connectTimeout((int) config('services.ml.ml1.connect_timeout'))
+        ->timeout((int) config('services.ml.ml1.timeout'))
+        ->acceptJson()->asJson()
+        ->post('/ml1/prediksi', [
+            'usia_bulan' => (int) $anak->usia_bulan,
+            'jk'         => $anak->jk,                 // "L" | "P"
+            'bb_kg'      => (float) $ukur->bb_kg,
+            'tb_cm'      => (float) $ukur->tb_cm,
+        ]);
+    $ml2 = Http::baseUrl(config('services.ml.ml2.base_url'))
+        ->connectTimeout((int) config('services.ml.ml2.connect_timeout'))
+        ->timeout((int) config('services.ml.ml2.timeout'))
+        ->acceptJson()->asJson()
+        ->post('/ml2/rekomendasi', ['prioritas_gizi' => ['protein' => 0.5, 'zat_besi' => 0.5], 'top_n' => 5]);
 } catch (ConnectionException $e) {
     // layanan tidak tersedia / timeout -> jalur cadangan
 }
@@ -245,17 +259,17 @@ try {
 
 ## 10. Deployment server
 
-- Jalankan sebagai servis terpisah (bukan Colab), di jaringan privat atau di belakang reverse proxy; `ML_API_URL` Laravel menunjuk alamat internal. **Batasi akses di tingkat jaringan** (tidak ada autentikasi). Set `API_DOCS_ENABLED=false` di server publik.
+- Jalankan sebagai servis terpisah (bukan Colab), di jaringan privat atau di belakang reverse proxy; `ML1_BASE_URL`/`ML2_BASE_URL` Laravel menunjuk alamat internal. **Batasi akses di tingkat jaringan** (tidak ada autentikasi). Set `API_DOCS_ENABLED=false` di server publik.
 - Contoh systemd:
 ```ini
 [Service]
 WorkingDirectory=/opt/ml-monitoring-gizi
 EnvironmentFile=/opt/ml-monitoring-gizi/.env
-ExecStart=/opt/ml-monitoring-gizi/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2
+ExecStart=/opt/ml-monitoring-gizi/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8001 --workers 2
 Restart=on-failure
 ```
 - Setiap worker memuat model sendiri (ML1 ±3,6 MB terkompresi, RandomForest 300 pohon). Mulai dengan 1–2 worker; ukur memori.
-- Pasca-deploy: `curl http://127.0.0.1:8000/health` harus `200` dan `status: ok`; bila `503`, baca `modules.*.detail`.
+- Pasca-deploy: `curl http://127.0.0.1:8001/health` harus `200` dan `status: ok`; bila `503`, baca `modules.*.detail`.
 - Log tidak memuat data anak. Jangan mengaktifkan log akses yang mencatat body request.
 - Mengganti ambang ML1 (KONF-02) mewajibkan latih ulang dan menaikkan `versi_artefak` (`docs/ml1/build_model_asli.py`); mengubah `metadata.json` saja membuat aturan dan model tidak sinkron.
 

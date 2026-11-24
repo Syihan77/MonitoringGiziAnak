@@ -209,12 +209,17 @@ tests/                       Feature/ + Unit/ (ZScoreServiceTest)
   `filterWajib()` selalu membuang resep tanpa energi/karbohidrat/protein/lemak
   (termasuk saat demo), sehingga resep itu tidak masuk kandidat, tidak mengisi
   kekurangan hasil ML2, dan tidak pernah direkomendasikan.
+  Energi tidak memicu rekomendasi sendirian: hanya defisiensi non-energi yang
+  menjadi fokus dan `prioritas_gizi` ML2, sedangkan energi tetap masuk skor
+  gizi umum sebagai faktor sekunder.
 - **RBAC**: ortu CRUD milik sendiri (IDOR→403); kader baca sewilayah + catat
-  ukur binaan + dashboard/logbook; tulis referensi & impor = admin.
+  ukur binaan + dashboard/logbook; admin baca-saja data anak, tulis referensi
+  & impor = admin.
 - **Deviasi SKPL yang disengaja** (tercatat di `docs/deviasi-skpl.md`):
   token Sanctum opaque (bukan JWT), `DELETE/PATCH` anak, kolom
-  `energi_per100g`, kolom gizi nullable, umur 0–60, kunci respons tambahan,
-  label usia resep dan ambang kategori pemantauan masih baseline sementara.
+  `energi_per100g`, kolom gizi nullable, umur 0–60, admin baca-saja data anak,
+  audit log sinkron, kunci respons tambahan, label usia resep dan ambang
+  kategori pemantauan masih baseline sementara.
 
 ---
 
