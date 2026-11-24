@@ -263,7 +263,8 @@
           });
 
           // 4. Simpan pengukuran awal (tanggal ukur = hari ini).
-          const today = new Date().toISOString().slice(0, 10);
+          const hariIni = new Date();
+          const today = `${hariIni.getFullYear()}-${String(hariIni.getMonth() + 1).padStart(2, '0')}-${String(hariIni.getDate()).padStart(2, '0')}`;
           const ukur = await window.NutriApi.ukurCreate(anak.anak_id, {
             berat_badan_kg: Number(dataPertumbuhan.beratBadan),
             tinggi_badan_cm: Number(dataPertumbuhan.tinggiBadan),

@@ -100,7 +100,10 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Batasi tanggal maksimal hari ini
       const tgl = document.getElementById('tanggalLahir');
-      if (tgl) tgl.max = new Date().toISOString().slice(0, 10);
+      if (tgl) {
+        const hariIni = new Date();
+        tgl.max = `${hariIni.getFullYear()}-${String(hariIni.getMonth() + 1).padStart(2, '0')}-${String(hariIni.getDate()).padStart(2, '0')}`;
+      }
 
       // RESTORE DATA DARI SESSION JIKA SUDAH ADA
       const savedData = JSON.parse(sessionStorage.getItem('ortuDataStep1') || 'null');

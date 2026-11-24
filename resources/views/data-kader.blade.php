@@ -99,7 +99,10 @@
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     const tgl = document.getElementById('tglLahir') || document.querySelector('input[type="date"]');
-    if (tgl) tgl.max = new Date().toISOString().slice(0, 10);
+    if (tgl) {
+      const hariIni = new Date();
+      tgl.max = `${hariIni.getFullYear()}-${String(hariIni.getMonth() + 1).padStart(2, '0')}-${String(hariIni.getDate()).padStart(2, '0')}`;
+    }
 
     // Ambil data jika sebelumnya sudah pernah diisi
     const saved = JSON.parse(sessionStorage.getItem('kaderData') || sessionStorage.getItem('kaderDataStep1') || 'null');

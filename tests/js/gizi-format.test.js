@@ -6,8 +6,17 @@ import {
     formatPersentaseAkg,
     labelStatusGizi,
     PESAN_TANPA_CATATAN,
+    tanggalLokal,
     tidakAdaCatatanMakan,
 } from '../../resources/js/gizi-format.js';
+
+test('tanggal lokal tidak bergeser menjadi kemarin pada dini hari', () => {
+    assert.equal(tanggalLokal(new Date(2026, 0, 1, 0, 30)), '2026-01-01');
+});
+
+test('tanggal lokal memakai bulan dan hari dua digit', () => {
+    assert.equal(tanggalLokal(new Date(2026, 10, 9, 23, 59)), '2026-11-09');
+});
 
 test('persentase_akg null menampilkan data tidak tersedia, bukan null%', () => {
     const hasil = formatPersentaseAkg(null, 'tidak_tersedia');

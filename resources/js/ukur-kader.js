@@ -1,3 +1,5 @@
+import { tanggalLokal } from './gizi-format.js';
+
 /**
  * Form ukur kader - catat pengukuran anak binaan (sinkron ke orang tua).
  */
@@ -17,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const boxHasil = document.getElementById('ukur-hasil');
   const btnSimpan = document.getElementById('btn-simpan');
 
-  const hariIni = new Date().toISOString().slice(0, 10);
+  const hariIni = tanggalLokal();
   inputTanggal.max = hariIni;
   inputTanggal.value = hariIni;
 
