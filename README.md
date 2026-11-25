@@ -8,8 +8,11 @@ Z-score antropometri mengacu standar WHO/Kemenkes (Permenkes No. 2/2020).
 Acuan kontrak: SKPL v2.0. Detail kontrak API: [`docs/kontrak-api.md`](docs/kontrak-api.md).
 Panduan deploy & operasional server: [`docs/panduan-operasional.md`](docs/panduan-operasional.md).
 
-**Status:** backend + frontend terintegrasi penuh, **153 automated test hijau**
-(1097 assertions, `composer test`), build frontend sukses (`npm run build`).
+**Status:** backend + frontend terintegrasi penuh, **166 test PHP hijau**
+(1.235 assertions, `composer test`) + **14 test JS** (`npm run test:js`),
+build frontend sukses (`npm run build`). Layanan ML sudah terverifikasi lokal
+(ML1 & ML2 `ready` di port 8001), tetapi **nonaktif secara default**
+(`ML_ENABLED=false`) sampai integrasi disetujui.
 
 ---
 
@@ -17,16 +20,17 @@ Panduan deploy & operasional server: [`docs/panduan-operasional.md`](docs/pandua
 
 | Lapisan | Teknologi (versi terkunci) |
 |---|---|
-| Bahasa | PHP `^8.5` |
+| Bahasa | PHP `^8.3` |
 | Framework | Laravel `^13.17` (`laravel/framework`) |
 | Auth API | Laravel Sanctum `^4.0` (token opaque, expiry 24 jam) |
 | Database | PostgreSQL 14+ (`pgsql`; kompatibel MySQL untuk skema inti) |
 | Frontend | Blade + Vite `^8` (`laravel-vite-plugin ^3`), vanilla JS + CSS per halaman |
+| Layanan ML | Python 3.13 (diuji 3.13.18; 3.14.6 terverifikasi lokal), FastAPI, scikit-learn `1.9.1` |
 | Dev/test | PHPUnit `^12.5`, Laravel Pint, Faker, Tinker |
 
 Daftar lengkap: `composer.json` (PHP) dan `package.json` (Node).
 Prasyarat di mesin: **PHP 8.3+, Composer 2, Node 24 + npm, PostgreSQL 14+,
-Git** (opsional).
+Git** (opsional), dan **Python 3.13+** hanya bila ingin menjalankan layanan ML.
 
 ---
 
@@ -48,16 +52,31 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-`.env` **tidak di-commit** (masuk `.gitignore`). Isi manual yang wajib:
+`.env` **tidak di-commit** (masuk `.gitignore`). `.env.example` sudah memuat
+nilai bawaan yang aman; isi manual yang wajib:
 
 | Variabel | Contoh | Keterangan |
 |---|---|---|
 | `APP_URL` | `http://localhost:8000` | Base URL lokal |
+| `APP_TIMEZONE` | `Asia/Jakarta` | Zona waktu aplikasi; jangan dikosongkan |
 | `DB_CONNECTION` | `pgsql` | Jangan diganti sqlite |
 | `DB_HOST` / `DB_PORT` | `127.0.0.1` / `5432` | Host PostgreSQL |
 | `DB_DATABASE` | `gizi_db` | Database utama |
 | `DB_USERNAME` / `DB_PASSWORD` | `gizi` / `••••••` | Kredensial asli hanya di `.env` lokal, **jangan** ke `.env.example` |
 | `DESA_NAMA` | `Nama Desa` | Dipakai seeder wilayah |
+
+Variabel ML dan demo (bawaan `.env.example` sudah benar untuk lokal):
+
+| Variabel | Bawaan | Keterangan |
+|---|---|---|
+| `ML_ENABLED` | `false` | `true` hanya setelah layanan ML hidup dan `ml:health` lulus |
+| `ML1_BASE_URL` / `ML2_BASE_URL` | `http://127.0.0.1:8001` | Satu FastAPI melayani ML1 & ML2; **jangan** pakai 8000 (dipakai Laravel) |
+| `ML1_CONNECT_TIMEOUT` / `ML1_TIMEOUT` | `1` / `2` | Detik |
+| `ML2_CONNECT_TIMEOUT` / `ML2_TIMEOUT` | `1` / `5` | Detik |
+| `NUTRITION_DEMO_ALLOW_DATA_LENGKAP` | `false` | Mode demo non-production; **wajib `false` di production** |
+
+Dengan `ML_ENABLED=false`, aplikasi tetap berjalan dan rekomendasi memakai
+fallback lokal; layanan ML tidak wajib untuk setup dasar.
 
 ### 2.3. Siapkan database (dua database!)
 
@@ -116,13 +135,65 @@ sudah dibangun ulang dari CSV TKPI (versi `1.1.0-tkpi`, 93 resep). Pada
 (exit 0). Label dan metrik K-Means tetap berasal dari basis lama dan ditandai
 `USANG_DATA_LAMA`; refit menunggu kebijakan nilai kosong. Jangan menampilkan
 label cluster sebagai analisis gizi. `ML_ENABLED` tetap `false` sampai
-integrasi disetujui.
+layanan ML terpasang dan `ml:health` lulus (§2.5).
 
 > File di `database/seeders/data/` adalah **sumber seed mandiri**. Arsip asli
 > (`1_MonitoringGizi/`) sudah dipindah keluar proyek; **dilarang membaca file
 > `*.pdf`** — sumber angka hanya CSV/MD di atas.
 
-### 2.5. Build frontend + jalan
+### 2.5. Layanan ML (opsional, port 8001)
+
+Satu FastAPI melayani ML1 (prediksi pertumbuhan) dan ML2 (rekomendasi menu).
+Laravel tetap di port 8000; jalankan ML di **8001** agar tidak bertabrakan.
+Langkah ini hanya diperlukan bila `ML_ENABLED=true` atau saat menguji
+`ml:health`/`ml:verify-basis`.
+
+Prasyarat: **Python 3.13** (diuji 3.13.18). Python 3.14.6 juga terverifikasi
+lokal, tetapi produksi memakai 3.13. `scikit-learn` dikunci `1.9.1` karena
+model ML1 dibuat dengan versi itu.
+
+```sh
+cd ml-monitoring-gizi/ml-monitoring-gizi
+
+# Windows
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # hanya untuk pytest
+
+# Linux/macOS
+# python3 -m venv .venv && source .venv/bin/activate
+# pip install -r requirements.txt -r requirements-dev.txt
+```
+
+Jalankan layanan (biarkan terminal ini hidup):
+
+```sh
+# Windows
+.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+
+# Linux/macOS
+# .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+```
+
+Cek dari root proyek (terminal lain, atau `cd ../..` lebih dulu):
+
+```sh
+curl http://127.0.0.1:8001/health
+php artisan ml:health        # harus "ML health: siap" dan exit 0
+php artisan ml:verify-basis  # 93 cocok / 0 selisih
+```
+
+Catatan:
+
+- `.venv/` sudah masuk `.gitignore`; jangan di-commit.
+- `ML_ENABLED` tetap `false` selama layanan belum dipakai; mengubahnya tidak
+  otomatis menyalakan layanan ML.
+- Setelah mengubah `.env`, jalankan `php artisan config:clear` bila konfigurasi
+  pernah di-cache.
+- Jika `ml:health` gagal, lihat §6.
+
+### 2.6. Build frontend + jalan
 
 ```sh
 npm run build
@@ -142,11 +213,18 @@ npm run dev                # Vite dev server :5173 + HMR
 > matikan dev server (hapus `public/hot`) lalu `npm run build` + hard-refresh.
 > Jangan menebak-nebak — verifikasi via fetch/DevTools bila perlu.
 
-### 2.6. Verifikasi instalasi
+### 2.7. Verifikasi instalasi
 
 ```sh
-php artisan test           # seluruh test harus hijau
+php artisan test              # 166 test PHP harus hijau
+npm run test:js               # 14 test JS
+npm run build                 # pastikan aset produksi terbentuk
+vendor/bin/pint --test        # gaya kode (opsional)
 curl http://localhost:8000/api/v1/ping
+
+# Hanya jika layanan ML (§2.5) berjalan:
+php artisan ml:health
+php artisan ml:verify-basis
 ```
 
 Akun uji cepat (via `POST /api/v1/auth/register` → `/auth/login`): role
@@ -163,26 +241,33 @@ app/
   Http/Requests/             RegisterRequest, LoginRequest (+ validasi inline)
   Models/                    User, Anak, Pertumbuhan, Konsumsi, BahanMakanan,
                              Resep(+Bahan,Log), WhoStandard, Wilayah, AuditLog
-  Policies/                  AnakPolicy (pemilik penuh; kader baca sewilayah)
+  Policies/                  AnakPolicy (pemilik penuh; kader baca sewilayah;
+                             admin baca-saja)
+  Rules/                     UsiaAnakMaksimal (0–60 bulan)
   Services/                  ZScoreService, NutritionService, RecommendationService
-  Support/                   ApiResponse (envelope), AuditLogger (sinkron)
+  Support/                   ApiResponse (envelope), AuditLogger (sinkron),
+                             AliasBahan, BahanResolver
 routes/
-  web.php                    17 Route::view (Blade) + /ukur-kader
+  web.php                    19 Route::view (Blade) + /ukur-kader
   api.php                    /api/v1 (throttle 120/mnt), auth:sanctum grup
 resources/
-  views/                     17 Blade + components/icon.blade.php (29 ikon SVG)
-  css/js                     per halaman + js/api.js (fetch wrapper + logout)
+  views/                     19 Blade + components/icon.blade.php (29 ikon SVG)
+  css/js                     per halaman + js/api.js (fetch wrapper + logout),
+                             js/gizi-format.js (format angka & tanggal lokal)
 database/
   migrations/                users, tokens(uuidMorphs), audit_logs, anaks,
                              who_standards(+varian), pertumbuhans,
                              wilayahs, bahan_makanans, konsumsis,
                              reseps(+bahan, rekomendasi_logs)
   seeders/ (+ data/)         lihat §2.4
-config/                      nutrition.php (AKG, cutoff, Z-score, kader,
-                             rekomendasi), wilayah.php
+config/                      app.php (timezone), nutrition.php (AKG, cutoff,
+                             Z-score, kader, rekomendasi), services.php (ML),
+                             wilayah.php
 docs/                        kontrak-api.md, panduan-operasional.md,
-                             deviasi-skpl.md
-tests/                       Feature/ + Unit/ (ZScoreServiceTest)
+                             deviasi-skpl.md, audit_gizi_tkpi_semua_resep.csv,
+                             audit-pemetaan-bahan.md
+ml-monitoring-gizi/          layanan FastAPI ML1 + ML2 (lihat §2.5)
+tests/                       Feature/ + Unit/ (ZScoreServiceTest), js/
 ```
 
 ---
@@ -232,7 +317,8 @@ php artisan db:seed --class=NamaSeeder --force
 php artisan resep:muat-gizi-tkpi --dry-run   # cek muat ulang gizi DB terisi
 php artisan resep:muat-gizi-tkpi             # terapkan (idempoten)
 php artisan ml:health                        # cek layanan + kesiapan ML1/ML2
-npm run dev                            # develop FE (lihat peringatan §2.5)
+php artisan ml:verify-basis                  # cocokkan basis ML2 dengan DB (93/93)
+npm run dev                            # develop FE (lihat peringatan §2.6)
 npm run build                          # sebelum serah terima/uji final
 php artisan view:cache && php artisan view:clear   # validasi sintaks Blade
 vendor/bin/pint --test                 # cek gaya kode (opsional)
@@ -254,6 +340,9 @@ vendor/bin/pint --test                 # cek gaya kode (opsional)
 | Mojibake `ðŸŽ¯` di Blade | File terkontaminasi encoding — jangan paste mentah; perbaiki via skrip decode Win-1252→UTF-8 |
 | ` streak 404` aset `/img/*.svg` | Cek nama file vs referensi; gunakan `<x-icon>` |
 | Rate-limit saat testing manual | 120 req/menit/token; tunggu 1 menit |
+| `ml:health` → `koneksi_gagal` | Layanan ML belum jalan, venv belum aktif, atau `ML1_BASE_URL`/`ML2_BASE_URL` masih `:8000` → jalankan §2.5 di port 8001 lalu ulangi |
+| `ml:health` → ML1/ML2 `tidak siap` | Dependensi/model belum lengkap (mis. `pygrowup`, `scikit-learn`) → pasang `requirements.txt` di venv yang sama |
+| Rekomendasi kosong di production | Belum ada resep `TERVERIFIKASI` → verifikasi lewat endpoint admin; mode demo hanya untuk non-production |
 
 ## 7. Checklist serah terima pilot desa
 
@@ -261,6 +350,13 @@ vendor/bin/pint --test                 # cek gaya kode (opsional)
 2. Ganti password `admin@gizi.local`; buat akun kader per posyandu.
 3. Impor register via `POST /admin/impor-anak` + `POST /admin/impor-ukur` (CSV ≤1000
    baris; format di `docs/kontrak-api.md`); periksa `galat[]` per respons.
-4. Latih kader: ukur benar + `posisi_ukur` wajib + login harian (token 24 jam).
-5. Backup: `pg_dump` terjadwal (detail di `docs/panduan-operasional.md`).
-6. Ingat: status gizi sistem bersifat **indikatif** — diagnosis tetap oleh nakes.
+4. Pastikan minimal **satu resep `TERVERIFIKASI`**. Seeder saat ini menghasilkan
+   62 `DATA_LENGKAP`, 31 `PERLU_VERIFIKASI`, dan **0 `TERVERIFIKASI`**; tanpa
+   verifikasi ahli, production tidak punya kandidat rekomendasi.
+5. Tetapkan `APP_DEBUG=false`, `APP_TIMEZONE=Asia/Jakarta`, dan
+   `NUTRITION_DEMO_ALLOW_DATA_LENGKAP=false`.
+6. Jika memakai ML: pasang layanan sesuai §2.5, jalankan `php artisan ml:health`
+   sampai exit 0, baru set `ML_ENABLED=true` dan uji satu rekomendasi end-to-end.
+7. Latih kader: ukur benar + `posisi_ukur` wajib + login harian (token 24 jam).
+8. Backup: `pg_dump` terjadwal (detail di `docs/panduan-operasional.md`).
+9. Ingat: status gizi sistem bersifat **indikatif** — diagnosis tetap oleh nakes.
