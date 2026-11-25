@@ -48,6 +48,38 @@ class AnakTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['aksi' => 'anak_create']);
     }
 
+    public function test_buat_anak_usia_60_bulan_masih_diterima(): void
+    {
+        $ortu = User::factory()->create();
+
+        $this->postJson('/api/v1/anak', $this->anakPayload([
+            'tanggal_lahir' => now()->subMonths(60)->toDateString(),
+        ]), $this->as($ortu))->assertCreated();
+    }
+
+    public function test_buat_anak_usia_lebih_dari_60_bulan_ditolak(): void
+    {
+        $ortu = User::factory()->create();
+
+        $this->postJson('/api/v1/anak', $this->anakPayload([
+            'tanggal_lahir' => now()->subMonths(61)->toDateString(),
+        ]), $this->as($ortu))
+            ->assertBadRequest()
+            ->assertJsonPath('error_code', 'VALIDATION_ERROR');
+    }
+
+    public function test_update_anak_usia_lebih_dari_60_bulan_ditolak(): void
+    {
+        $ortu = User::factory()->create();
+        $anak = Anak::create([...$this->anakPayload(), 'user_id' => $ortu->id]);
+
+        $this->patchJson("/api/v1/anak/{$anak->id}", [
+            'tanggal_lahir' => now()->subMonths(61)->toDateString(),
+        ], $this->as($ortu))
+            ->assertBadRequest()
+            ->assertJsonPath('error_code', 'VALIDATION_ERROR');
+    }
+
     public function test_buat_anak_tanpa_alamat_tetap_berhasil(): void
     {
         $ortu = User::factory()->create();

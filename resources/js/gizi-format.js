@@ -1,3 +1,16 @@
+/**
+ * Tanggal hari ini menurut zona waktu browser (YYYY-MM-DD).
+ * Jangan memakai toISOString(): nilainya UTC dan dapat menggeser tanggal
+ * menjadi kemarin pada pukul 00.00-06.59 WIB.
+ */
+export function tanggalLokal(sekarang = new Date()) {
+    const tahun = sekarang.getFullYear();
+    const bulan = String(sekarang.getMonth() + 1).padStart(2, '0');
+    const hari = String(sekarang.getDate()).padStart(2, '0');
+
+    return `${tahun}-${bulan}-${hari}`;
+}
+
 const LABEL_STATUS_GIZI = {
     tidak_tersedia: 'Data tidak tersedia',
     belum_ada_data: 'Belum ada data',

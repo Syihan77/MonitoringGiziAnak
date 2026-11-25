@@ -61,6 +61,29 @@ class ImporCsvTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['aksi' => 'impor_anak']);
     }
 
+    public function test_impor_anak_usia_lebih_dari_60_bulan_ditolak_per_baris(): void
+    {
+        $pemilik = User::factory()->create();
+        $bayi = now()->subMonths(12)->toDateString();
+        $terlaluTua = now()->subMonths(61)->toDateString();
+
+        $res = $this->postJson('/api/v1/admin/impor-anak', [
+            'file' => $this->csv(
+                "nama,tanggal_lahir,jenis_kelamin,wilayah_posyandu,user_id\n"
+                ."Bayi,{$bayi},L,Posyandu Melati,{$pemilik->id}\n"
+                ."Besar,{$terlaluTua},P,Posyandu Melati,{$pemilik->id}\n"
+            ),
+        ], $this->asAdmin());
+
+        $res->assertOk()
+            ->assertJsonPath('data.total_baris', 2)
+            ->assertJsonPath('data.berhasil', 1)
+            ->assertJsonPath('data.gagal', 1);
+
+        $this->assertDatabaseHas('anaks', ['nama' => 'Bayi']);
+        $this->assertDatabaseMissing('anaks', ['nama' => 'Besar']);
+    }
+
     public function test_impor_anak_baris_rusak_dilaporkan_tanpa_gagalkan_batch(): void
     {
         $pemilik = User::factory()->create();

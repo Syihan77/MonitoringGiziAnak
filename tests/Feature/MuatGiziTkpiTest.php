@@ -135,7 +135,11 @@ class MuatGiziTkpiTest extends TestCase
         $this->assertStringNotContainsString('normalisasi basis ML', (string) $r058->catatan_resep);
         $this->assertSame(1, substr_count((string) $r058->catatan_resep, DatasetGiziTkpi::CATATAN));
 
-        $this->assertSame($statusSebelum, Resep::pluck('status_verifikasi_data', 'id_resep')->all());
+        $statusSesudah = Resep::pluck('status_verifikasi_data', 'id_resep')->all();
+        ksort($statusSebelum);
+        ksort($statusSesudah);
+
+        $this->assertSame($statusSebelum, $statusSesudah);
         $this->assertSame($jumlahBahan, ResepBahan::count());
 
         $this->artisan('resep:muat-gizi-tkpi')

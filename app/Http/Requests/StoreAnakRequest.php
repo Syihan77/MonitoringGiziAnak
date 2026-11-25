@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UsiaAnakMaksimal;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -19,7 +20,7 @@ class StoreAnakRequest extends FormRequest
     {
         return [
             'nama' => ['required', 'string', 'max:100'],
-            'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
+            'tanggal_lahir' => ['required', 'date', 'before_or_equal:today', new UsiaAnakMaksimal],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'alamat' => ['nullable', 'string', 'max:500'],
             'pantangan' => ['sometimes', 'array', 'max:50'],

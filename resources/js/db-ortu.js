@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const hariIni = new Date().toISOString().slice(0, 10);
+        const hariIni = tanggalLokalHariIni();
 
         const asliText = btnCalculate.innerHTML;
         btnCalculate.innerHTML = 'Menyimpan...';

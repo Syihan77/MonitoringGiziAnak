@@ -23,6 +23,9 @@ class Ml1PertumbuhanTest extends TestCase
         $this->seed(WhoStandardsSeeder::class);
         Http::preventStrayRequests();
         config()->set('services.ml.enabled', true);
+        // Kunci alamat ML agar tes tidak bergantung pada .env mesin pengembang.
+        config()->set('services.ml.ml1.base_url', 'http://127.0.0.1:8000');
+        config()->set('services.ml.ml2.base_url', 'http://127.0.0.1:8000');
     }
 
     private function as(User $user): array

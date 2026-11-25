@@ -17,8 +17,8 @@ Semua deviasi harus disetujui pemilik produk sebelum pilot.
 ## 2. `PATCH` dan `DELETE` pada anak
 
 - SKPL: pembaruan profil anak memakai `PUT`.
-- Implementasi: `PUT`, `PATCH`, dan `DELETE /anak/{id}` tersedia untuk pemilik
-  atau admin.
+- Implementasi: `PUT`, `PATCH`, dan `DELETE /anak/{id}` tersedia hanya untuk
+  pemilik. Admin bersifat baca-saja untuk data anak.
 - Alasan: `PATCH` memudahkan pembaruan sebagian; `DELETE` diperlukan untuk
   koreksi data yang salah saat pendampingan.
 - Dampak: ini superset kontrak. Klien lama yang hanya memakai `PUT` tetap
@@ -72,13 +72,34 @@ Semua deviasi harus disetujui pemilik produk sebelum pilot.
 ## 4. Dukungan usia 0–60 bulan
 
 - SKPL: target utama 12–59 bulan.
-- Implementasi: validasi pertumbuhan menerima 0–60 bulan, sedangkan resep
-  memiliki batas `usia_min_bulan` sendiri.
+- Implementasi: pendaftaran, pembaruan profil, impor CSV, dan validasi
+  pertumbuhan menerima usia 0–60 bulan; resep memiliki batas
+  `usia_min_bulan` sendiri.
 - Alasan: baku WHO menyediakan data 0–60 bulan; membatasi input akan
   menghalangi pemantauan bayi dan anak tepat 60 bulan.
 - Dampak: rekomendasi menu tetap memakai batas usia resep. Resep pada dataset
   saat ini memiliki `usia_min_bulan=12`, sehingga tidak ditawarkan untuk bayi
   di bawah 12 bulan.
+
+## 5. Admin baca-saja untuk data anak
+
+- SKPL RBAC: kolom admin pada area anak ditulis “—”.
+- Implementasi: admin dapat membaca seluruh data anak (`AnakPolicy::view`),
+  tetapi tidak dapat membuat, mengubah, atau menghapus data anak; operasi tulis
+  tetap milik orang tua. Admin hanya mengelola data referensi dan impor.
+- Alasan: admin adalah pengelola sistem/referensi, bukan pencatat data
+  pertumbuhan anak; impor massal tetap tersedia untuk kebutuhan pilot.
+- Dampak: endpoint tulis anak mengembalikan 403 bagi admin.
+
+## 6. Audit log sinkron dan terisolasi
+
+- SKPL F-14: pencatatan audit dilakukan secara asinkron.
+- Implementasi: `AuditLogger` menulis ke tabel `audit_logs` secara sinkron dan
+  kegagalannya diisolasi agar tidak menggagalkan transaksi utama.
+- Alasan: volume pilot masih kecil; penulisan sinkron menghindari worker queue
+  tambahan dan menjaga jejak audit langsung tersedia.
+- Dampak: tidak ada job/queue audit; kegagalan audit dilaporkan terpisah dan
+  tidak membatalkan aksi pengguna.
 
 ## Catatan implementasi (bukan perubahan kontrak)
 
