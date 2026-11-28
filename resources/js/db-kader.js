@@ -25,6 +25,13 @@ function inisial(nama) {
   return nama.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 }
 
+function formatTanggal(tanggal) {
+  if (!tanggal) return '-';
+  const d = new Date(`${tanggal}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return tanggal;
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
 // ==========================================
 // API SERVICE CLASS (window.NutriApi)
 // ==========================================
@@ -99,7 +106,22 @@ class DashboardController {
     this.api = new DashboardAPI();
     this.childrenList = [];
     this.wilayah = null;
+    this.childrenPromise = null;
     this.init();
+  }
+
+  /**
+   * Ambil daftar anak sekali saja (di-cache sebagai promise) agar dashboard
+   * dan halaman riwayat memakai data yang sama tanpa request ganda.
+   */
+  loadChildren() {
+    if (!this.childrenPromise) {
+      this.childrenPromise = this.api.getChildrenList().catch((error) => {
+        this.childrenPromise = null; // izinkan percobaan ulang
+        throw error;
+      });
+    }
+    return this.childrenPromise;
   }
 
   async init() {
@@ -118,7 +140,7 @@ class DashboardController {
       this.wilayah = profil.wilayah_posyandu;
       const [summary, childrenList] = await Promise.all([
         this.api.getSummary(this.wilayah),
-        this.api.getChildrenList()
+        this.loadChildren()
       ]);
       this.childrenList = childrenList;
 
@@ -365,32 +387,58 @@ class HistoryController {
   constructor(getChildren) {
     this.getChildren = getChildren;
     this.historyData = [];
+    this.loaded = false;
   }
 
   async init() {
+    const tbody = document.getElementById('history-table-body');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Memuat data...</td></tr>';
+    }
+
     try {
       const children = await this.getChildren();
-      this.historyData = children
-        .filter((c) => c.ukur_terakhir)
-        .map((c) => ({
-          anak_id: c.anak_id,
-          nama: c.nama || '-',
-          usia: `${c.usia_bulan} Bulan`,
-          tanggal: c.ukur_terakhir.tanggal_ukur,
-          status: metaKategori(c.ukur_terakhir).label,
-        }))
-        .sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
-      this.renderHistoryTable(this.historyData);
+      this.setData(children);
     } catch (error) {
       console.error('Gagal memuat data history:', error);
+      this.showError('Gagal memuat riwayat pengukuran. Silakan refresh halaman.');
     }
+  }
+
+  /** Dipanggil setelah daftar anak tersedia (dari dashboard maupun fetch sendiri). */
+  setData(children) {
+    this.loaded = true;
+    this.historyData = (Array.isArray(children) ? children : [])
+      .map((c) => {
+        const ukur = c.ukur_terakhir || null;
+        const meta = metaKategori(ukur);
+        return {
+          anak_id: c.anak_id,
+          nama: c.nama || '-',
+          usia: `${c.usia_bulan ?? '-'} Bulan`,
+          tanggal: ukur ? formatTanggal(ukur.tanggal_ukur) : '-',
+          tanggalUrut: ukur ? ukur.tanggal_ukur : '',
+          status: meta.label,
+          statusCls: ukur ? meta.cls : 'gray',
+        };
+      })
+      // Yang sudah diukur tampil lebih dulu (terbaru di atas), sisanya alfabetis.
+      .sort((a, b) => {
+        if (a.tanggalUrut && b.tanggalUrut) return a.tanggalUrut < b.tanggalUrut ? 1 : -1;
+        if (a.tanggalUrut) return -1;
+        if (b.tanggalUrut) return 1;
+        return a.nama.localeCompare(b.nama, 'id');
+      });
+
+    this.renderHistoryTable(this.historyData);
   }
 
   renderHistoryTable(data) {
     const tbody = document.getElementById('history-table-body');
+    if (!tbody) return;
 
     if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada pengukuran tercatat</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada balita binaan di wilayah ini</td></tr>';
       return;
     }
 
@@ -399,7 +447,7 @@ class HistoryController {
         <td><strong style="color: #006a38;">${item.nama}</strong></td>
         <td>${item.usia}</td>
         <td>${item.tanggal}</td>
-        <td><span class="status-badge">${item.status}</span></td>
+        <td><span class="status-badge ${item.statusCls}">${item.status}</span></td>
         <td><span style="color: #006a38; font-weight: 600;">Lihat Detail</span></td>
       </tr>
     `).join('');
@@ -413,6 +461,12 @@ class HistoryController {
         window.location.href = `/riwayat-kader?id=${id}`;
       });
     });
+  }
+
+  showError(message) {
+    const tbody = document.getElementById('history-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: #e53935;">${message}</td></tr>`;
   }
 
   filterHistory(keyword) {
@@ -431,7 +485,9 @@ let navigation;
 document.addEventListener('DOMContentLoaded', () => {
   navigation = new NavigationController();
   dashboard = new DashboardController();
-  historyController = new HistoryController(() => Promise.resolve(dashboard.childrenList));
+  // Pakai promise yang sama dengan dashboard: tidak ada request ganda dan
+  // riwayat tidak lagi terbaca kosong saat dashboard masih memuat data.
+  historyController = new HistoryController(() => dashboard.loadChildren());
   historyController.init();
 
   const searchInput = document.getElementById('search-input');
@@ -450,6 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (historySearchInput) {
     historySearchInput.addEventListener('input', (e) => {
       const keyword = e.target.value.toLowerCase();
+      if (!historyController.loaded) return;
       historyController.filterHistory(keyword);
     });
   }
